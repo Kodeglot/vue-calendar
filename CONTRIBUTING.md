@@ -1,6 +1,6 @@
 # Contributing Guide
 
-We welcome contributions from the community! Here's how you can help improve Vue Calendar Date Picker.
+We welcome contributions from the community! Here's how you can help improve Vue Calendar.
 
 ## Getting Started
 
