@@ -2,15 +2,17 @@
   "name": "vue-calendar",
   "version": "0.1.0",
   "description": "A customizable calendar date picker component for Vue 3 with Tailwind CSS support",
-  "main": "./dist/vue-tailwind-calendar.umd.js",
-  "module": "./dist/vue-tailwind-calendar.es.js",
+  "type": "module",
+  "main": "./dist/vue-calendar.umd.js",
+  "module": "./dist/vue-calendar.es.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vue-tsc --emitDeclarationOnly",
+    "build": "vite build",
+    "build:types": "vite build --config vite.config.types.ts",
     "prepublishOnly": "npm run build",
     "test": "vitest"
   },
@@ -19,16 +21,18 @@
     "vue": "^3.3.0"
   },
   "devDependencies": {
-    "@types/autoprefixer": "^9.7.2",
-    "@types/node": "^18.19.81",
+    "@types/autoprefixer": "^10.2.4",
+    "@types/node": "^22.13.11",
     "@types/tailwindcss": "^3.0.11",
     "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
     "node-releases": "^2.0.19",
     "tailwindcss": "^4.0.15",
     "typescript": "^5.0.0",
     "vite": "^6.2.2",
-    "vitest": "^0.25.0",
-    "vue-tsc": "^1.0.0"
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^3.0.9",
+    "vue-tsc": "^2.2.8"
   },
   "keywords": [
     "vue",
@@ -41,15 +45,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/vue-tailwind-calendar.git"
+    "url": "git+https://github.com/Kodeglot/vue-calendar.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/vue-tailwind-calendar/issues"
+    "url": "https://github.com/Kodeglot/vue-calendar/issues"
   },
-  "homepage": "https://github.com/yourusername/vue-tailwind-calendar#readme",
+  "homepage": "https://github.com/Kodeglot/vue-calendar#readme",
   "dependencies": {
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.0.15"
+    "@tailwindcss/vite": "^4.0.15",
+    "pinia": "^3.0.1"
   }
 }

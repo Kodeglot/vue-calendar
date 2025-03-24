@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import VueCalendar from './components/VueCalendar.vue'
+import CalendarView from './views/CalendarView.vue'
 </script>
 
 <template>
-  <VueCalendar />
+  <CalendarView />
 </template>
-
-<style>
-/* Global styles can go here */
-</style>
