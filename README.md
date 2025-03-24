@@ -1,6 +1,6 @@
-# Vue Calendar Date Picker 🗓️
+# Vue Calendar 🗓️
 
-[![npm version](https://img.shields.io/npm/v/vue-calendar-date-picker.svg)](https://www.npmjs.com/package/vue-calendar-date-picker)
+[![npm version](https://img.shields.io/npm/v/vue-calendar.svg)](https://www.npmjs.com/package/vue-calendar)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/Kodeglot/vue-calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/Kodeglot/vue-calendar/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/Kodeglot/vue-calendar)](https://codecov.io/gh/Kodeglot/vue-calendar)
@@ -23,23 +23,23 @@ A fully-featured, customizable calendar date picker component for Vue 3 with bui
 
 ### Using npm
 ```bash
-npm install vue-calendar-date-picker
+npm install vue-calendar
 ```
 
 ### Using yarn
 ```bash
-yarn add vue-calendar-date-picker
+yarn add vue-calendar
 ```
 
 ### Using pnpm
 ```bash
-pnpm add vue-calendar-date-picker
+pnpm add vue-calendar
 ```
 
 ### CDN
 Add the following script tag to your HTML:
 ```html
-<script src="https://unpkg.com/vue-calendar-date-picker/dist/vue-calendar-date-picker.umd.js"></script>
+<script src="https://unpkg.com/vue-calendar/dist/vue-calendar.umd.js"></script>
 ```
 
 ## API Reference
