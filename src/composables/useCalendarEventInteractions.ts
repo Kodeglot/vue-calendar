@@ -204,10 +204,20 @@ export function useCalendarEventInteractions(
 
   const handleMouseDown = (e: MouseEvent) => {
     try {
-      if (!isResizing.value && !(e.target as HTMLElement).classList.contains('cursor-row-resize')) {
+      // Prevent drag during resize
+      if (isResizing.value) return
+      
+      // Check if clicking on a resize handle by checking parent element
+      const target = e.target as HTMLElement
+      if (target.classList.contains('cursor-row-resize') || 
+          target.parentElement?.querySelector('.cursor-row-resize') === target) {
         e.stopPropagation()
-        emit('click', event)
+        return // Prevent drag when clicking on resize handles
       }
+      
+      // Only handle drag if not resizing and not clicking on a resize handle
+      e.stopPropagation()
+      emit('click', event)
     } catch (error) {
       console.error('Mouse down event failed:', error)
     }

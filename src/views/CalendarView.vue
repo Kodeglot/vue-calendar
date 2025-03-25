@@ -181,6 +181,7 @@ const emit = defineEmits<{
   (e: "event-created", event: CalendarEvent): void;
   (e: "event-updated", event: CalendarEvent): void;
   (e: "event-deleted", eventId: string): void;
+  (e: "openEventModal", date: Date): void;
 }>();
 
 // Reactive state
@@ -318,6 +319,8 @@ const handleEventSave = (event: CalendarEvent) => {
  * Opens the event modal for creating a new event at the current time
  */
 const toggleNewEventForm = () => {
-  eventModal.value?.openModal(new Date());
+  const date = new Date();
+  eventModal.value?.openModal(date);
+  emit('openEventModal', date);
 };
 </script>
