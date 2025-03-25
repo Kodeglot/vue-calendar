@@ -165,7 +165,12 @@ interface EventComponentEmits {
    * @param newStart - Final start time as ISO string
    * @param newEnd - Final end time as ISO string
    */
-  (e: "resize-end", event: CalendarEvent, newStart: string, newEnd: string): void;
+  (
+    e: "resize-end",
+    event: CalendarEvent,
+    newStart: string,
+    newEnd: string
+  ): void;
 
   /**
    * Emitted when drag starts
@@ -184,7 +189,7 @@ interface EventComponentEmits {
 const emit = defineEmits<EventComponentEmits>();
 
 // Create a wrapper emit function that matches composable signature
-  const wrappedEmit = (event: string, ...args: any[]) => {
+const wrappedEmit = (event: string, ...args: any[]) => {
   const emitKey = event as keyof EventComponentEmits;
   switch (emitKey) {
     case "resize":
@@ -230,6 +235,7 @@ const {
   pxPerHour: props.pxPerHour,
   snapInterval: 5,
   minHeight: 30,
+  timeZone: props.timeZone,
 });
 
 // Calculate initial position on mount
@@ -263,7 +269,7 @@ const formatTime = (dateString: string) => {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      timeZone: props.timeZone,
+      timeZone: props.timeZone, // Always use UTC for consistent display
     });
   } catch (error) {
     console.error("Time formatting failed:", error);

@@ -29,6 +29,12 @@ interface UseCalendarEventInteractionsOptions {
    * @default 30
    */
   minHeight?: number
+
+  /**
+   * Timezone for time calculations (IANA timezone name)
+   * @default 'UTC'
+   */
+  timeZone?: string
 }
 
 interface UseCalendarEventInteractionsReturn {
@@ -105,16 +111,27 @@ export function useCalendarEventInteractions(
         height: 50
       }
     } else {
-      // Get UTC time and apply timezone offset
-      const utcHours = start.getUTCHours()
-      const utcMinutes = start.getUTCMinutes()
-      const timezoneOffset = start.getTimezoneOffset() / 60
-      const startHours = (utcHours - timezoneOffset) + (utcMinutes / 60)
+      // Calculate hours in specified timezone (or UTC if not specified)
+      const timeZone = options.timeZone || 'UTC'
+      const startHours = new Date(event.start).toLocaleTimeString('en-US', {
+        timeZone,
+        hour12: false,
+        hour: 'numeric',
+        minute: 'numeric'
+      }).split(':').map(Number)
+      const startTotalHours = startHours[0] + (startHours[1] / 60)
 
-      const durationHours = (end.getTime() - start.getTime()) / 3600000
+      const endHours = new Date(event.end).toLocaleTimeString('en-US', {
+        timeZone,
+        hour12: false,
+        hour: 'numeric',
+        minute: 'numeric'
+      }).split(':').map(Number)
+      const endTotalHours = endHours[0] + (endHours[1] / 60)
+      const durationHours = endTotalHours - startTotalHours
 
       position.value = {
-        top: Math.max(0, startHours * pxPerHour),
+        top: Math.max(0, startTotalHours * pxPerHour),
         height: Math.max(minHeight, durationHours * pxPerHour)
       }
     }
