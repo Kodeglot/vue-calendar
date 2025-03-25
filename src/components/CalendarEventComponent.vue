@@ -340,7 +340,12 @@ const formatTime = (dateString: string) => {
     if (isNaN(date.getTime())) {
       throw new Error('Invalid date string provided')
     }
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    // Use UTC timezone for consistent formatting across environments
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      timeZone: 'UTC'
+    })
   } catch (error) {
     console.error('Time formatting failed:', error)
     return '--:--'

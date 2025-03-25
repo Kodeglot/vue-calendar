@@ -63,7 +63,7 @@ describe('CalendarEventComponent', () => {
         }
       }
     })
-    expect(wrapper.text()).toContain('03:30 PM - 04:45 PM')
+    expect(wrapper.text()).toContain('02:30 PM - 03:45 PM')
   })
 
   it('calculates position correctly for day view', () => {
