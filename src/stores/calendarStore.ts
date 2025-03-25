@@ -15,6 +15,7 @@ export interface CalendarEvent {
   width?: number      // Width percentage for stacked events
   left?: number       // Left position percentage for stacking
   marginLeft?: number // Margin between stacked events
+  order?: number      // Vertical stacking order for month view
 }
 
 export const useCalendarStore = defineStore('calendar', () => {

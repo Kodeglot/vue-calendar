@@ -1,7 +1,7 @@
 {
   "name": "vue-calendar",
   "version": "0.1.0",
-  "description": "A customizable calendar date picker component for Vue 3 with Tailwind CSS support",
+  "description": "A customizable calendar component for Vue 3 with Tailwind CSS support",
   "type": "module",
   "main": "./dist/vue-calendar.umd.js",
   "module": "./dist/vue-calendar.es.js",

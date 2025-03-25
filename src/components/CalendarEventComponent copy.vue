@@ -42,8 +42,7 @@
     <div
       v-if="resizable"
       :class="[
-        'absolute top-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 transition-opacity',
-        isResizing && resizeDirection === 'top' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+        'absolute top-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity',
         customClasses?.resizeHandle
       ]"
       @mousedown.stop="startResize('top')"
@@ -51,17 +50,10 @@
     <div
       v-if="resizable"
       :class="[
-        'absolute bottom-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 transition-opacity',
-        isResizing && resizeDirection === 'bottom' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+        'absolute bottom-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity',
         customClasses?.resizeHandle
       ]"
       @mousedown.stop="startResize('bottom')"
-    ></div>
-
-    <!-- Resize Indicator -->
-    <div
-      v-if="isResizing"
-      class="absolute inset-0 bg-opacity-10 pointer-events-none"
     ></div>
   </div>
 </template>
@@ -127,24 +119,24 @@ interface EventComponentProps {
   /**
    * Pixels per hour for time calculations
    * Determines the vertical scale of the calendar
-   * @default 60
+   * @default 63
    */
   pxPerHour?: number
 }
 
 const props = withDefaults(defineProps<EventComponentProps>(), {
   resizable: false,
-  pxPerHour: 60
+  pxPerHour: 63
 })
 
 interface EventComponentEmits {
   /**
    * Emitted when event is resized
    * @param event - The calendar event
-   * @param newStart - New start time as ISO string
-   * @param newEnd - New end time as ISO string
+   * @param newStart - New start time
+   * @param newEnd - New end time
    */
-  (e: 'resize', event: CalendarEvent, newStart: string, newEnd: string): void
+  (e: 'resize', event: CalendarEvent, newStart: Date, newEnd: Date): void
   
   /**
    * Emitted when drag starts
@@ -174,29 +166,25 @@ const initialTop = ref(0) // Initial top position
 const initialHeight = ref(100) // Initial height
 
 // Calculate initial position based on event times
-  const calculatePosition = () => {
-    const start = new Date(props.event.start)
-    const end = new Date(props.event.end)
-    
-    // Calculate start time in hours since midnight
-    const startHours = start.getHours() + (start.getMinutes() / 60)
-    const durationHours = (end.getTime() - start.getTime()) / 3600000
+const calculatePosition = () => {
+  const start = new Date(props.event.start)
+  const end = new Date(props.event.end)
+  const startHours = start.getHours() + start.getMinutes() / 60
+  const durationHours = (end.getTime() - start.getTime()) / 3600000
 
-    // Handle different view types
-    if (props.viewType === 'month') {
-      // For month view, stack events vertically with fixed height
-      position.value = {
-        top: (props.event.order || 0) * 60, // 60px height
-        height: 0
-      }
-    } else {
-      // For week/day views, calculate position based on time
-      position.value = {
-        top: Math.max(0, startHours * props.pxPerHour),
-        height: Math.max(30, durationHours * props.pxPerHour) // Minimum 30px height (30 minutes)
-      }
-    }
+  position.value = {
+    top: startHours * props.pxPerHour,
+    height: durationHours * props.pxPerHour,
   }
+
+  // Stick to top if viewType is Month & static height 50px
+  if (props.viewType === 'month') {
+    position.value.top = 0
+    position.value.height = 50
+  }
+
+  // console.log(position.value)
+}
 
 // Resize Handlers
 const startResize = (direction: 'top' | 'bottom') => {
@@ -208,67 +196,46 @@ const startResize = (direction: 'top' | 'bottom') => {
   document.addEventListener('mouseup', stopResize)
 }
 
-  const handleResizeMove = (e: MouseEvent) => {
-    if (!isResizing.value || !props.containerRef) return
+const handleResizeMove = (e: MouseEvent) => {
+  if (!isResizing.value || !props.containerRef) return
 
-    // Calculate mouse position relative to container
-    const containerRect = props.containerRef.getBoundingClientRect()
-    const mouseY = e.clientY - containerRect.top
-    const deltaY =
-      mouseY -
-      (resizeDirection.value === 'top' ? initialTop.value : initialTop.value + initialHeight.value)
+  // Calculate mouse position relative to container
+  const containerRect = props.containerRef.getBoundingClientRect()
+  const mouseY = e.clientY - containerRect.top
+  const deltaY =
+    mouseY -
+    (resizeDirection.value === 'top' ? initialTop.value : initialTop.value + initialHeight.value)
 
-    let newTop = initialTop.value
-    let newHeight = initialHeight.value
+  let newTop = initialTop.value
+  let newHeight = initialHeight.value
 
-    // Calculate new dimensions based on resize direction
-    if (resizeDirection.value === 'top') {
-      newHeight = Math.max(5, initialHeight.value - deltaY) // Minimum 5px (5 minutes)
-      newTop = initialTop.value + deltaY
-      
-      // Snap to 5 minute intervals
-      const snapInterval = (5 / 60) * props.pxPerHour
-      newTop = Math.round(newTop / snapInterval) * snapInterval
-      newHeight = Math.max(5, initialHeight.value - (newTop - initialTop.value))
-    } else {
-      newHeight = Math.max(5, initialHeight.value + deltaY)
-      
-      // Snap to 5 minute intervals
-      const snapInterval = (5 / 60) * props.pxPerHour
-      newHeight = Math.round(newHeight / snapInterval) * snapInterval
-    }
-
-    // Convert pixel positions to time values
-    const newStart = new Date(props.event.start)
-    const newEnd = new Date(props.event.end)
-
-    if (resizeDirection.value === 'top') {
-      const minutes = (newTop / props.pxPerHour) * 60
-      newStart.setHours(Math.floor(minutes / 60))
-      newStart.setMinutes(Math.floor(minutes % 60 / 5) * 5) // Snap to 5 minutes
-    } else {
-      const totalMinutes = ((newTop + newHeight) / props.pxPerHour) * 60
-      newEnd.setHours(Math.floor(totalMinutes / 60))
-      newEnd.setMinutes(Math.floor(totalMinutes % 60 / 5) * 5) // Snap to 5 minutes
-    }
-
-    // Prevent events from overlapping midnight
-    if (newStart.getDate() !== newEnd.getDate()) {
-      if (resizeDirection.value === 'top') {
-        newStart.setDate(newEnd.getDate())
-        newStart.setHours(0)
-        newStart.setMinutes(0)
-      } else {
-        newEnd.setDate(newStart.getDate())
-        newEnd.setHours(23)
-        newEnd.setMinutes(59)
-      }
-    }
-
-    // Update visual position and emit changes
-    position.value = { top: newTop, height: newHeight }
-    emit('resize', props.event, newStart.toISOString(), newEnd.toISOString())
+  // Calculate new dimensions based on resize direction
+  if (resizeDirection.value === 'top') {
+    newHeight = Math.max(20, initialHeight.value - deltaY) // Minimum 20px (15min)
+    newTop = initialTop.value + deltaY
+  } else {
+    newHeight = Math.max(20, initialHeight.value + deltaY)
   }
+
+  // Convert pixel positions to time values
+  const newStart = new Date(props.event.start)
+  const newEnd = new Date(props.event.end)
+
+  if (resizeDirection.value === 'top') {
+    const minutes = (newTop / props.pxPerHour) * 60
+    newStart.setHours(Math.floor(minutes / 60))
+    newStart.setMinutes(minutes % 60)
+  } else {
+    const totalMinutes = ((newTop + newHeight) / props.pxPerHour) * 60
+    newEnd.setHours(Math.floor(totalMinutes / 60))
+    newEnd.setMinutes(totalMinutes % 60)
+  }
+
+  // Update visual position and emit changes
+  position.value = { top: newTop, height: newHeight }
+  console.log(position.value)
+  emit('resize', props.event, newStart, newEnd)
+}
 
 const stopResize = () => {
   isResizing.value = false
@@ -293,11 +260,8 @@ const handleDragStart = (e: DragEvent) => {
 const handleMouseDown = (e: MouseEvent) => {
   try {
     if (props.resizable) return // Prevent drag during resize
-    // Only handle drag if not resizing and not clicking on a resize handle
-    if (!isResizing.value && !(e.target as HTMLElement).classList.contains('cursor-row-resize')) {
-      e.stopPropagation()
-      emit('click', props.event)
-    }
+    e.stopPropagation() // Prevent text selection
+    emit('click', props.event)
   } catch (error) {
     console.error('Mouse down event failed:', error)
   }

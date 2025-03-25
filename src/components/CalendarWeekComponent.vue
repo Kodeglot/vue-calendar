@@ -1,45 +1,116 @@
 <template>
-  <!-- Week Grid Layout -->
-  <div class="grid grid-cols-7 gap-px bg-gray-200">
-    <!-- Day Headers -->
-    <div
-      v-for="date in visibleDates"
-      :key="date.toISOString()"
-      class="bg-white p-2 font-semibold text-center"
-    >
-      {{ days[date.getDay()] }} {{ date.getDate() }}
+  <!-- Main Week View Container -->
+  <div
+    class="grow flex flex-col w-full"
+    role="grid"
+    aria-label="Week View Calendar"
+  >
+    <!-- Time Grid Container -->
+
+    <div class="flex flex-row">
+      <div class="w-20 min-h-10"></div>
+      <div class="flex-1">
+        <!-- Day Headers -->
+        <div class="flex-1 grid grid-cols-7 bg-gray-200" role="row">
+          <div
+            v-for="date in visibleDates"
+            :key="date.toISOString()"
+            class="bg-white p-2 font-semibold text-center"
+            role="columnheader"
+            :aria-label="`${days[date.getDay()]} ${date.getDate()}`"
+          >
+            {{ days[date.getDay()] }} {{ date.getDate() }}
+          </div>
+        </div>
+
+        <!-- All Day Events Section -->
+        <div class="border-t" role="rowgroup" aria-label="All Day Events">
+          <!-- Dynamic Rows for All Day Events -->
+          <div
+            v-for="row in allDayRows"
+            :key="row"
+            class="grid grid-cols-7 gap-px"
+            role="row"
+          >
+            <div
+              v-for="date in visibleDates"
+              :key="date.toISOString()"
+              class="p-2"
+              role="gridcell"
+            >
+              <CalendarEventComponent
+                v-for="(event, index) in getAllDayEventsForRow(date, row)"
+                :key="event.id"
+                :event="event"
+                :resizable="false"
+                :viewType="'week'"
+                class="mb-1"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Day Columns -->
-    <div
-      v-for="(date, index) in visibleDates"
-      :key="date.toISOString()"
-      class="min-h-screen bg-white relative"
-      @dragover.prevent="handleDragOver"
-      @drop="handleDrop(date)"
-    >
-      <!-- Hour Grid -->
-      <div v-for="hour in hours" :key="hour" class="h-16 border-t relative">
+    <div class="flex flex-row">
+      <div
+        class="w-20 h-24 text-center"
+        ref="dayGrid"
+        @dragover.prevent="handleDragOver"
+      >
+        <!-- Hour Indicators -->
         <div
-          v-if="index == 0 && hour != 0"
-          class="absolute -top-3 left-2 text-sm text-gray-500"
+          v-for="hour in hours"
+          :key="hour"
+          class="relative text-center w-full"
+          :style="{ height: `${hourHeight}px` }"
+          role="row"
         >
-          {{ formatHour(hour) }}
+          <div
+            v-if="hour != 0"
+            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full"
+            role="time"
+            :aria-label="formatHour(hour)"
+          >
+            {{ formatHour(hour) }}
+          </div>
         </div>
       </div>
 
-      <!-- Events -->
-      <CalendarEventComponent
-        v-for="event in getStackedEvents(date)"
-        :key="event.id"
-        :event="event"
-        :resizable="true"
-        :viewType="'week'"
-        @resize="handleResize"
-        @dragstart="handleEventDragStart"
-        class="absolute"
-        :style="eventPosition(event)"
-      />
+      <div class="flex-1 overflow-auto" role="rowgroup" aria-label="Time Slots">
+        <!-- Day Columns -->
+        <div class="grid grid-cols-7 gap-px bg-gray-200">
+          <div
+            v-for="(date, index) in visibleDates"
+            :key="date.toISOString()"
+            class="bg-white relative"
+            @dragover.prevent="handleDragOver"
+            @drop="handleDrop(date)"
+            role="gridcell"
+          >
+            <TimeGridComponent
+              :hourHeight="hourHeight"
+              :timeFormat="{ hour: 'numeric', minute: '2-digit' }"
+              :showHourLabels="index === 0"
+              @timeClick="handleTimeClick"
+            >
+              <CalendarEventComponent
+                v-for="event in getStackedEvents(date)"
+                :key="event.id"
+                :event="event"
+                :resizable="true"
+                :viewType="'week'"
+                :containerRef="dayGrid"
+                @resize="handleResize"
+                @dragstart="handleEventDragStart"
+                class="absolute"
+                :style="eventPosition(event)"
+                role="article"
+              />
+            </TimeGridComponent>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -48,46 +119,135 @@
 import { ref, computed } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
+import TimeGridComponent from "./TimeGridComponent.vue";
 
+/**
+ * CalendarWeekComponent - Displays a week view calendar with time slots and events
+ *
+ * Features:
+ * - Responsive week view layout
+ * - Drag and drop event handling
+ * - Event resizing
+ * - All-day events section
+ * - Accessible markup
+ *
+ * @example
+ * <CalendarWeekComponent :currentDate="new Date()" />
+ */
 interface EventPosition {
   top: string;
   height: string;
 }
 
-const props = defineProps<{
-  currentDate: Date; // Focus date for the week
-}>();
+const props = defineProps({
+  hourHeight: {
+    type: Number,
+    required: true,
+    default: 50,
+  },
+  /**
+   * The current date to display in the week view
+   * @required
+   * @type {Date}
+   */
+  currentDate: {
+    type: Date,
+    required: true,
+    validator: (value: Date) => !isNaN(value.getTime()),
+  },
+});
 
 const emit = defineEmits<{
+  /**
+   * Emitted when an event is dropped on a new date
+   * @param {string} eventId - The ID of the moved event
+   * @param {Date} date - The new date the event was dropped on
+   */
   (e: "event-dropped", eventId: string, date: Date): void;
+  /**
+   * Emitted when a time slot is clicked
+   * @param {Date} time - The clicked time
+   */
+  (e: "time-click", time: Date): void;
 }>();
 
+// Constants
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-const store = useCalendarStore();
 const hours = Array.from({ length: 24 }, (_, i) => i); // [0..23] hour array
-const draggedEvent = ref<CalendarEvent | null>(null); // Currently dragged event
+const store = useCalendarStore();
+const draggedEvent = ref<CalendarEvent | null>(null);
 
-// Generate dates for the current week
+/**
+ * Reference to the day grid container
+ * @type {Ref<HTMLElement>}
+ */
+const dayGrid = ref<HTMLElement>();
+
+/**
+ * Generates the visible dates for the current week
+ * @returns {Date[]} Array of 7 dates representing the current week
+ */
 const visibleDates = computed<Date[]>(() => {
   const start = new Date(props.currentDate);
   start.setDate(start.getDate() - start.getDay()); // Start on Sunday
 
-  const dates: Date[] = [];
-  for (let i = 0; i < 7; i++) {
+  return Array.from({ length: 7 }, (_, i) => {
     const date = new Date(start);
     date.setDate(date.getDate() + i);
-    dates.push(date);
-  }
-
-  return dates;
+    return date;
+  });
 });
 
-// Calculate event stacking positions
+/**
+ * Gets all-day events for a specific date
+ * @param {Date} date - The date to get events for
+ * @returns {CalendarEvent[]} Array of all-day events
+ */
+const getAllDayEvents = (date: Date) => {
+  return store.getEventsForDate(date).filter((event) => {
+    const start = new Date(event.start);
+    const end = new Date(event.end);
+    return end.getTime() - start.getTime() === 86400000; // 24 hours
+  });
+};
+
+/**
+ * Calculates number of rows needed for all-day events
+ * @returns {number} Number of rows needed (2 events per row)
+ */
+const allDayRows = computed(() => {
+  const maxEvents = Math.max(
+    ...visibleDates.value.map((date) => getAllDayEvents(date).length)
+  );
+  return Math.max(1, Math.ceil(maxEvents / 2));
+});
+
+/**
+ * Gets events for a specific row
+ * @param {Date} date - The date to get events for
+ * @param {number} row - The row number (1-based)
+ * @returns {CalendarEvent[]} Array of events for the row
+ */
+const getAllDayEventsForRow = (date: Date, row: number) => {
+  const events = getAllDayEvents(date);
+  return events.slice((row - 1) * 2, row * 2);
+};
+
+/**
+ * Gets stacked events with calculated positions
+ * @param {Date} date - The date to get events for
+ * @returns {CalendarEvent[]} Array of events with position data
+ */
 const getStackedEvents = computed(() => (date: Date) => {
   const events = store.getEventsForDate(date);
   return calculateEventPositions(events);
 });
 
+/**
+ * Calculates event positions to prevent overlap
+ * @param {CalendarEvent[]} events - Array of events to position
+ * @returns {CalendarEvent[]} Events with position data
+ */
 const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
@@ -95,7 +255,6 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
 
   const columns: CalendarEvent[][] = [];
 
-  // Arrange events into columns to prevent overlap
   sortedEvents.forEach((event) => {
     let placed = false;
     for (const column of columns) {
@@ -112,36 +271,34 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
     }
   });
 
-  // Calculate width and positions for each event
+  // Calculate width and positions
   columns.forEach((column, colIndex) => {
     column.forEach((event) => {
       const totalColumns = columns.length;
-      event.width = 100 / totalColumns; // Equal width for all columns
-      event.left = colIndex * event.width; // Left position based on column index
-      event.marginLeft = 0.5; // Small gap between events
+      event.width = 100 / totalColumns;
+      event.left = colIndex * event.width;
+      event.marginLeft = 0.5;
     });
   });
 
   return sortedEvents;
 };
 
-// Calculate event top position and height
+/**
+ * Calculates event position and height
+ * @param {CalendarEvent} event - The event to position
+ * @returns {EventPosition} Object with top and height properties
+ */
 const eventPosition = (event: CalendarEvent): EventPosition => {
   const start = new Date(event.start);
   const end = new Date(event.end);
   const startHours = start.getHours() + start.getMinutes() / 60;
   const durationHours = (end.getTime() - start.getTime()) / 3600000;
 
-  console.log(start.getHours());
-
-  const p = {
-    top: `${startHours * 63}px`, // 80px per hour
-    height: `${durationHours * 63}px`,
+  return {
+    top: `${startHours * 60}px`, // 60px per hour
+    height: `${durationHours * 60}px`,
   };
-
-  console.log(p);
-
-  return p;
 };
 
 // Event Handlers
@@ -158,18 +315,33 @@ const handleDragOver = (e: DragEvent) => {
 
 const handleDrop = (date: Date) => {
   if (!draggedEvent.value) return;
-
-  const newStart = new Date(date);
-  console.log(newStart);
-  store.updateEventDateOnly(draggedEvent.value.id, newStart);
+  store.updateEventDateOnly(draggedEvent.value.id, date);
   draggedEvent.value = null;
 };
 
-const handleResize = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
-  store.updateEventDuration(event.id, newStart, newEnd);
+/**
+ * Handles event resize by updating the event duration
+ * @param event - The calendar event being resized
+ * @param newStart - New start time as ISO string
+ * @param newEnd - New end time as ISO string
+ */
+const handleResize = (
+  event: CalendarEvent,
+  newStart: string,
+  newEnd: string
+) => {
+  store.updateEventDuration(event.id, new Date(newStart), new Date(newEnd));
 };
 
-// Format hour display (e.g., 2 PM)
+const handleTimeClick = (time: Date) => {
+  emit("time-click", time);
+};
+
+/**
+ * Formats hour for display
+ * @param {number} hour - The hour to format (0-23)
+ * @returns {string} Formatted time string (e.g., "2 PM")
+ */
 const formatHour = (hour: number) => {
   return new Date(2023, 0, 1, hour).toLocaleTimeString([], {
     hour: "numeric",
