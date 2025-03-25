@@ -55,7 +55,7 @@
     <div class="flex flex-row">
       <div
         class="w-20 h-24 text-center"
-        ref="dayGrid"
+        ref="weekGrid"
         @dragover.prevent="handleDragOver"
       >
         <!-- Hour Indicators -->
@@ -94,19 +94,21 @@
               :showHourLabels="index === 0"
               @timeClick="handleTimeClick"
             >
-              <CalendarEventComponent
-                v-for="event in getStackedEvents(date)"
-                :key="event.id"
-                :event="event"
-                :resizable="true"
-                :viewType="'week'"
-                :containerRef="dayGrid"
-                @resize="handleResize"
-                @dragstart="handleEventDragStart"
-                class="absolute"
-                :style="eventPosition(event)"
-                role="article"
-              />
+              <!-- Calendar Events -->
+              <template v-if="weekGrid">
+                <CalendarEventComponent
+                  v-for="event in getStackedEvents(date)"
+                  :key="event.id"
+                  :event="event"
+                  :resizable="true"
+                  :viewType="'week'"
+                  :containerRef="weekGrid"
+                  @resize="handleResize"
+                  @dragstart="handleEventDragStart"
+                  class="absolute"
+                  role="article"
+                />
+              </template>
             </TimeGridComponent>
           </div>
         </div>
@@ -116,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
@@ -143,7 +145,7 @@ const props = defineProps({
   hourHeight: {
     type: Number,
     required: true,
-    default: 50,
+    default: 60,
   },
   /**
    * The current date to display in the week view
@@ -181,7 +183,12 @@ const draggedEvent = ref<CalendarEvent | null>(null);
  * Reference to the day grid container
  * @type {Ref<HTMLElement>}
  */
-const dayGrid = ref<HTMLElement>();
+const weekGrid = ref<HTMLElement>();
+const isMounted = ref(false);
+
+onMounted(() => {
+  isMounted.value = true;
+});
 
 /**
  * Generates the visible dates for the current week
@@ -296,8 +303,8 @@ const eventPosition = (event: CalendarEvent): EventPosition => {
   const durationHours = (end.getTime() - start.getTime()) / 3600000;
 
   return {
-    top: `${startHours * 60}px`, // 60px per hour
-    height: `${durationHours * 60}px`,
+    top: `${startHours * props.hourHeight}px`,
+    height: `${durationHours * props.hourHeight}px`,
   };
 };
 

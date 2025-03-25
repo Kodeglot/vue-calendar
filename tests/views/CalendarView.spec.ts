@@ -146,10 +146,10 @@ describe('CalendarView', () => {
       color: '#3b82f6'
     }
 
-    store.events = [] // Reset store
+    store.events = new Map() // Reset store
     store.addEvent(testEvent)
     await nextTick()
-    expect(store.events).toHaveLength(1)
-    expect(store.events[0].id).toBe('test-1')
+    expect(store.events.size).toBe(1)
+    expect(store.events.get('test-1')?.id).toBe('test-1')
   })
 })

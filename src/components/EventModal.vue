@@ -108,7 +108,6 @@ function handleSubmit() {
     color: event.value.color
   };
   
-  store.addEvent(newEvent);
   emit('save', newEvent);
   closeModal();
 }

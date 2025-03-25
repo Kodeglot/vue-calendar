@@ -59,7 +59,7 @@
     <component
       :is="currentViewComponent"
       :current-date="currentDate"
-      :hour-height="50"
+      :hour-height="60"
       v-bind="
         props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
       "

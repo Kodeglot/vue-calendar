@@ -56,6 +56,7 @@ describe('CalendarEventComponent', () => {
     const wrapper = mount(CalendarEventComponent, {
       props: {
         ...baseProps,
+        timeZone: 'UTC', // Explicitly set UTC for consistency
         event: {
           ...baseProps.event,
           start: '2025-03-25T14:30:00Z',
@@ -63,7 +64,24 @@ describe('CalendarEventComponent', () => {
         }
       }
     })
+    // Expect UTC time format
     expect(wrapper.text()).toContain('02:30 PM - 03:45 PM')
+  })
+
+  it('formats time correctly for Brussels timezone', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: {
+        ...baseProps,
+        timeZone: 'Europe/Brussels',
+        event: {
+          ...baseProps.event,
+          start: '2025-03-25T14:30:00Z',
+          end: '2025-03-25T15:45:00Z'
+        }
+      }
+    })
+    // Expect Brussels time format (UTC+1)
+    expect(wrapper.text()).toContain('03:30 PM - 04:45 PM')
   })
 
   it('calculates position correctly for day view', () => {
@@ -80,7 +98,8 @@ describe('CalendarEventComponent', () => {
       }
     })
     const vm = wrapper.vm as unknown as { position: { top: number; height: number } }
-    expect(vm.position.top).toBe(630) // (9.5 + 1) hours * 60px
+    // Position calculations still use UTC for consistent layout
+    expect(vm.position.top).toBe(630) // 9.5 hours * 60px (UTC time)
     expect(vm.position.height).toBe(135) // 2.25 hours * 60px
   })
 

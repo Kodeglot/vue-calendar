@@ -6,24 +6,24 @@ interface UseCalendarEventInteractionsOptions {
    * Calendar event data
    */
   event: CalendarEvent
-  
+
   /**
    * Container reference for position calculations
    */
   containerRef?: HTMLElement
-  
+
   /**
    * Pixels per hour for time calculations
    * @default 60
    */
   pxPerHour?: number
-  
+
   /**
    * Snap interval in minutes
    * @default 15
    */
   snapInterval?: number
-  
+
   /**
    * Minimum event height in pixels
    * @default 30
@@ -36,32 +36,32 @@ interface UseCalendarEventInteractionsReturn {
    * Current position and dimensions
    */
   position: Ref<{ top: number; height: number }>
-  
+
   /**
    * Whether a resize is in progress
    */
   isResizing: Ref<boolean>
-  
+
   /**
    * Current resize direction
    */
   resizeDirection: Ref<'top' | 'bottom'>
-  
+
   /**
    * Start a resize operation
    */
   startResize: (direction: 'top' | 'bottom') => void
-  
+
   /**
    * Handle drag start event
    */
   handleDragStart: (e: DragEvent) => void
-  
+
   /**
    * Handle mouse down event
    */
   handleMouseDown: (e: MouseEvent) => void
-  
+
   /**
    * Calculate initial position based on event times
    */
@@ -98,43 +98,56 @@ export function useCalendarEventInteractions(
   ) => {
     const start = new Date(event.start)
     const end = new Date(event.end)
-    
+
     if (viewType === 'month') {
       position.value = {
         top: (order || 0) * 55, // 50px height + 5px margin
         height: 50
       }
     } else {
-      const startHours = start.getHours() + (start.getMinutes() / 60)
+      // Get UTC time and apply timezone offset
+      const utcHours = start.getUTCHours()
+      const utcMinutes = start.getUTCMinutes()
+      const timezoneOffset = start.getTimezoneOffset() / 60
+      const startHours = (utcHours - timezoneOffset) + (utcMinutes / 60)
+
       const durationHours = (end.getTime() - start.getTime()) / 3600000
-      
+
       position.value = {
         top: Math.max(0, startHours * pxPerHour),
         height: Math.max(minHeight, durationHours * pxPerHour)
       }
     }
+
+    // console.log(position.value)
   }
 
   // Resize Handlers
   const startResize = (direction: 'top' | 'bottom') => {
-    if (!containerRef) return
-    
+    console.log("=== startResize start")
+    isResizing.value = true
+    if (!containerRef) {
+      console.error("Containerref missing")
+      return
+    }
+
     resizeDirection.value = direction
     isResizing.value = true
     initialTop.value = position.value.top
     initialHeight.value = position.value.height
-    
+
     document.addEventListener('mousemove', handleResizeMove)
     document.addEventListener('mouseup', stopResize)
   }
 
   const handleResizeMove = (e: MouseEvent) => {
+    console.log("=== handleResizeMove start")
     if (!isResizing.value || !containerRef) return
 
     const containerRect = containerRef.getBoundingClientRect()
     const mouseY = e.clientY - containerRect.top
-    const deltaY = mouseY - (resizeDirection.value === 'top' 
-      ? initialTop.value 
+    const deltaY = mouseY - (resizeDirection.value === 'top'
+      ? initialTop.value
       : initialTop.value + initialHeight.value)
 
     let newTop = initialTop.value
@@ -143,7 +156,7 @@ export function useCalendarEventInteractions(
     if (resizeDirection.value === 'top') {
       newHeight = Math.max(minHeight, initialHeight.value - deltaY)
       newTop = initialTop.value + deltaY
-      
+
       // Snap to interval
       const snapPixels = minutesToPixels(snapInterval)
       newTop = Math.round(newTop / snapPixels) * snapPixels
@@ -182,6 +195,12 @@ export function useCalendarEventInteractions(
     }
 
     position.value = { top: newTop, height: newHeight }
+    
+    // Update event times immediately during resize
+    event.start = newStart.toISOString()
+    event.end = newEnd.toISOString()
+    
+    // Emit updates during resize for real-time feedback
     emit('resize', event, newStart.toISOString(), newEnd.toISOString())
   }
 
@@ -189,10 +208,16 @@ export function useCalendarEventInteractions(
     isResizing.value = false
     document.removeEventListener('mousemove', handleResizeMove)
     document.removeEventListener('mouseup', stopResize)
+    
+    // Emit final resize event with updated times
+    emit('resize-end', event, event.start, event.end)
   }
 
   // Drag Handlers
   const handleDragStart = (e: DragEvent) => {
+    if (isResizing.value)
+      return
+    console.log("=== drag start")
     try {
       if (!event.id) throw new Error('Event ID is required for drag operation')
       e.dataTransfer?.setData('text/plain', event.id)
@@ -206,17 +231,18 @@ export function useCalendarEventInteractions(
     try {
       // Prevent drag during resize
       if (isResizing.value) return
-      
+
       // Check if clicking on a resize handle by checking parent element
       const target = e.target as HTMLElement
-      if (target.classList.contains('cursor-row-resize') || 
-          target.parentElement?.querySelector('.cursor-row-resize') === target) {
+      if (target.classList.contains('cursor-row-resize') ||
+        target.parentElement?.querySelector('.cursor-row-resize') === target) {
         e.stopPropagation()
         return // Prevent drag when clicking on resize handles
       }
-      
+
       // Only handle drag if not resizing and not clicking on a resize handle
       e.stopPropagation()
+    
       emit('click', event)
     } catch (error) {
       console.error('Mouse down event failed:', error)

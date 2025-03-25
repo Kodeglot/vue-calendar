@@ -68,18 +68,19 @@
         <!-- Main Time Grid -->
         <TimeGridComponent :hourHeight="hourHeight" :timeFormat="timeFormat">
           <!-- Calendar Events -->
-          <CalendarEventComponent
-            v-for="event in stackedEvents"
-            :key="event.id"
-            :event="event"
-            :resizable="true"
-            :container-ref="dayGrid"
-            @resize="handleResize"
-            @dragstart="handleEventDragStart"
-            class="absolute"
-            :viewType="'day'"
-            :style="eventPosition(event)"
-          />
+          <template v-if="dayGrid">
+            <CalendarEventComponent
+              v-for="event in stackedEvents"
+              :key="event.id"
+              :event="event"
+              :resizable="true"
+              :container-ref="dayGrid"
+              @resize="handleResize"
+              @dragstart="handleEventDragStart"
+              class="absolute"
+              :viewType="'day'"
+            />
+          </template>
         </TimeGridComponent>
       </div>
     </div>
@@ -87,10 +88,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
+
+/**
+ * Reference to the day grid container
+ * @type {Ref<HTMLElement>}
+ */
+const dayGrid = ref<HTMLElement | null>(null);
+const isMounted = ref(false);
+
+onMounted(() => {
+  isMounted.value = true;
+});
+
+/**
+ * Currently dragged event reference
+ * @type {Ref<CalendarEvent | null>}
+ */
+const draggedEvent = ref<CalendarEvent | null>(null);
 
 /**
  * CalendarDayComponent - Displays a single day view with time slots and events
@@ -217,18 +235,6 @@ const handleDayClick = (event: MouseEvent, hour: number) => {
   // Emit event with clicked date/time
   emit("dayClick", clickedDate);
 };
-
-/**
- * Reference to the day grid container
- * @type {Ref<HTMLElement>}
- */
-const dayGrid = ref<HTMLElement>();
-
-/**
- * Currently dragged event reference
- * @type {Ref<CalendarEvent | null>}
- */
-const draggedEvent = ref<CalendarEvent | null>(null);
 
 /**
  * Get all-day events for a specific date
@@ -413,6 +419,7 @@ const handleResize = (
   newStart: string | Date,
   newEnd: string | Date
 ) => {
+  console.log("=== daycomponentn handleresize");
   try {
     // Convert inputs to Date objects if they aren't already
     const startDate = newStart instanceof Date ? newStart : new Date(newStart);
@@ -431,6 +438,7 @@ const handleResize = (
     const newEndTime = new Date(event.end);
     newEndTime.setMinutes(newEndTime.getMinutes() + endDelta);
 
+    console.log(store.events);
     store.updateEventDuration(event.id, newStartTime, newEndTime);
   } catch (error) {
     console.error("Error resizing event:", error);

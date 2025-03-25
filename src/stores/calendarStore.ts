@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Calendar Event Interface
@@ -22,13 +23,13 @@ export const useCalendarStore = defineStore('calendar', () => {
   // State
   const currentDate = ref(new Date())
   const selectedDate = ref<Date | null>(null)
-  const events = ref<CalendarEvent[]>([])
+  const events = ref<Map<string, CalendarEvent>>(new Map())
   const plugins = ref<CalendarPlugin[]>([])
 
   // Getters
   const currentMonth = computed(() => currentDate.value.getMonth())
   const monthEvents = computed(() => {
-    return events.value.filter(event => {
+    return Array.from(events.value.values()).filter(event => {
       const eventDate = new Date(event.start)
       return eventDate.getMonth() === currentMonth.value &&
         eventDate.getFullYear() === currentDate.value.getFullYear()
@@ -37,13 +38,15 @@ export const useCalendarStore = defineStore('calendar', () => {
 
   // Actions
   const addEvent = (event: CalendarEvent): void => {
-    events.value.push(event)
-    console.log(events.value)
+    if (!event.id) {
+      event.id = uuidv4()
+    }
+    events.value.set(event.id, event)
     plugins.value.forEach(plugin => plugin.onEventAdd?.(event))
   }
 
   const updateEventDateOnly = (eventId: string, newDate: Date): void => {
-    const event = events.value.find(e => e.id === eventId)
+    const event = events.value.get(eventId)
     if (event) {
       const start = new Date(event.start)
       const end = new Date(event.end)
@@ -54,11 +57,12 @@ export const useCalendarStore = defineStore('calendar', () => {
 
       event.start = newStart.toISOString()
       event.end = newEnd.toISOString()
+      events.value.set(eventId, event)
     }
   }
 
   const updateEventDate = (eventId: string, newDate: Date): void => {
-    const event = events.value.find(e => e.id === eventId)
+    const event = events.value.get(eventId)
     if (event) {
       const start = new Date(event.start)
       const end = new Date(event.end)
@@ -69,19 +73,21 @@ export const useCalendarStore = defineStore('calendar', () => {
 
       event.start = newStart.toISOString()
       event.end = newEnd.toISOString()
+      events.value.set(eventId, event)
     }
   }
 
   const updateEventDuration = (eventId: string, newStart: Date, newEnd: Date): void => {
-    const event = events.value.find(e => e.id === eventId)
+    const event = events.value.get(eventId)
     if (event) {
       event.start = newStart.toISOString()
       event.end = newEnd.toISOString()
+      events.value.set(eventId, event)
     }
   }
 
   const getEventsForDate = (date: Date): CalendarEvent[] => {
-    return events.value.filter(event =>
+    return Array.from(events.value.values()).filter(event =>
       new Date(event.start).toDateString() === date.toDateString()
     )
   }
@@ -89,7 +95,7 @@ export const useCalendarStore = defineStore('calendar', () => {
   const getEventsForWeek = (startDate: Date): CalendarEvent[] => {
     const endDate = new Date(startDate)
     endDate.setDate(endDate.getDate() + 6)
-    return events.value.filter(event => {
+    return Array.from(events.value.values()).filter(event => {
       const eventStart = new Date(event.start)
       return eventStart >= startDate && eventStart <= endDate
     })
@@ -100,7 +106,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     plugin.onRegister?.({
       currentDate: currentDate.value,
       selectedDate: selectedDate.value,
-      events: events.value,
+      events: Array.from(events.value.values()),
       plugins: plugins.value,
       currentMonth: currentMonth.value,
       monthEvents: monthEvents.value,
