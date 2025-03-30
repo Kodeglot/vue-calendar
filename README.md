@@ -86,7 +86,7 @@ export interface CalendarEvent {
   title: string
   start: string
   end: string
-  color: string
+  tailwindColor: string // Use one of the following Tailwind colors: red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, slate, gray, zinc, neutral, stone
 }
 
 export const useCalendarStore = defineStore('calendar', {
@@ -276,7 +276,7 @@ async function syncWithGoogleCalendar() {
       title: event.summary,
       start: event.start.dateTime || event.start.date,
       end: event.end.dateTime || event.end.date,
-      color: event.colorId ? `#${event.colorId}` : '#3b82f6'
+      tailwindColor: event.colorId || 'blue'
     })
   })
 }

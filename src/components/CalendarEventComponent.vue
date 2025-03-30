@@ -16,7 +16,7 @@
       viewType === 'month' ? 'mt-2' : '',
       viewType === 'day' ? 'ml-16' : '',
       `${getPastelColor(event.id)}`,
-      `border-l-4 border-l-${getPastelColorBorder(event.id)}-500`,
+      `border-l-4 ${getPastelColorBorder(event.id)}`,
       customClasses?.eventContainer,
       ...($attrs.class as string[] || [])
     ]"
@@ -261,8 +261,7 @@ const handleClick = (e: MouseEvent) => {
 const getPastelColor = (id: string) => {
   // Use tailwindColor if available, otherwise generate consistent pastel color
   if (props.event.tailwindColor) {
-    const colorSplitted = props.event.tailwindColor.split("-");
-    return colorSplitted[0] + "-" + colorSplitted[1] + "-100";
+    return `bg-${props.event.tailwindColor}-100`;
   }
   const colors = [
     "bg-red-100",
@@ -293,9 +292,35 @@ const getPastelColor = (id: string) => {
 };
 
 const getPastelColorBorder = (id: string) => {
-  const bgColor = getPastelColor(id);
-  const colorSplitted = props.event.tailwindColor.split("-");
-  return `border-l-${colorSplitted[1]}-500`;
+  if (props.event.tailwindColor) {
+    return `border-l-${props.event.tailwindColor}-500`;
+  }
+  const colors = [
+    "border-l-red-500",
+    "border-l-orange-500",
+    "border-l-amber-500",
+    "border-l-yellow-500",
+    "border-l-lime-500",
+    "border-l-green-500",
+    "border-l-emerald-500",
+    "border-l-teal-500",
+    "border-l-cyan-500",
+    "border-l-sky-500",
+    "border-l-blue-500",
+    "border-l-indigo-500",
+    "border-l-violet-500",
+    "border-l-purple-500",
+    "border-l-fuchsia-500",
+    "border-l-pink-500",
+    "border-l-rose-500",
+    "border-l-slate-500",
+    "border-l-gray-500",
+    "border-l-zinc-500",
+    "border-l-neutral-500",
+    "border-l-stone-500",
+  ];
+  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
 };
 
 const formatTime = (dateString: string) => {
