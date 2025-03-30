@@ -15,11 +15,12 @@
       'text-sm p-2 rounded cursor-move absolute truncate hover:shadow-sm group event-transition focus:outline-none focus:ring-2 focus:ring-primary-500',
       viewType === 'month' ? 'mt-2' : '',
       viewType === 'day' ? 'ml-16' : '',
+      `${getPastelColor(event.id)}`,
+      `border-l-4 border-l-${getPastelColorBorder(event.id)}-500`,
       customClasses?.eventContainer,
+      ...($attrs.class as string[] || [])
     ]"
     :style="{
-      backgroundColor: event.color + '20',
-      borderLeft: `4px solid ${event.color}`,
       top: `${position.top}px`,
       height: `${position.height}px`,
       width: `calc(${event.width}% - 2px)`,
@@ -257,6 +258,46 @@ const handleClick = (e: MouseEvent) => {
 };
 
 // Format time display (HH:MM)
+const getPastelColor = (id: string) => {
+  // Use tailwindColor if available, otherwise generate consistent pastel color
+  if (props.event.tailwindColor) {
+    const colorSplitted = props.event.tailwindColor.split("-");
+    return colorSplitted[0] + "-" + colorSplitted[1] + "-100";
+  }
+  const colors = [
+    "bg-red-100",
+    "bg-orange-100",
+    "bg-amber-100",
+    "bg-yellow-100",
+    "bg-lime-100",
+    "bg-green-100",
+    "bg-emerald-100",
+    "bg-teal-100",
+    "bg-cyan-100",
+    "bg-sky-100",
+    "bg-blue-100",
+    "bg-indigo-100",
+    "bg-violet-100",
+    "bg-purple-100",
+    "bg-fuchsia-100",
+    "bg-pink-100",
+    "bg-rose-100",
+    "bg-slate-100",
+    "bg-gray-100",
+    "bg-zinc-100",
+    "bg-neutral-100",
+    "bg-stone-100",
+  ];
+  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+};
+
+const getPastelColorBorder = (id: string) => {
+  const bgColor = getPastelColor(id);
+  const colorSplitted = props.event.tailwindColor.split("-");
+  return `border-l-${colorSplitted[1]}-500`;
+};
+
 const formatTime = (dateString: string) => {
   try {
     if (!dateString) {
@@ -269,7 +310,7 @@ const formatTime = (dateString: string) => {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      timeZone: props.timeZone, // Always use UTC for consistent display
+      timeZone: props.timeZone || "UTC", // Fallback to UTC if not specified
     });
   } catch (error) {
     console.error("Time formatting failed:", error);

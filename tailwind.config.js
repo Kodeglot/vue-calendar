@@ -1,21 +1,25 @@
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
+  mode: 'jit',  
   content: [
-    './src/**/*.{vue,js,ts,jsx,tsx}',
-    './dist/**/*.{vue,js,ts,jsx,tsx}'
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}'
+  ],
+  safelist: [
+    {
+      pattern: /bg-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(100|500)/,
+      variants: ['hover', 'focus']
+    },
+    {
+      pattern: /border-l-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(500)/,
+      variants: ['hover', 'focus']
+    }
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#3b82f6',
-          light: '#60a5fa',
-          dark: '#2563eb'
-        }
-      }
-    }
+    extend: {},
   },
-  plugins: [],
-  corePlugins: {
-    preflight: false // Disable Tailwind's base styles to avoid conflicts
-  }
+  plugins: [
+    require( '@tailwindcss/forms' ),
+    require( '@tailwindcss/typography' )
+  ],
 }

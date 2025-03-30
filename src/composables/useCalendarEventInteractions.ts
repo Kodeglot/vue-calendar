@@ -32,9 +32,9 @@ interface UseCalendarEventInteractionsOptions {
 
   /**
    * Timezone for time calculations (IANA timezone name)
-   * @default 'UTC'
+   * Must be specified for accurate time calculations
    */
-  timeZone?: string
+  timeZone: string
 }
 
 interface UseCalendarEventInteractionsReturn {
@@ -67,6 +67,16 @@ interface UseCalendarEventInteractionsReturn {
    * Handle mouse down event
    */
   handleMouseDown: (e: MouseEvent) => void
+
+  /**
+   * Handle resize movement
+   */
+  handleResizeMove: (e: MouseEvent) => void
+
+  /**
+   * Current event reference
+   */
+  event: CalendarEvent
 
   /**
    * Calculate initial position based on event times
@@ -111,23 +121,26 @@ export function useCalendarEventInteractions(
         height: 50
       }
     } else {
-      // Calculate hours in specified timezone (or UTC if not specified)
-      const timeZone = options.timeZone || 'UTC'
-      const startHours = new Date(event.start).toLocaleTimeString('en-US', {
-        timeZone,
+      // Convert times to specified timezone
+      const formatOptions: Intl.DateTimeFormatOptions = {
+        timeZone: options.timeZone,
         hour12: false,
-        hour: 'numeric',
-        minute: 'numeric'
-      }).split(':').map(Number)
-      const startTotalHours = startHours[0] + (startHours[1] / 60)
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }
+      
+      const startTime = new Intl.DateTimeFormat('en-US', formatOptions)
+        .format(new Date(event.start))
+        .split(':')
+        .map(Number)
+      const startTotalHours = startTime[0] + (startTime[1] / 60)
 
-      const endHours = new Date(event.end).toLocaleTimeString('en-US', {
-        timeZone,
-        hour12: false,
-        hour: 'numeric',
-        minute: 'numeric'
-      }).split(':').map(Number)
-      const endTotalHours = endHours[0] + (endHours[1] / 60)
+      const endTime = new Intl.DateTimeFormat('en-US', formatOptions)
+        .format(new Date(event.end))
+        .split(':')
+        .map(Number)
+      const endTotalHours = endTime[0] + (endTime[1] / 60)
       const durationHours = endTotalHours - startTotalHours
 
       position.value = {
@@ -135,18 +148,12 @@ export function useCalendarEventInteractions(
         height: Math.max(minHeight, durationHours * pxPerHour)
       }
     }
-
-    // console.log(position.value)
   }
 
   // Resize Handlers
   const startResize = (direction: 'top' | 'bottom') => {
-    console.log("=== startResize start")
     isResizing.value = true
-    if (!containerRef) {
-      console.error("Containerref missing")
-      return
-    }
+    if (!containerRef) return
 
     resizeDirection.value = direction
     isResizing.value = true
@@ -158,7 +165,6 @@ export function useCalendarEventInteractions(
   }
 
   const handleResizeMove = (e: MouseEvent) => {
-    console.log("=== handleResizeMove start")
     if (!isResizing.value || !containerRef) return
 
     const containerRect = containerRef.getBoundingClientRect()
@@ -171,12 +177,14 @@ export function useCalendarEventInteractions(
     let newHeight = initialHeight.value
 
     if (resizeDirection.value === 'top') {
-      newHeight = Math.max(minHeight, initialHeight.value - deltaY)
-      newTop = initialTop.value + deltaY
-
-      // Snap to interval
+      // Calculate proposed new top position
+      const proposedTop = initialTop.value + deltaY
+      
+      // Snap to nearest interval
       const snapPixels = minutesToPixels(snapInterval)
-      newTop = Math.round(newTop / snapPixels) * snapPixels
+      newTop = Math.round(proposedTop / snapPixels) * snapPixels
+      
+      // Adjust height based on snapped top position
       newHeight = Math.max(minHeight, initialHeight.value - (newTop - initialTop.value))
     } else {
       newHeight = Math.max(minHeight, initialHeight.value + deltaY)
@@ -232,9 +240,7 @@ export function useCalendarEventInteractions(
 
   // Drag Handlers
   const handleDragStart = (e: DragEvent) => {
-    if (isResizing.value)
-      return
-    console.log("=== drag start")
+    if (isResizing.value) return
     try {
       if (!event.id) throw new Error('Event ID is required for drag operation')
       e.dataTransfer?.setData('text/plain', event.id)
@@ -249,12 +255,17 @@ export function useCalendarEventInteractions(
       // Prevent drag during resize
       if (isResizing.value) return
 
-      // Check if clicking on a resize handle by checking parent element
+      // Check if clicking on a resize handle by checking element and ancestors
       const target = e.target as HTMLElement
-      if (target.classList.contains('cursor-row-resize') ||
-        target.parentElement?.querySelector('.cursor-row-resize') === target) {
-        e.stopPropagation()
-        return // Prevent drag when clicking on resize handles
+      let currentElement: HTMLElement | null = target
+      while (currentElement) {
+        if (currentElement.classList.contains('cursor-row-resize') || 
+            currentElement.dataset.resizeHandle === 'true') {
+          e.stopPropagation()
+          e.preventDefault()
+          return // Prevent drag when clicking on resize handles
+        }
+        currentElement = currentElement.parentElement
       }
 
       // Only handle drag if not resizing and not clicking on a resize handle
@@ -276,6 +287,8 @@ export function useCalendarEventInteractions(
     startResize,
     handleDragStart,
     handleMouseDown,
+    handleResizeMove,
+    event,
     calculatePosition
   }
 }

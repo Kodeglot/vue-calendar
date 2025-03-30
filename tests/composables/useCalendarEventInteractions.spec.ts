@@ -49,7 +49,8 @@ describe('useCalendarEventInteractions', () => {
 
     it('calculates position correctly for month view', () => {
       const { position, calculatePosition } = useCalendarEventInteractions(mockEmit, {
-        event: mockEvent
+        event: mockEvent,
+        timeZone: 'UTC'
       })
 
       calculatePosition('month', 2)
@@ -105,7 +106,8 @@ describe('useCalendarEventInteractions', () => {
 
   it('handles drag start correctly', () => {
     const { handleDragStart, isResizing } = useCalendarEventInteractions(mockEmit, {
-      event: mockEvent
+      event: mockEvent,
+      timeZone: 'UTC'
     })
 
     const mockDragEvent = new Event('dragstart') as DragEvent
@@ -132,7 +134,8 @@ describe('useCalendarEventInteractions', () => {
       event: mockEvent,
       containerRef: mockContainer,
       pxPerHour: 60,
-      snapInterval: 15
+      snapInterval: 15,
+      timeZone: 'UTC'
     })
 
     // Test top resize
@@ -144,5 +147,141 @@ describe('useCalendarEventInteractions', () => {
     startResize('bottom')
     expect(isResizing.value).toBe(true)
     expect(resizeDirection.value).toBe('bottom')
+  })
+
+  describe('Resize movement handling', () => {
+    beforeEach(() => {
+      Object.defineProperty(mockContainer, 'getBoundingClientRect', {
+        value: () => ({ top: 0 }),
+        configurable: true
+      })
+    })
+
+    it('handles top resize movement with snapping', () => {
+      const { startResize, handleResizeMove, position, event, calculatePosition } = useCalendarEventInteractions(mockEmit, {
+        event: mockEvent,
+        containerRef: mockContainer,
+        pxPerHour: 60,
+        snapInterval: 15,
+        minHeight: 30,
+        timeZone: 'UTC'
+      })
+
+      // Set initial position
+      calculatePosition('day')
+      const initialTop = position.value.top // Should be 870 (14.5 hours * 60px)
+
+      startResize('top')
+      // Simulate mouse moving up by 30px (half hour)
+      const mockMouseEvent = {
+        clientY: initialTop - 30, // Move up by 30px
+        preventDefault: vi.fn()
+      } as unknown as MouseEvent
+
+      handleResizeMove(mockMouseEvent)
+      // Should snap to 15 minute intervals (45px change)
+      expect(position.value.top).toBe(initialTop - 45)
+      expect(event.start).not.toBe(mockEvent.start) // Should update event time
+    })
+
+    it('handles bottom resize movement with snapping', () => {
+      const { startResize, handleResizeMove, position, event } = useCalendarEventInteractions(mockEmit, {
+        event: mockEvent,
+        containerRef: mockContainer,
+        pxPerHour: 60,
+        snapInterval: 15,
+        minHeight: 30,
+        timeZone: 'UTC'
+      })
+
+      startResize('bottom')
+      const mockMouseEvent = {
+        clientY: 200,
+        preventDefault: vi.fn()
+      } as unknown as MouseEvent
+
+      handleResizeMove(mockMouseEvent)
+      expect(position.value.height).toBe(120) // Snapped to 15 min interval
+      expect(event.end).not.toBe(mockEvent.end) // Should update event time
+    })
+
+    it('prevents midnight overlaps during resize', () => {
+      const midnightEvent = {
+        ...mockEvent,
+        start: '2025-03-25T23:30:00Z',
+        end: '2025-03-26T00:30:00Z'
+      }
+      const { startResize, handleResizeMove, position, event } = useCalendarEventInteractions(mockEmit, {
+        event: midnightEvent,
+        containerRef: mockContainer,
+        pxPerHour: 60,
+        snapInterval: 15,
+        timeZone: 'UTC'
+      })
+
+      // Try to resize top past midnight
+      startResize('top')
+      const mockMouseEvent = {
+        clientY: 1500, // Would push start into next day
+        preventDefault: vi.fn()
+      } as unknown as MouseEvent
+      Object.defineProperty(mockContainer, 'getBoundingClientRect', {
+        value: () => ({ top: 0 })
+      })
+
+      handleResizeMove(mockMouseEvent)
+      const eventDate = new Date(event.start)
+      expect(eventDate.getUTCHours()).toBe(0)
+      expect(eventDate.getUTCMinutes()).toBe(0)
+    })
+  })
+
+  describe('Mouse event handling', () => {
+    it('handles mouse down on non-resize elements', () => {
+      const { handleMouseDown } = useCalendarEventInteractions(mockEmit, {
+        event: mockEvent,
+        timeZone: 'UTC'
+      })
+
+      const mockMouseEvent = {
+        target: document.createElement('div'),
+        stopPropagation: vi.fn()
+      } as unknown as MouseEvent
+
+      handleMouseDown(mockMouseEvent)
+      expect(mockEmit).toHaveBeenCalledWith('click', mockEvent)
+    })
+
+    it('ignores mouse down on resize handles', () => {
+      const { handleMouseDown } = useCalendarEventInteractions(mockEmit, {
+        event: mockEvent,
+        timeZone: 'UTC'
+      })
+
+      const resizeHandle = document.createElement('div')
+      resizeHandle.classList.add('cursor-row-resize')
+      const mockMouseEvent = {
+        target: resizeHandle,
+        stopPropagation: vi.fn()
+      } as unknown as MouseEvent
+
+      handleMouseDown(mockMouseEvent)
+      expect(mockEmit).not.toHaveBeenCalled()
+    })
+  })
+
+  it('cleans up event listeners on unmount', () => {
+    const { startResize, isResizing } = useCalendarEventInteractions(mockEmit, {
+      event: mockEvent,
+      containerRef: mockContainer,
+      timeZone: 'UTC'
+    })
+
+    startResize('top')
+    expect(isResizing.value).toBe(true)
+
+    // Simulate unmount
+    document.dispatchEvent(new Event('mouseup'))
+    expect(isResizing.value).toBe(false)
   })
 })

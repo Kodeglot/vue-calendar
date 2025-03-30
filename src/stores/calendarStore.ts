@@ -11,7 +11,7 @@ export interface CalendarEvent {
   title: string       // Display title of the event
   start: string       // ISO string of event start time
   end: string         // ISO string of event end time
-  color: string       // Hex color code for event styling
+  tailwindColor: string // Tailwind color name (e.g. 'blue', 'green', 'red')
   allDay?: boolean    // Flag for all-day events
   width?: number      // Width percentage for stacked events
   left?: number       // Left position percentage for stacking

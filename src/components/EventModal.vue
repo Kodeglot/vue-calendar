@@ -39,11 +39,20 @@
 
             <div>
               <label class="block text-sm font-medium mb-1">Color</label>
-              <input
-                v-model="event.color"
-                type="color"
-                class="w-full h-10"
-              />
+              <div class="flex flex-row flex-wrap">
+                <button
+                  v-for="color in ['bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500', 'bg-emerald-500', 'bg-teal-500', 'bg-cyan-500', 'bg-sky-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500', 'bg-pink-500', 'bg-rose-500', 'bg-slate-500', 'bg-gray-500', 'bg-zinc-500', 'bg-neutral-500', 'bg-stone-500']"
+                  :key="color"
+                  type="button"
+                  @click="event.tailwindColor = color"
+                  :class="[
+                    'm-1 h-8 w-8 rounded-full border-2',
+                    `${color}`,
+                    event.tailwindColor === color ? 'border-black' : 'border-transparent'
+                  ]"
+                  :title="color"
+                />
+              </div>
             </div>
           </div>
 
@@ -80,7 +89,7 @@ const event = ref({
   title: 'New Event',
   start: '',
   end: '',
-  color: '#3b82f6'
+  tailwindColor: 'bg-blue-500'
 });
 
 const store = useCalendarStore();
@@ -105,7 +114,7 @@ function handleSubmit() {
     title: event.value.title,
     start: new Date(event.value.start).toISOString(),
     end: new Date(event.value.end).toISOString(),
-    color: event.value.color
+    tailwindColor: event.value.tailwindColor
   };
   
   emit('save', newEvent);

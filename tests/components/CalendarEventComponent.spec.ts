@@ -80,8 +80,19 @@ describe('CalendarEventComponent', () => {
       }
     ]
 
+    // Mock process.env.TZ for consistent testing
+    const originalTZ = process.env.TZ
+    beforeEach(() => {
+      process.env.TZ = 'UTC' // Force UTC for all tests
+    })
+    afterEach(() => {
+      process.env.TZ = originalTZ
+    })
+
     testCases.forEach(({ timeZone, start, end, expected }) => {
       it(`formats time correctly for ${timeZone}`, () => {
+        // Force the test timezone regardless of host environment
+        process.env.TZ = timeZone
         const wrapper = mount(CalendarEventComponent, {
           props: {
             ...baseProps,
