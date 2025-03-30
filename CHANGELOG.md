@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated EventModal color options to use consistent bg-{color}-500 format
+- Changed default event color from 'blue' to 'bg-blue-500'
+
 ### Added
 - Initial project setup
 - Basic calendar component with month, week, and day views
@@ -22,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized performance for large event sets
 
 ### Fixed
-- Timezone handling in event dates
+- Improved UTC timezone handling in event dates
 - Drag and drop edge cases
 - Responsive layout issues
 
