@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Renamed CalendarEvent 'color' property to 'tailwindColor' for clarity
+- Updated color documentation to list all valid Tailwind color options
 - Updated EventModal color options to use consistent bg-{color}-500 format
 - Changed default event color from 'blue' to 'bg-blue-500'
 
