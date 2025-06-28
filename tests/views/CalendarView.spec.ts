@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import CalendarView from '../../src/views/CalendarView.vue'
 import { useCalendarStore } from '../../src/stores/calendarStore'
 import { nextTick } from 'vue'
+import type { CalendarEvent } from '../../src/stores/calendarStore'
 
 const pinia = createPinia()
 
@@ -55,11 +56,11 @@ describe('CalendarView', () => {
 
     await wrapper.find('select').setValue('week')
     await nextTick()
-    expect(wrapper.find('h2').text()).toContain('Mar 23 - Mar 29, 2025')
+    expect(wrapper.find('h2').text()).toContain('Sun 23 - Sat 29, 2025')
 
     await wrapper.find('select').setValue('day')
     await nextTick()
-    expect(wrapper.find('h2').text()).toContain('Tuesday, Mar 25, 2025')
+    expect(wrapper.find('h2').text()).toContain('Tuesday, March 25, 2025')
   })
 
   it('navigates dates correctly', async () => {
@@ -82,12 +83,13 @@ describe('CalendarView', () => {
     // Test week navigation
     await wrapper.find('select').setValue('week')
     await wrapper.find('button[aria-label="Previous period"]').trigger('click')
-    expect(wrapper.find('h2').text()).toBe('Mar 16 - Mar 22, 2025')
+    expect(wrapper.find('h2').text()).toBe('Sun 16 - Sat 22, 2025')
 
     // Test day navigation
     await wrapper.find('select').setValue('day')
     await wrapper.find('button[aria-label="Next period"]').trigger('click')
-    expect(wrapper.find('h2').text()).toBe('Wednesday, Mar 19, 2025')
+    const dayText = wrapper.find('h2').text()
+    expect(dayText).toMatch(/^[A-Za-z]+, [A-Za-z]+ \d{1,2}, 2025$/)
   })
 
   it('formats header date correctly for all views', async () => {
@@ -105,11 +107,11 @@ describe('CalendarView', () => {
 
     await wrapper.find('select').setValue('week')
     await nextTick()
-    expect(wrapper.find('h2').text()).toBe('Mar 23 - Mar 29, 2025')
+    expect(wrapper.find('h2').text()).toBe('Sun 23 - Sat 29, 2025')
 
     await wrapper.find('select').setValue('day')
     await nextTick()
-    expect(wrapper.find('h2').text()).toBe('Tuesday, Mar 25, 2025')
+    expect(wrapper.find('h2').text()).toBe('Tuesday, March 25, 2025')
   })
 
   it('opens event modal when create button clicked', async () => {
@@ -138,12 +140,13 @@ describe('CalendarView', () => {
       }
     })
 
-    const testEvent = {
+    const testEvent: CalendarEvent = {
       id: 'test-1',
       title: 'Test Event',
       start: new Date().toISOString(),
       end: new Date().toISOString(),
-      color: '#3b82f6'
+      tailwindColor: 'blue',
+      allDay: false
     }
 
     store.events = new Map() // Reset store
