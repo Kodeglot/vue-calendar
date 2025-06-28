@@ -69,7 +69,6 @@
           :event="ce"
           :resizable="false"
           :viewType="'month'"
-          @dragstart="(e) => handleDragStart(e, ce)"
         />
       </div>
     </div>
@@ -239,11 +238,6 @@ const getStackedEvents = computed(() => (date: Date) => {
 const isToday = (date: Date) => {
   const today = new Date();
   return date.toDateString() === today.toDateString();
-};
-
-// Drag Start Handler
-const handleDragStart = (e: DragEvent, event: CalendarEvent) => {
-  e.dataTransfer?.setData("text/plain", event.id);
 };
 
 // Drop Handler

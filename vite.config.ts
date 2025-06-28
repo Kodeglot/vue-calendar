@@ -23,4 +23,9 @@ export default defineConfig({
       tsconfig: './tsconfig.vitest.json'
     }
   },
+  // Development server configuration
+  server: {
+    port: 3000,
+    open: true
+  }
 })

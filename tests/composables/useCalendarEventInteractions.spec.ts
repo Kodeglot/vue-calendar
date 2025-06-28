@@ -105,7 +105,7 @@ describe('useCalendarEventInteractions', () => {
   })
 
   it('handles drag start correctly', () => {
-    const { handleDragStart, isResizing } = useCalendarEventInteractions(mockEmit, {
+    const { isResizing } = useCalendarEventInteractions(mockEmit, {
       event: mockEvent,
       timeZone: 'UTC'
     })

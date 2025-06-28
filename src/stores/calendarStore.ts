@@ -36,6 +36,10 @@ export const useCalendarStore = defineStore('calendar', () => {
     })
   })
 
+  const getEventById = (eventId: string): CalendarEvent => {
+    return events.value.get(eventId)!
+  }
+
   // Actions
   const addEvent = (event: CalendarEvent): void => {
     if (!event.id) {
@@ -86,6 +90,26 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   }
 
+  const updateEventTime = (eventId: string, newTime: Date): void => {
+    const event = events.value.get(eventId)
+    if (event) {
+      const start = new Date(event.start)
+      const end = new Date(event.end)
+      const duration = end.getTime() - start.getTime()
+
+      // Update time components while keeping original date
+      start.setHours(newTime.getHours())
+      start.setMinutes(newTime.getMinutes())
+      start.setSeconds(newTime.getSeconds())
+
+      const newEnd = new Date(start.getTime() + duration)
+
+      event.start = start.toISOString()
+      event.end = newEnd.toISOString()
+      events.value.set(eventId, event)
+    }
+  }
+
   const getEventsForDate = (date: Date): CalendarEvent[] => {
     return Array.from(events.value.values()).filter(event =>
       new Date(event.start).toDateString() === date.toDateString()
@@ -114,9 +138,10 @@ export const useCalendarStore = defineStore('calendar', () => {
       updateEventDate,
       updateEventDateOnly,
       updateEventDuration,
+      updateEventTime,
       getEventsForDate,
       getEventsForWeek,
-      registerPlugin
+      registerPlugin,
     })
   }
 
@@ -127,10 +152,12 @@ export const useCalendarStore = defineStore('calendar', () => {
     plugins,
     currentMonth,
     monthEvents,
+    getEventById,
     addEvent,
     updateEventDate,
     updateEventDateOnly,
     updateEventDuration,
+    updateEventTime,
     getEventsForDate,
     getEventsForWeek,
     registerPlugin
@@ -149,6 +176,7 @@ export interface CalendarPlugin {
     updateEventDate: (eventId: string, newDate: Date) => void
     updateEventDateOnly: (eventId: string, newDate: Date) => void
     updateEventDuration: (eventId: string, newStart: Date, newEnd: Date) => void
+    updateEventTime: (eventId: string, newTime: Date) => void
     getEventsForDate: (date: Date) => CalendarEvent[]
     getEventsForWeek: (startDate: Date) => CalendarEvent[]
     registerPlugin: (plugin: CalendarPlugin) => void
