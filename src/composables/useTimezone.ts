@@ -1,0 +1,250 @@
+import { ref, computed } from 'vue'
+import { format, parseISO, formatISO } from 'date-fns'
+import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz'
+
+/**
+ * Timezone utility composable for handling ISO date storage and localized display
+ * 
+ * This composable ensures that:
+ * - All dates are stored in ISO format (UTC)
+ * - Display times are shown in the user's local timezone
+ * - Timezone conversions are handled properly
+ */
+export function useTimezone() {
+  // Get user's timezone
+  const userTimezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
+  
+  // Common time formats
+  const timeFormats = {
+    time: 'HH:mm',
+    time12: 'h:mm a',
+    date: 'yyyy-MM-dd',
+    dateTime: 'yyyy-MM-dd HH:mm',
+    dateTime12: 'yyyy-MM-dd h:mm a',
+    monthDay: 'MMM d',
+    weekday: 'EEEE',
+    weekdayShort: 'EEE',
+    monthYear: 'MMMM yyyy',
+    fullDate: 'EEEE, MMMM d, yyyy'
+  }
+
+  /**
+   * Convert a date to the user's timezone for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Date object in user's timezone
+   */
+  const toUserTimezone = (date: string | Date): Date => {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    return toZonedTime(dateObj, userTimezone.value)
+  }
+
+  /**
+   * Convert a date from user's timezone to UTC for storage
+   * @param date - Date object in user's timezone
+   * @returns Date object in UTC
+   */
+  const toUTC = (date: Date): Date => {
+    return fromZonedTime(date, userTimezone.value)
+  }
+
+  /**
+   * Format a date for display in user's timezone
+   * @param date - Date string in ISO format or Date object
+   * @param formatStr - Format string (see timeFormats)
+   * @returns Formatted date string
+   */
+  const formatForDisplay = (date: string | Date, formatStr: string): string => {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    return formatInTimeZone(dateObj, userTimezone.value, formatStr)
+  }
+
+  /**
+   * Format time for display (HH:mm format)
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted time string
+   */
+  const formatTime = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.time)
+  }
+
+  /**
+   * Format time for display (12-hour format)
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted time string
+   */
+  const formatTime12 = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.time12)
+  }
+
+  /**
+   * Format date for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted date string
+   */
+  const formatDate = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.date)
+  }
+
+  /**
+   * Format date and time for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted date and time string
+   */
+  const formatDateTime = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.dateTime)
+  }
+
+  /**
+   * Format date and time for display (12-hour format)
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted date and time string
+   */
+  const formatDateTime12 = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.dateTime12)
+  }
+
+  /**
+   * Format month and day for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted month and day string
+   */
+  const formatMonthDay = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.monthDay)
+  }
+
+  /**
+   * Format weekday for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted weekday string
+   */
+  const formatWeekday = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.weekday)
+  }
+
+  /**
+   * Format short weekday for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted short weekday string
+   */
+  const formatWeekdayShort = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.weekdayShort)
+  }
+
+  /**
+   * Format month and year for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted month and year string
+   */
+  const formatMonthYear = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.monthYear)
+  }
+
+  /**
+   * Format full date for display
+   * @param date - Date string in ISO format or Date object
+   * @returns Formatted full date string
+   */
+  const formatFullDate = (date: string | Date): string => {
+    return formatForDisplay(date, timeFormats.fullDate)
+  }
+
+  /**
+   * Convert a date to ISO string for storage
+   * @param date - Date object
+   * @returns ISO string
+   */
+  const toISOString = (date: Date): string => {
+    return formatISO(date)
+  }
+
+  /**
+   * Get current date in user's timezone
+   * @returns Current date in user's timezone
+   */
+  const now = computed(() => {
+    return new Date()
+  })
+
+  /**
+   * Get current date in UTC for storage
+   * @returns Current date in UTC
+   */
+  const nowUTC = computed(() => {
+    return toUTC(now.value)
+  })
+
+  /**
+   * Check if a date is today
+   * @param date - Date string in ISO format or Date object
+   * @returns True if the date is today
+   */
+  const isToday = (date: string | Date): boolean => {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    const today = new Date()
+    return format(dateObj, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')
+  }
+
+  /**
+   * Check if a date is in the same day as another date
+   * @param date1 - First date
+   * @param date2 - Second date
+   * @returns True if both dates are in the same day
+   */
+  const isSameDay = (date1: string | Date, date2: string | Date): boolean => {
+    const d1 = typeof date1 === 'string' ? parseISO(date1) : date1
+    const d2 = typeof date2 === 'string' ? parseISO(date2) : date2
+    return format(d1, 'yyyy-MM-dd') === format(d2, 'yyyy-MM-dd')
+  }
+
+  /**
+   * Get the start of day in user's timezone
+   * @param date - Date string in ISO format or Date object
+   * @returns Start of day in user's timezone
+   */
+  const startOfDay = (date: string | Date): Date => {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate())
+  }
+
+  /**
+   * Get the end of day in user's timezone
+   * @param date - Date string in ISO format or Date object
+   * @returns End of day in user's timezone
+   */
+  const endOfDay = (date: string | Date): Date => {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59, 999)
+  }
+
+  return {
+    // Timezone info
+    userTimezone,
+    timeFormats,
+    
+    // Conversion functions
+    toUserTimezone,
+    toUTC,
+    toISOString,
+    
+    // Formatting functions
+    formatForDisplay,
+    formatTime,
+    formatTime12,
+    formatDate,
+    formatDateTime,
+    formatDateTime12,
+    formatMonthDay,
+    formatWeekday,
+    formatWeekdayShort,
+    formatMonthYear,
+    formatFullDate,
+    
+    // Utility functions
+    now,
+    nowUTC,
+    isToday,
+    isSameDay,
+    startOfDay,
+    endOfDay
+  }
+} 
