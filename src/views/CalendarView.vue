@@ -296,6 +296,7 @@ const nextPeriod = () => {
  */
 const handleEventDrop = (eventId: string, date: Date) => {
   if (props.enableDragDrop) {
+    // The store will automatically trigger position recalculation
     store.updateEventDateOnly(eventId, date);
   }
 };

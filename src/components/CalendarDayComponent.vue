@@ -322,23 +322,38 @@ const currentDay = computed(() => {
 });
 
 /**
- * Calculate event positions and prevent overlaps
+ * Calculate event positions and prevent overlaps - Optimized version
  * @param {CalendarEvent[]} events - Array of events to position
  * @returns {CalendarEvent[]} Events with position data
  */
 const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
+  if (events.length === 0) return events;
+  
+  // Pre-sort events by start time for better performance
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
   );
 
   const columns: CalendarEvent[][] = [];
+  const eventStartTimes = new Map<string, number>();
+  const eventEndTimes = new Map<string, number>();
+
+  // Pre-calculate start and end times to avoid repeated Date object creation
+  sortedEvents.forEach(event => {
+    eventStartTimes.set(event.id, new Date(event.start).getTime());
+    eventEndTimes.set(event.id, new Date(event.end).getTime());
+  });
 
   // Arrange events into columns to prevent overlap
   sortedEvents.forEach((event) => {
+    const eventStart = eventStartTimes.get(event.id)!;
     let placed = false;
+    
     for (const column of columns) {
       const lastEvent = column[column.length - 1];
-      if (new Date(event.start) >= new Date(lastEvent.end)) {
+      const lastEventEnd = eventEndTimes.get(lastEvent.id)!;
+      
+      if (eventStart >= lastEventEnd) {
         column.push(event);
         placed = true;
         break;
@@ -350,12 +365,13 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
     }
   });
 
-  // Calculate width and positions for each event
+  // Calculate width and positions for each event in a single pass
+  const totalColumns = columns.length;
   columns.forEach((column, colIndex) => {
+    const columnWidth = 100 / totalColumns; // Equal width for all columns
     column.forEach((event) => {
-      const totalColumns = columns.length;
-      event.width = 100 / totalColumns; // Equal width for all columns
-      event.left = colIndex * event.width; // Left position based on column index
+      event.width = columnWidth;
+      event.left = colIndex * columnWidth; // Left position based on column index
       event.marginLeft = 0.5; // Small gap between events
     });
   });
