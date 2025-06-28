@@ -5,13 +5,15 @@
 [![CI/CD](https://github.com/Kodeglot/vue-calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/Kodeglot/vue-calendar/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/Kodeglot/vue-calendar)](https://codecov.io/gh/Kodeglot/vue-calendar)
 
-A fully-featured, customizable calendar date picker component for Vue 3 with built-in Tailwind CSS support. Perfect for building scheduling applications, event calendars, and date pickers.
+A fully-featured, customizable calendar component for Vue 3 with built-in Tailwind CSS support. Perfect for building scheduling applications, event calendars, and date management systems.
 
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
+- [Quick Start](#quick-start)
+- [Demo](#demo)
 - [API Reference](#api-reference)
+- [Usage Examples](#usage-examples)
 - [Customization](#customization)
 - [Development](#development)
 - [Contributing](#contributing)
@@ -19,21 +21,37 @@ A fully-featured, customizable calendar date picker component for Vue 3 with bui
 - [Roadmap](#roadmap)
 - [License](#license)
 
+## Features
+
+- 🎨 **Fully customizable** with Tailwind CSS
+- ⚡️ **Lightweight and performant** Vue 3 component
+- 🧩 **TypeScript support** with full type definitions
+- 📱 **Responsive design** for all screen sizes
+- 🔌 **Easy to integrate** with any Vue 3 project
+- 🖱️ **Drag and drop support** for event management
+- 🎨 **22 customizable event colors** using Tailwind color palette
+- 🗓️ **Multiple view modes** (month, week, day)
+- 🔄 **Event resizing** with time snapping
+- 📅 **All-day event support**
+- 🎯 **Time-based positioning** with 5-minute snap intervals
+- 🛠️ **Plugin architecture** for extensibility
+- 🧪 **Comprehensive testing** with Vitest
+
 ## Installation
 
 ### Using npm
 ```bash
-npm install vue-calendar
+npm install vue-calendar date-fns date-fns-tz
 ```
 
 ### Using yarn
 ```bash
-yarn add vue-calendar
+yarn add vue-calendar date-fns date-fns-tz
 ```
 
 ### Using pnpm
 ```bash
-pnpm add vue-calendar
+pnpm add vue-calendar date-fns date-fns-tz
 ```
 
 ### CDN
@@ -42,103 +60,101 @@ Add the following script tag to your HTML:
 <script src="https://unpkg.com/vue-calendar/dist/vue-calendar.umd.js"></script>
 ```
 
-## API Reference
+## Quick Start
 
-### Props
+### 1. Install Dependencies
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `events` | Array | `[]` | Array of calendar events |
-| `initialDate` | Date | `new Date()` | Initial date to display |
-| `initialView` | String | `'month'` | Initial view mode (`day`, `week`, `month`) |
-| `locale` | String | `'en-US'` | Locale for date formatting |
-| `timeFormat` | String | `'12h'` | Time format (`12h` or `24h`) |
-| `showControls` | Boolean | `true` | Show navigation controls |
-| `showEventButton` | Boolean | `true` | Show add event button |
-| `enableDragDrop` | Boolean | `true` | Enable drag and drop functionality |
+```bash
+npm install vue-calendar pinia date-fns date-fns-tz
+```
 
-### Events
+### 2. Setup Pinia Store
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `event-created` | `event: CalendarEvent` | Fired when new event is created |
-| `event-updated` | `event: CalendarEvent` | Fired when event is updated |
-| `event-deleted` | `eventId: string` | Fired when event is deleted |
-| `date-select` | `date: Date` | Fired when date is selected |
-| `view-change` | `view: string` | Fired when view mode changes |
-
-### Slots
-
-| Slot | Props | Description |
-|------|-------|-------------|
-| `event` | `{ event: CalendarEvent }` | Custom event template |
-| `header` | `{ date: Date, view: string }` | Custom header content |
-| `footer` | `{ date: Date, view: string }` | Custom footer content |
-
-First, create and configure your calendar store using Pinia:
+Create your calendar store using Pinia:
 
 ```typescript
 // stores/calendarStore.ts
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
 export interface CalendarEvent {
   id: string
   title: string
-  start: string
-  end: string
-  tailwindColor: string // Use one of the following Tailwind colors: red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, slate, gray, zinc, neutral, stone
+  start: string        // ISO date string (UTC)
+  end: string          // ISO date string (UTC)
+  tailwindColor: string // Tailwind color name (e.g., 'blue', 'red', 'green')
+  allDay?: boolean
+  width?: number       // For event stacking
+  left?: number        // For event positioning
+  marginLeft?: number  // For event spacing
+  order?: number       // Vertical stacking order
 }
 
-export const useCalendarStore = defineStore('calendar', {
-  state: () => ({
-    events: [] as CalendarEvent[],
-  }),
-  actions: {
-    addEvent(event: CalendarEvent) {
-      this.events.push(event)
-    },
-    updateEvent(event: CalendarEvent) {
-      const index = this.events.findIndex(e => e.id === event.id)
-      if (index !== -1) {
-        this.events[index] = event
-      }
-    },
-    updateEventDateOnly(eventId: string, newDate: Date) {
-      const event = this.events.find(e => e.id === eventId)
-      if (event) {
-        const duration = new Date(event.end).getTime() - new Date(event.start).getTime()
-        event.start = newDate.toISOString()
-        event.end = new Date(newDate.getTime() + duration).toISOString()
-      }
-    },
-    deleteEvent(eventId: string) {
-      this.events = this.events.filter(e => e.id !== eventId)
+export const useCalendarStore = defineStore('calendar', () => {
+  const events = ref<Map<string, CalendarEvent>>(new Map())
+  const currentDate = ref(new Date())
+  const selectedDate = ref<Date | null>(null)
+
+  const addEvent = (event: CalendarEvent) => {
+    if (!event.id) {
+      event.id = uuidv4()
     }
+    events.value.set(event.id, event)
+  }
+
+  const updateEventDateOnly = (eventId: string, newDate: Date) => {
+    const event = events.value.get(eventId)
+    if (event) {
+      const start = new Date(event.start)
+      const end = new Date(event.end)
+      const duration = end.getTime() - start.getTime()
+
+      const newStart = new Date(newDate)
+      const newEnd = new Date(newStart.getTime() + duration)
+
+      event.start = newStart.toISOString()
+      event.end = newEnd.toISOString()
+      events.value.set(eventId, event)
+    }
+  }
+
+  const getEventsForDate = (date: Date): CalendarEvent[] => {
+    return Array.from(events.value.values()).filter(event =>
+      new Date(event.start).toDateString() === date.toDateString()
+    )
+  }
+
+  return {
+    events,
+    currentDate,
+    selectedDate,
+    addEvent,
+    updateEventDateOnly,
+    getEventsForDate
   }
 })
 ```
 
-## Basic Usage
+### 3. Setup Vue App
 
-```javascript
+```typescript
+// main.ts
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import VueCalendar from 'vue-calendar'
-import 'vue-calendar/dist/style.css'
+import App from './App.vue'
+import './style.css'
 
 const app = createApp(App)
-const pinia = createPinia()
-
-app.use(pinia)
-app.use(VueCalendar)
+app.use(createPinia())
 app.mount('#app')
 ```
 
-In your component:
+### 4. Use the Calendar Component
 
 ```vue
 <template>
-  <VueCalendar
+  <CalendarView
     :initial-date="new Date()"
     :initial-view="'month'"
     :show-controls="true"
@@ -151,272 +167,425 @@ In your component:
 </template>
 
 <script setup lang="ts">
-import { useCalendarStore } from './stores/calendarStore'
+import { CalendarView, useCalendarStore, type CalendarEvent } from 'vue-calendar'
 
 const store = useCalendarStore()
 
-function handleEventCreated(event) {
+function handleEventCreated(event: CalendarEvent) {
   console.log('Event created:', event)
 }
 
-function handleEventUpdated(event) {
+function handleEventUpdated(event: CalendarEvent) {
   console.log('Event updated:', event)
 }
 
-function handleEventDeleted(eventId) {
+function handleEventDeleted(eventId: string) {
   console.log('Event deleted:', eventId)
 }
 </script>
 ```
 
-## Advanced Usage
+### 5. Import Styles (Optional)
 
-### Customizing Appearance with Tailwind
+If you want to use the default styles, import the CSS:
+
+```typescript
+// main.ts
+import 'vue-calendar/dist/style.css'
+```
+
+## Timezone Support
+
+Vue Calendar includes comprehensive timezone support:
+
+- **ISO Storage**: All dates are stored in ISO format (UTC) for consistency
+- **Localized Display**: Times are displayed in the user's local timezone
+- **Automatic Detection**: User's timezone is automatically detected
+- **Proper Conversions**: All timezone conversions are handled correctly
+
+### Using Timezone Utilities
+
+```vue
+<script setup lang="ts">
+import { useTimezone } from 'vue-calendar'
+
+const { 
+  formatTime, 
+  formatTime12, 
+  formatDate, 
+  formatDateTime,
+  toUserTimezone,
+  toUTC,
+  userTimezone 
+} = useTimezone()
+
+// Format times for display
+const displayTime = formatTime('2024-01-15T10:30:00Z') // Shows in user's timezone
+const displayTime12 = formatTime12('2024-01-15T10:30:00Z') // 12-hour format
+
+// Convert between timezones
+const localTime = toUserTimezone('2024-01-15T10:30:00Z')
+const utcTime = toUTC(localTime)
+
+console.log('User timezone:', userTimezone.value)
+</script>
+```
+
+### Time Format Options
+
+The calendar supports both 12-hour and 24-hour time formats:
 
 ```vue
 <template>
-  <VueCalendar
-    class="custom-calendar"
-    :initial-date="new Date()"
-    :initial-view="'month'"
-    :show-controls="true"
-    :show-event-button="true"
-    :enable-drag-drop="true"
+  <!-- 24-hour format (default) -->
+  <CalendarEventComponent 
+    :event="event" 
+    :time-format="'24h'" 
+  />
+  
+  <!-- 12-hour format -->
+  <CalendarEventComponent 
+    :event="event" 
+    :time-format="'12h'" 
   />
 </template>
-
-<style>
-.custom-calendar {
-  /* Customize calendar container */
-  @apply rounded-lg shadow-lg border border-gray-200;
-  
-  /* Customize header */
-  .calendar-header {
-    @apply bg-blue-500 text-white rounded-t-lg p-4;
-  }
-  
-  /* Customize event cards */
-  .calendar-event {
-    @apply bg-blue-50 border border-blue-200 rounded-md p-2;
-  }
-  
-  /* Customize today's date */
-  .today {
-    @apply bg-blue-100 text-blue-800 font-bold;
-  }
-}
-</style>
 ```
 
-### Handling Recurring Events
+## Demo
+
+### Live Demo
+Check out the live demo to see Vue Calendar in action:
+- **CDN Demo**: Open `demo/index.html` in your browser
+- **Development Demo**: Run `npm run demo` to start the interactive demo
+
+### Running the Demo Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/Kodeglot/vue-calendar.git
+cd vue-calendar
+
+# Install dependencies
+npm install
+
+# Start the demo
+npm run demo
+```
+
+The demo will open at `http://localhost:3001` and showcase all the calendar features including:
+- Month, week, and day views
+- Event creation and editing
+- Drag and drop functionality
+- Event resizing
+- Color customization
+- Responsive design
+
+## API Reference
+
+### CalendarView Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `initialDate` | `Date` | `new Date()` | Initial date to display |
+| `initialView` | `'month' \| 'week' \| 'day'` | `'month'` | Initial view mode |
+| `timeFormat` | `'12h' \| '24h'` | `'24h'` | Time format for displaying times |
+| `showControls` | `boolean` | `true` | Show navigation controls |
+| `showEventButton` | `boolean` | `true` | Show add event button |
+| `enableDragDrop` | `boolean` | `true` | Enable drag and drop functionality |
+| `customClasses` | `CustomClasses` | `{}` | Custom CSS classes for styling |
+
+### CalendarView Events
+
+| Event | Parameters | Description |
+|-------|------------|-------------|
+| `date-change` | `date: Date` | Emitted when displayed date changes |
+| `event-created` | `event: CalendarEvent` | Emitted when new event is created |
+| `event-updated` | `event: CalendarEvent` | Emitted when event is updated |
+| `event-deleted` | `eventId: string` | Emitted when event is deleted |
+| `openEventModal` | `date: Date` | Emitted when event modal is opened |
+
+### CalendarEvent Interface
 
 ```typescript
-// In your calendar store
-function createRecurringEvent(baseEvent: CalendarEvent, recurrence: {
-  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly',
-  endDate?: Date,
-  count?: number
-}) {
-  const events: CalendarEvent[] = []
-  let currentDate = new Date(baseEvent.start)
-  
-  while (true) {
-    // Add the event
-    events.push({
-      ...baseEvent,
-      start: currentDate.toISOString(),
-      end: new Date(currentDate.getTime() + 
-        (new Date(baseEvent.end).getTime() - 
-        new Date(baseEvent.start).getTime()
-    ).toISOString()
-    })
-    
-    // Calculate next occurrence
-    switch (recurrence.frequency) {
-      case 'daily':
-        currentDate.setDate(currentDate.getDate() + 1)
-        break
-      case 'weekly':
-        currentDate.setDate(currentDate.getDate() + 7)
-        break
-      case 'monthly':
-        currentDate.setMonth(currentDate.getMonth() + 1)
-        break
-      case 'yearly':
-        currentDate.setFullYear(currentDate.getFullYear() + 1)
-        break
-    }
-    
-    // Check termination conditions
-    if (recurrence.endDate && currentDate > recurrence.endDate) break
-    if (recurrence.count && events.length >= recurrence.count) break
-  }
-  
-  return events
+interface CalendarEvent {
+  id: string                    // Unique identifier
+  title: string                 // Event title
+  start: string                 // ISO date string for start time
+  end: string                   // ISO date string for end time
+  tailwindColor: string         // Tailwind color name
+  allDay?: boolean              // Whether event is all-day
+  width?: number                // Width percentage for stacking
+  left?: number                 // Left position percentage
+  marginLeft?: number           // Margin between stacked events
+  order?: number                // Vertical stacking order
 }
 ```
 
-### Integrating with External APIs
+### Available Tailwind Colors
 
-```typescript
-// Example: Sync with Google Calendar
-async function syncWithGoogleCalendar() {
-  const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-    headers: {
-      'Authorization': `Bearer ${googleAccessToken}`
-    }
-  })
-  
-  const events = await response.json()
-  const store = useCalendarStore()
-  
-  events.items.forEach((event: any) => {
-    store.addEvent({
-      id: event.id,
-      title: event.summary,
-      start: event.start.dateTime || event.start.date,
-      end: event.end.dateTime || event.end.date,
-      tailwindColor: event.colorId || 'blue'
-    })
-  })
-}
-```
+The calendar supports 22 Tailwind colors for events:
+- `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`
+- `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`
+- `fuchsia`, `pink`, `rose`, `slate`, `gray`, `zinc`, `neutral`, `stone`
 
-### Advanced Event Filtering
+## Usage Examples
+
+### Basic Calendar Setup
 
 ```vue
 <template>
-  <VueCalendar
+  <div class="h-screen p-4">
+    <CalendarView
+      :initial-date="new Date()"
+      :initial-view="'month'"
+      :time-format="'24h'"
+      :show-controls="true"
+      :show-event-button="true"
+      :enable-drag-drop="true"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { CalendarView } from 'vue-calendar'
+</script>
+```
+
+### Custom Styling
+
+```vue
+<template>
+  <CalendarView
     :initial-date="new Date()"
     :initial-view="'month'"
-    :event-filter="filterEvents"
+    :custom-classes="{
+      container: 'rounded-xl shadow-2xl border-2 border-blue-200',
+      header: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white',
+      controls: 'bg-gray-50 rounded-lg p-2',
+      viewSelector: 'border-blue-300 focus:border-blue-500',
+      eventButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold'
+    }"
   />
 </template>
 
 <script setup lang="ts">
-import { useCalendarStore } from './stores/calendarStore'
+import { CalendarView } from 'vue-calendar'
+</script>
+```
+
+### Event Handling
+
+```vue
+<template>
+  <CalendarView
+    :initial-date="new Date()"
+    :initial-view="'week'"
+    @event-created="handleEventCreated"
+    @event-updated="handleEventUpdated"
+    @event-deleted="handleEventDeleted"
+  />
+</template>
+
+<script setup lang="ts">
+import { CalendarView, useCalendarStore, type CalendarEvent } from 'vue-calendar'
 
 const store = useCalendarStore()
 
-function filterEvents(event: CalendarEvent, viewType: 'month' | 'week' | 'day') {
-  // Example: Only show events longer than 1 hour in month view
-  if (viewType === 'month') {
-    const duration = new Date(event.end).getTime() - new Date(event.start).getTime()
-    return duration > 3600000
-  }
-  return true
+function handleEventCreated(event: CalendarEvent) {
+  // Add to your backend
+  store.addEvent(event)
+  console.log('New event:', event)
+}
+
+function handleEventUpdated(event: CalendarEvent) {
+  // Update in your backend
+  console.log('Updated event:', event)
+}
+
+function handleEventDeleted(eventId: string) {
+  // Delete from your backend
+  console.log('Deleted event:', eventId)
 }
 </script>
 ```
 
-### Custom Event Templates
+### Drag and Drop with Custom Logic
 
 ```vue
 <template>
-  <VueCalendar
+  <CalendarView
     :initial-date="new Date()"
-    :initial-view="'month'"
-  >
-    <template #event="{ event }">
-      <div class="custom-event">
-        <div class="event-icon">📅</div>
-        <div class="event-content">
-          <h3>{{ event.title }}</h3>
-          <p>{{ formatTime(event.start) }} - {{ formatTime(event.end) }}</p>
-        </div>
-      </div>
-    </template>
-  </VueCalendar>
-</template>
-
-<style>
-.custom-event {
-  @apply flex items-center p-2 bg-white rounded-lg shadow-sm;
-}
-
-.event-icon {
-  @apply text-2xl mr-2;
-}
-
-.event-content {
-  @apply flex-1;
-}
-
-.event-content h3 {
-  @apply font-semibold text-sm;
-}
-
-.event-content p {
-  @apply text-xs text-gray-500;
-}
-</style>
-```
-
-### Drag and Drop Configuration
-
-```vue
-<template>
-  <VueCalendar
-    :initial-date="new Date()"
-    :initial-view="'month'"
+    :initial-view="'week'"
     :enable-drag-drop="true"
     @event-dropped="handleEventDrop"
   />
 </template>
 
 <script setup lang="ts">
-import { useCalendarStore } from './stores/calendarStore'
+import { CalendarView, useCalendarStore } from 'vue-calendar'
 
 const store = useCalendarStore()
 
 function handleEventDrop(eventId: string, newDate: Date) {
+  // Update event date in store
   store.updateEventDateOnly(eventId, newDate)
+  
+  // Sync with backend
+  console.log(`Event ${eventId} moved to ${newDate}`)
 }
 </script>
 ```
 
-## Features
+### Using Individual Components
 
-- 🎨 Fully customizable with Tailwind CSS
-- ⚡️ Lightweight and performant
-- 🧩 TypeScript support
-- 📱 Responsive design
-- 🔌 Easy to integrate
-- 🖱️ Drag and drop support
-- 🎨 Customizable event colors
-- 🗓️ Multiple view modes (month, week, day)
-- 🌐 Internationalization support
-- 📅 Recurring events
-- 🔍 Advanced filtering
-- 📊 Customizable views
-- 🛠️ Developer friendly API
+```vue
+<template>
+  <div>
+    <CalendarMonthComponent :current-date="currentDate" />
+    <CalendarWeekComponent :current-date="currentDate" :hour-height="60" />
+    <CalendarDayComponent :current-date="currentDate" :hour-height="60" />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { 
+  CalendarMonthComponent, 
+  CalendarWeekComponent, 
+  CalendarDayComponent 
+} from 'vue-calendar'
+
+const currentDate = new Date()
+</script>
+```
+
+### Time Format Options
+
+```vue
+<template>
+  <div>
+    <!-- 24-hour format (default) -->
+    <CalendarView
+      :initial-date="new Date()"
+      :initial-view="'week'"
+      :time-format="'24h'"
+    />
+    
+    <!-- 12-hour format with AM/PM -->
+    <CalendarView
+      :initial-date="new Date()"
+      :initial-view="'week'"
+      :time-format="'12h'"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { CalendarView } from 'vue-calendar'
+</script>
+```
+
+## Customization
+
+### Custom CSS Classes
+
+You can customize the appearance using the `customClasses` prop:
+
+```typescript
+interface CustomClasses {
+  container?: string    // Main container
+  header?: string       // Header section
+  controls?: string     // Navigation controls
+  viewSelector?: string // View selector dropdown
+  eventButton?: string  // Event creation button
+}
+```
+
+### Event Colors
+
+Events can be colored using any of the 22 Tailwind colors:
+
+```typescript
+const event: CalendarEvent = {
+  id: '1',
+  title: 'Meeting',
+  start: '2024-01-15T10:00:00Z',
+  end: '2024-01-15T11:00:00Z',
+  tailwindColor: 'blue' // Will use blue-100 background and blue-500 border
+}
+```
+
+### Time Formatting
+
+The calendar automatically formats times based on the user's locale and timezone settings.
 
 ## Development
 
 ### Project Setup
 ```bash
+# Clone the repository
+git clone https://github.com/Kodeglot/vue-calendar.git
+cd vue-calendar
+
 # Install dependencies
 npm install
 
-# Compile and hot-reload for development
+# Start development server
 npm run dev
 
-# Compile and minify for production
+# Start demo server
+npm run demo
+
+# Build for production
 npm run build
 
-# Run unit tests
-npm run test:unit
+# Run tests
+npm run test
 
-# Run end-to-end tests
-npm run test:e2e
+# Run tests in watch mode
+npm run test:watch
 
-# Lint and fix files
+# Run test coverage
+npm run test:coverage
+
+# Type checking
+npm run type-check
+
+# Linting
 npm run lint
+```
+
+### Project Structure
+```
+src/
+├── components/           # Reusable components
+│   ├── CalendarDayComponent.vue
+│   ├── CalendarEventComponent.vue
+│   ├── CalendarMonthComponent.vue
+│   ├── CalendarWeekComponent.vue
+│   ├── EventModal.vue
+│   └── TimeGridComponent.vue
+├── composables/          # Vue composables
+│   └── useCalendarEventInteractions.ts
+├── stores/              # Pinia stores
+│   └── calendarStore.ts
+├── views/               # Main view components
+│   └── CalendarView.vue
+├── index.ts             # Package entry point
+└── main.ts              # App entry point
+demo/
+└── index.html           # Demo page
 ```
 
 ## Contributing
 
 We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+
+### Development Guidelines
+- Use TypeScript for all new code
+- Follow Vue 3 Composition API patterns
+- Write tests for new features
+- Use Tailwind CSS for styling
+- Follow the existing code structure
 
 ## Changelog
 
@@ -424,12 +593,15 @@ See [CHANGELOG.md](CHANGELOG.md) for a history of changes and releases.
 
 ## Roadmap
 
-- [ ] Add year view
-- [ ] Add resource view
-- [ ] Add timeline view
-- [ ] Add built-in timezone support
-- [ ] Add built-in recurrence rules
-- [ ] Add built-in export/import functionality
+- [ ] **Year View** - Add yearly calendar view
+- [ ] **Resource View** - Support for resource scheduling
+- [ ] **Timeline View** - Horizontal timeline layout
+- [ ] **Recurring Events** - Built-in recurrence rules
+- [ ] **Timezone Support** - Enhanced timezone handling
+- [ ] **Export/Import** - Calendar data persistence
+- [ ] **Event Templates** - Predefined event templates
+- [ ] **Advanced Filtering** - Event filtering and search
+- [ ] **Performance Optimization** - Virtual scrolling for large datasets
 
 ## Documentation
 
