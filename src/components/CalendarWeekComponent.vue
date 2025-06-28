@@ -256,10 +256,12 @@ const visibleDates = computed<Date[]>(() => {
  * @returns {CalendarEvent[]} Array of all-day events
  */
 const getAllDayEvents = (date: Date) => {
+  const dateString = date.toDateString()
   return store.getEventsForDate(date).filter((event) => {
-    const start = new Date(event.start);
-    const end = new Date(event.end);
-    return end.getTime() - start.getTime() === 86400000; // 24 hours
+    const start = new Date(event.start)
+    const end = new Date(event.end)
+    // All-day events span exactly 24 hours (86400000 ms)
+    return end.getTime() - start.getTime() === 86400000
   });
 };
 
@@ -296,22 +298,37 @@ const getStackedEvents = computed(() => (date: Date) => {
 });
 
 /**
- * Calculates event positions to prevent overlap
+ * Calculates event positions to prevent overlap - Optimized version
  * @param {CalendarEvent[]} events - Array of events to position
  * @returns {CalendarEvent[]} Events with position data
  */
 const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
+  if (events.length === 0) return events;
+  
+  // Pre-sort events by start time for better performance
   const sortedEvents = [...events].sort(
     (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
   );
 
   const columns: CalendarEvent[][] = [];
+  const eventStartTimes = new Map<string, number>();
+  const eventEndTimes = new Map<string, number>();
+
+  // Pre-calculate start and end times to avoid repeated Date object creation
+  sortedEvents.forEach(event => {
+    eventStartTimes.set(event.id, new Date(event.start).getTime());
+    eventEndTimes.set(event.id, new Date(event.end).getTime());
+  });
 
   sortedEvents.forEach((event) => {
+    const eventStart = eventStartTimes.get(event.id)!;
     let placed = false;
+    
     for (const column of columns) {
       const lastEvent = column[column.length - 1];
-      if (new Date(event.start) >= new Date(lastEvent.end)) {
+      const lastEventEnd = eventEndTimes.get(lastEvent.id)!;
+      
+      if (eventStart >= lastEventEnd) {
         column.push(event);
         placed = true;
         break;
@@ -323,12 +340,13 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
     }
   });
 
-  // Calculate width and positions
+  // Calculate width and positions in a single pass
+  const totalColumns = columns.length;
   columns.forEach((column, colIndex) => {
+    const columnWidth = 100 / totalColumns;
     column.forEach((event) => {
-      const totalColumns = columns.length;
-      event.width = 100 / totalColumns;
-      event.left = colIndex * event.width;
+      event.width = columnWidth;
+      event.left = colIndex * columnWidth;
       event.marginLeft = 0.5;
     });
   });

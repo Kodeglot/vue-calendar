@@ -44,11 +44,16 @@ interface Props {
 
 const { hourHeight, timeFormat, showHourLabels = true } = defineProps<Props>();
 
+// Cache hours array to avoid recreation on every render
 const hours = Array.from({ length: 24 }, (_, i) => i);
 const timeGrid = ref<HTMLElement>();
 
+// Cache date formatter for better performance
+const dateFormatter = new Date(2023, 0, 1);
+
 const formatHour = (hour: number) => {
-  return new Date(2023, 0, 1, hour).toLocaleTimeString("en-US", timeFormat);
+  dateFormatter.setHours(hour);
+  return dateFormatter.toLocaleTimeString("en-US", timeFormat);
 };
 
 const handleDragOver = (e: DragEvent) => {

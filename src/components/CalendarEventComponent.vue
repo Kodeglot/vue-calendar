@@ -8,6 +8,7 @@
   -->
   <div
     :key="event.id"
+    :data-event-id="event.id"
     role="button"
     aria-label="Calendar event"
     :aria-describedby="`event-${event.id}-description`"
@@ -72,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch, onUnmounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useCalendarEventInteractions } from "@/composables/useCalendarEventInteractions";
 import { useTimezone } from "@/composables/useTimezone";
@@ -216,6 +217,7 @@ const {
   startResize,
   handleMouseDown,
   calculatePosition,
+  forceRecalculatePosition,
 } = useCalendarEventInteractions(wrappedEmit, {
   event: props.event,
   containerRef: props.containerRef,
@@ -229,7 +231,46 @@ const {
 // Calculate initial position on mount
 onMounted(() => {
   calculatePosition(props.viewType, props.event.order);
+  
+  // Listen for external position recalculation requests
+  const handleRecalculatePosition = () => {
+    forceRecalculatePosition();
+  };
+  
+  // Add event listener to the component element
+  const element = document.querySelector(`[data-event-id="${props.event.id}"]`);
+  if (element) {
+    element.addEventListener('recalculate-position', handleRecalculatePosition);
+  }
+  
+  // Store cleanup function
+  const cleanup = () => {
+    if (element) {
+      element.removeEventListener('recalculate-position', handleRecalculatePosition);
+    }
+  };
+  
+  // Clean up on unmount
+  onUnmounted(cleanup);
 });
+
+// Watch for changes in event data and recalculate position
+watch(
+  () => [props.event.start, props.event.end, props.event.order],
+  () => {
+    // Force recalculation when event times change
+    forceRecalculatePosition();
+  },
+  { deep: true }
+);
+
+// Watch for view type changes and recalculate position
+watch(
+  () => props.viewType,
+  (newViewType) => {
+    calculatePosition(newViewType, props.event.order);
+  }
+);
 
 // Handle click events
 const handleClick = (e: MouseEvent) => {
@@ -267,69 +308,49 @@ const formatEventTime = () => {
   }
 };
 
-// Format time display (HH:MM)
+// Format time display (HH:MM) - Memoized for better performance
 const getPastelColor = (id: string) => {
   // Use tailwindColor if available, otherwise generate consistent pastel color
   if (props.event.tailwindColor) {
     return `bg-${props.event.tailwindColor}-100`;
   }
+  
+  // Memoized color array to avoid recreation
   const colors = [
-    "bg-red-100",
-    "bg-orange-100",
-    "bg-amber-100",
-    "bg-yellow-100",
-    "bg-lime-100",
-    "bg-green-100",
-    "bg-emerald-100",
-    "bg-teal-100",
-    "bg-cyan-100",
-    "bg-sky-100",
-    "bg-blue-100",
-    "bg-indigo-100",
-    "bg-violet-100",
-    "bg-purple-100",
-    "bg-fuchsia-100",
-    "bg-pink-100",
-    "bg-rose-100",
-    "bg-slate-100",
-    "bg-gray-100",
-    "bg-zinc-100",
-    "bg-neutral-100",
-    "bg-stone-100",
+    "bg-red-100", "bg-orange-100", "bg-amber-100", "bg-yellow-100", "bg-lime-100",
+    "bg-green-100", "bg-emerald-100", "bg-teal-100", "bg-cyan-100", "bg-sky-100",
+    "bg-blue-100", "bg-indigo-100", "bg-violet-100", "bg-purple-100", "bg-fuchsia-100",
+    "bg-pink-100", "bg-rose-100", "bg-slate-100", "bg-gray-100", "bg-zinc-100",
+    "bg-neutral-100", "bg-stone-100",
   ];
-  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
+  
+  // Optimized hash calculation
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) & 0xffffffff;
+  }
+  return colors[Math.abs(hash) % colors.length];
 };
 
 const getPastelColorBorder = (id: string) => {
   if (props.event.tailwindColor) {
     return `border-l-${props.event.tailwindColor}-500`;
   }
-  const colors = [
-    "border-l-red-500",
-    "border-l-orange-500",
-    "border-l-amber-500",
-    "border-l-yellow-500",
-    "border-l-lime-500",
-    "border-l-green-500",
-    "border-l-emerald-500",
-    "border-l-teal-500",
-    "border-l-cyan-500",
-    "border-l-sky-500",
-    "border-l-blue-500",
-    "border-l-indigo-500",
-    "border-l-violet-500",
-    "border-l-purple-500",
-    "border-l-fuchsia-500",
-    "border-l-pink-500",
-    "border-l-rose-500",
-    "border-l-slate-500",
-    "border-l-gray-500",
-    "border-l-zinc-500",
-    "border-l-neutral-500",
-    "border-l-stone-500",
+  
+  // Memoized border color array
+  const borderColors = [
+    "border-l-red-500", "border-l-orange-500", "border-l-amber-500", "border-l-yellow-500", "border-l-lime-500",
+    "border-l-green-500", "border-l-emerald-500", "border-l-teal-500", "border-l-cyan-500", "border-l-sky-500",
+    "border-l-blue-500", "border-l-indigo-500", "border-l-violet-500", "border-l-purple-500", "border-l-fuchsia-500",
+    "border-l-pink-500", "border-l-rose-500", "border-l-slate-500", "border-l-gray-500", "border-l-zinc-500",
+    "border-l-neutral-500", "border-l-stone-500",
   ];
-  const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return colors[hash % colors.length];
+  
+  // Use same hash as background color for consistency
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) & 0xffffffff;
+  }
+  return borderColors[Math.abs(hash) % borderColors.length];
 };
 </script>

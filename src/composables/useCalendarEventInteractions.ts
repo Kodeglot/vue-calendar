@@ -92,6 +92,35 @@ interface UseCalendarEventInteractionsReturn {
    * Calculate initial position based on event times
    */
   calculatePosition: (viewType: 'month' | 'week' | 'day', order?: number) => void
+
+  /**
+   * Force recalculation of position - useful after external changes
+   */
+  forceRecalculatePosition: () => void
+}
+
+// Performance monitoring utility
+const isDevelopment = import.meta.env.DEV
+
+const performanceLog = (operation: string, startTime: number) => {
+  if (isDevelopment) {
+    const duration = performance.now() - startTime
+    if (duration > 16) { // Log operations taking longer than 16ms (60fps threshold)
+      console.warn(`Performance warning: ${operation} took ${duration.toFixed(2)}ms`)
+    }
+  }
+}
+
+// Throttle utility for drag operations
+const throttle = (func: Function, limit: number) => {
+  let inThrottle: boolean
+  return function(this: any, ...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args)
+      inThrottle = true
+      setTimeout(() => inThrottle = false, limit)
+    }
+  }
 }
 
 export function useCalendarEventInteractions(
@@ -119,6 +148,15 @@ export function useCalendarEventInteractions(
   const initialHeight = ref(0)
   const dragThreshold = 5 // Minimum pixels to move before starting drag
 
+  // Cache DateTimeFormat instances for better performance
+  const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: options.timeZone,
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  })
+
   // Convert minutes to pixels based on pxPerHour
   const minutesToPixels = (minutes: number) => (minutes / 60) * pxPerHour
 
@@ -127,6 +165,7 @@ export function useCalendarEventInteractions(
     viewType: 'month' | 'week' | 'day',
     order?: number
   ) => {
+    const startTime = performance.now()
 
     if (viewType === 'month') {
       position.value = {
@@ -134,22 +173,14 @@ export function useCalendarEventInteractions(
         height: 50
       }
     } else {
-      // Convert times to specified timezone
-      const formatOptions: Intl.DateTimeFormatOptions = {
-        timeZone: options.timeZone,
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23'
-      }
-
-      const startTime = new Intl.DateTimeFormat('en-US', formatOptions)
+      // Use cached formatter for better performance
+      const startTime = dateTimeFormatter
         .format(new Date(event.start))
         .split(':')
         .map(Number)
       const startTotalHours = startTime[0] + (startTime[1] / 60)
 
-      const endTime = new Intl.DateTimeFormat('en-US', formatOptions)
+      const endTime = dateTimeFormatter
         .format(new Date(event.end))
         .split(':')
         .map(Number)
@@ -161,6 +192,8 @@ export function useCalendarEventInteractions(
         height: Math.max(minHeight, durationHours * pxPerHour)
       }
     }
+
+    performanceLog('calculatePosition', startTime)
   }
 
   // Resize Handlers
@@ -179,14 +212,6 @@ export function useCalendarEventInteractions(
 
   const handleResizeMove = (e: MouseEvent) => {
     if (!isResizing.value || !containerRef) return
-
-    // console.group('Calendar Event Resize')
-    // console.log('Resizing event:', event.title || event.id)
-    // console.log('Direction:', resizeDirection.value)
-    // console.log('Original times:', {
-    //   start: event.start,
-    //   end: event.end
-    // })
 
     const containerRect = containerRef.getBoundingClientRect()
     const mouseY = e.clientY - containerRect.top
@@ -245,13 +270,6 @@ export function useCalendarEventInteractions(
     // Update event times immediately during resize
     event.start = newStart.toISOString()
     event.end = newEnd.toISOString()
-
-    console.log('New times:', {
-      start: event.start,
-      end: event.end
-    })
-    console.log('Position:', position.value)
-    console.groupEnd()
   }
 
   const stopResize = () => {
@@ -261,8 +279,10 @@ export function useCalendarEventInteractions(
 
   }
 
-  // Drag Handlers
-  const handleDragMove = (e: MouseEvent) => {
+  // Throttled drag move handler for better performance
+  const throttledDragMove = throttle((e: MouseEvent) => {
+    const startTime = performance.now()
+    
     if (!containerRef) {
       console.error('Container ref not available for drag')
       return
@@ -278,7 +298,6 @@ export function useCalendarEventInteractions(
     if (!isDragging.value && (Math.abs(deltaY) > dragThreshold ||
       (options.viewType === 'week' && Math.abs(deltaX) > dragThreshold))) {
       isDragging.value = true
-      // emit('dragstart', e, event)
     }
 
     if (!isDragging.value) return
@@ -344,18 +363,18 @@ export function useCalendarEventInteractions(
       }
     }
 
-    // Update position and event data
-    // position.value = {
-    //   top: snappedTop,
-    //   height: position.value.height
-    // }
-
     // Store dates in UTC format
     event.start = newStart.toISOString()
     event.end = newEnd.toISOString()
     
     // Recalculate position based on updated times to ensure visual consistency
     calculatePosition(options.viewType)
+    
+    performanceLog('handleDragMove', startTime)
+  }, 16) // Throttle to ~60fps
+
+  const handleDragMove = (e: MouseEvent) => {
+    throttledDragMove(e)
   }
 
   const stopDrag = () => {
@@ -366,8 +385,13 @@ export function useCalendarEventInteractions(
       document.removeEventListener('mouseup', stopDrag)
 
       if (isDragging.value) {
-        // Recalculate final position based on updated event times
+        // Force recalculation of position based on updated event times
         calculatePosition(options.viewType)
+        
+        // Additional safety check - ensure position is correct
+        setTimeout(() => {
+          calculatePosition(options.viewType)
+        }, 0)
         
         // Emit final drag event with updated times
         emit('dragend', event, event.start, event.end)
@@ -437,6 +461,13 @@ export function useCalendarEventInteractions(
     }
   }
 
+  /**
+   * Force recalculation of position - useful after external changes
+   */
+  const forceRecalculatePosition = () => {
+    calculatePosition(options.viewType)
+  }
+
   // Cleanup
   onUnmounted(stopResize)
 
@@ -450,6 +481,7 @@ export function useCalendarEventInteractions(
     handleResizeMove,
     handleDragMove,
     event,
-    calculatePosition
+    calculatePosition,
+    forceRecalculatePosition
   }
 }

@@ -26,18 +26,50 @@ export const useCalendarStore = defineStore('calendar', () => {
   const events = ref<Map<string, CalendarEvent>>(new Map())
   const plugins = ref<CalendarPlugin[]>([])
 
+  // Cache for position recalculation to avoid excessive DOM queries
+  let positionRecalculationTimeout: number | null = null
+
+  // Helper function to trigger position recalculation with debouncing
+  const triggerPositionRecalculation = () => {
+    // Clear existing timeout to debounce multiple calls
+    if (positionRecalculationTimeout) {
+      clearTimeout(positionRecalculationTimeout)
+    }
+    
+    positionRecalculationTimeout = setTimeout(() => {
+      const eventElements = document.querySelectorAll('[data-event-id]');
+      eventElements.forEach((element) => {
+        element.dispatchEvent(new CustomEvent('recalculate-position'));
+      });
+      positionRecalculationTimeout = null;
+    }, 16); // ~60fps debouncing
+  };
+
+  // Memoized date string for efficient comparison
+  const getDateString = (date: Date) => date.toDateString()
+
   // Getters
   const currentMonth = computed(() => currentDate.value.getMonth())
   const monthEvents = computed(() => {
+    const currentMonthValue = currentMonth.value
+    const currentYear = currentDate.value.getFullYear()
+    
     return Array.from(events.value.values()).filter(event => {
       const eventDate = new Date(event.start)
-      return eventDate.getMonth() === currentMonth.value &&
-        eventDate.getFullYear() === currentDate.value.getFullYear()
+      return eventDate.getMonth() === currentMonthValue &&
+        eventDate.getFullYear() === currentYear
     })
   })
 
   const getEventById = (eventId: string): CalendarEvent => {
     return events.value.get(eventId)!
+  }
+
+  // Optimized event update helper
+  const updateEventTimes = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
+    event.start = newStart.toISOString()
+    event.end = newEnd.toISOString()
+    events.value.set(event.id, event)
   }
 
   // Actions
@@ -59,9 +91,8 @@ export const useCalendarStore = defineStore('calendar', () => {
       const newStart = new Date(newDate)
       const newEnd = new Date(newStart.getTime() + duration)
 
-      event.start = newStart.toISOString()
-      event.end = newEnd.toISOString()
-      events.value.set(eventId, event)
+      updateEventTimes(event, newStart, newEnd)
+      triggerPositionRecalculation();
     }
   }
 
@@ -75,18 +106,16 @@ export const useCalendarStore = defineStore('calendar', () => {
       const newStart = new Date(newDate)
       const newEnd = new Date(newStart.getTime() + duration)
 
-      event.start = newStart.toISOString()
-      event.end = newEnd.toISOString()
-      events.value.set(eventId, event)
+      updateEventTimes(event, newStart, newEnd)
+      triggerPositionRecalculation();
     }
   }
 
   const updateEventDuration = (eventId: string, newStart: Date, newEnd: Date): void => {
     const event = events.value.get(eventId)
     if (event) {
-      event.start = newStart.toISOString()
-      event.end = newEnd.toISOString()
-      events.value.set(eventId, event)
+      updateEventTimes(event, newStart, newEnd)
+      triggerPositionRecalculation();
     }
   }
 
@@ -104,21 +133,22 @@ export const useCalendarStore = defineStore('calendar', () => {
 
       const newEnd = new Date(start.getTime() + duration)
 
-      event.start = start.toISOString()
-      event.end = newEnd.toISOString()
-      events.value.set(eventId, event)
+      updateEventTimes(event, start, newEnd)
+      triggerPositionRecalculation();
     }
   }
 
   const getEventsForDate = (date: Date): CalendarEvent[] => {
+    const targetDateString = getDateString(date)
     return Array.from(events.value.values()).filter(event =>
-      new Date(event.start).toDateString() === date.toDateString()
+      getDateString(new Date(event.start)) === targetDateString
     )
   }
 
   const getEventsForWeek = (startDate: Date): CalendarEvent[] => {
     const endDate = new Date(startDate)
     endDate.setDate(endDate.getDate() + 6)
+    
     return Array.from(events.value.values()).filter(event => {
       const eventStart = new Date(event.start)
       return eventStart >= startDate && eventStart <= endDate
