@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Kodeglot
+Copyright (c) 2024 Kodeglot
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,49 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+ADDITIONAL TERMS AND DISCLAIMERS:
+
+1. PUBLIC USAGE: This software is provided as a public service and may be used
+   by anyone for any purpose, including commercial applications, without
+   restriction.
+
+2. NO WARRANTY: The software is provided "as is" without any warranties,
+   express or implied. The authors make no representations about the
+   suitability, reliability, availability, timeliness, or accuracy of the
+   software for any purpose.
+
+3. NO LIABILITY: IN NO EVENT SHALL THE AUTHORS, COPYRIGHT HOLDERS, OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+   OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+4. USE AT YOUR OWN RISK: You acknowledge that you are using this software at
+   your own risk. The authors accept no responsibility for any damages,
+   losses, or issues that may arise from the use of this software.
+
+5. NO SUPPORT OBLIGATION: The authors are under no obligation to provide
+   support, maintenance, updates, or modifications to this software.
+
+6. THIRD-PARTY DEPENDENCIES: This software may depend on third-party libraries
+   and frameworks. The authors are not responsible for the functionality,
+   security, or licensing of such third-party components.
+
+7. DATA AND PRIVACY: This software does not collect, store, or transmit any
+   personal data. However, users are responsible for ensuring compliance with
+   applicable data protection and privacy laws in their jurisdiction.
+
+8. COMPLIANCE: Users are responsible for ensuring that their use of this
+   software complies with all applicable laws and regulations in their
+   jurisdiction.
+
+By using this software, you acknowledge that you have read, understood, and
+agreed to these terms and conditions. If you do not agree to these terms, do
+not use this software.
+
+For questions or concerns regarding this license, please contact the authors
+through the project's GitHub repository.
