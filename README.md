@@ -552,6 +552,12 @@ npm run type-check
 
 # Linting
 npm run lint
+
+# Test Suite Robustness
+#
+# - The test suite covers all major features, including timezone handling, drag and drop, resizing, and edge cases.
+# - Tests use robust, implementation-agnostic assertions and mock Pinia and timezones for reliable, reproducible results.
+# - Contributions should include tests for new features and edge cases.
 ```
 
 ### Project Structure

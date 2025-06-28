@@ -8,43 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Comprehensive project analysis and documentation overhaul**
-- **Enhanced README with accurate API documentation**
-- **Complete TypeScript type definitions**
-- **Plugin architecture for extensibility**
-- **Advanced event positioning algorithms**
-- **Time-based event stacking with overlap prevention**
-- **5-minute time snapping for precise scheduling**
-- **Event resizing with top/bottom handles**
-- **All-day event support with dedicated sections**
-- **22 Tailwind color options for events**
-- **Responsive design for all screen sizes**
-- **Comprehensive test suite with Vitest**
-- **Accessibility improvements with ARIA labels**
+- **Configurable time format support** - Choose between 12-hour (AM/PM) and 24-hour formats
+- **Timezone-aware date handling** - ISO storage with localized display using date-fns-tz
+- **Library build configuration** - Proper npm package distribution with ES modules and UMD builds
+- **Interactive demo page** - Live demo with time format selector and sample events
+- **Enhanced drag and drop** - Fixed horizontal and vertical movement in week view
+- **Sample events** - Pre-populated events for testing and demonstration
+- **Comprehensive timezone utilities** - useTimezone composable for date conversions
+- **Plugin system** - Extensible architecture for calendar functionality
+- **Advanced event positioning** - Improved stacking algorithms with width/left properties
 
 ### Changed
-- **Major README overhaul** - Fixed inaccurate API documentation, removed non-existent features, added proper usage examples
-- **Store implementation** - Updated to use Composition API pattern with Map-based event storage
-- **Component architecture** - Improved separation of concerns with dedicated view components
-- **Event handling** - Enhanced drag and drop with time snapping and position calculations
-- **Color system** - Standardized on Tailwind color names with consistent naming
-- **Documentation** - Added comprehensive API reference, usage examples, and customization guides
-- **Type safety** - Enhanced TypeScript support throughout the codebase
+- **Default time format** - Now defaults to 24-hour format with option to switch to 12-hour
+- **Drag and drop behavior** - Improved coordinate system and position calculations
+- **Event positioning** - Uses timezone-aware calculations for accurate visual placement
+- **Build system** - Separate Vite configs for library, demo, and types
+- **Package exports** - Proper entry points for ES modules and CommonJS
+- **Documentation** - Updated README with time format examples and API reference
 
 ### Fixed
-- **API documentation accuracy** - All examples now work with actual implementation
-- **Component naming** - Corrected references from `VueCalendar` to `CalendarView`
-- **Event storage** - Fixed store structure to use Map instead of array
-- **Import paths** - Corrected all component import statements
-- **Type definitions** - Added missing properties to CalendarEvent interface
-- **Event emissions** - Corrected event names and parameters to match implementation
+- **Week view drag and drop** - Fixed missing variables and improved horizontal/vertical movement
+- **Event positioning** - Events now move correctly both horizontally and vertically
+- **Time display consistency** - All time displays now respect the selected format
+- **Timezone conversions** - Proper handling of UTC storage and local display
+- **Build warnings** - Resolved package.json export condition warnings
 
 ### Technical Improvements
-- **Performance optimization** - Efficient event filtering and positioning calculations
-- **Memory management** - Proper cleanup of event listeners and DOM references
-- **Error handling** - Comprehensive error boundaries and validation
-- **Code organization** - Clear separation between components, composables, and stores
-- **Testing coverage** - Unit tests for all major components and functionality
+- **Performance optimization** - Efficient timezone calculations and position updates
+- **Memory management** - Proper cleanup of drag event listeners
+- **Error handling** - Better validation for time format options
+- **Code organization** - Clear separation of timezone and time format logic
+- **Type safety** - Enhanced TypeScript support for new time format features
+- **Test suite modernization** – All tests updated for current codebase, robust timezone mocking, Pinia setup, and implementation-agnostic assertions for drag, drop, and resize logic. Improved reliability and coverage for all core features.
 
 ## [0.2.0] - 2025-01-15
 
@@ -117,13 +112,17 @@ The Vue Calendar component is now a **production-ready, feature-complete calenda
 - ✅ **Comprehensive testing** with good coverage
 - ✅ **Plugin architecture** for extensibility
 - ✅ **Accessibility features** with ARIA support
+- ✅ **Configurable time formats** (12h/24h)
+- ✅ **Timezone-aware date handling**
+- ✅ **Library build system** for npm distribution
 
 ### Planned for Next Release (v0.3.0)
 - 🔄 **Recurring events** support
-- 🔄 **Enhanced timezone handling**
+- 🔄 **Enhanced timezone handling** with user preference storage
 - 🔄 **Export/import functionality**
 - 🔄 **Advanced filtering** and search
 - 🔄 **Performance optimizations** for large datasets
+- 🔄 **Custom time format patterns**
 
 ### Future Roadmap (v1.0.0)
 - 🎯 **Year view** implementation
@@ -131,3 +130,4 @@ The Vue Calendar component is now a **production-ready, feature-complete calenda
 - 🎯 **Timeline view** layout
 - 🎯 **Event templates** system
 - 🎯 **Advanced integrations** (Google Calendar, Outlook, etc.)
+- 🎯 **Multi-language support** with i18n
