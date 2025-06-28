@@ -28,7 +28,6 @@
       ...customStyles?.eventContainer,
     }"
     :draggable="!isResizing"
-    @dragstart="handleDragStart"
     @mousedown="handleMouseDown"
     @click="handleClick"
   >
@@ -37,7 +36,7 @@
       {{ event.title }}
     </div>
     <div :class="['text-xs text-gray-600', customClasses?.eventTime]">
-      {{ formatTime(event.start) }} - {{ formatTime(event.end) }}
+      {{ formatEventTime() }}
     </div>
 
     <!-- Resize Handles -->
@@ -73,9 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
-import type { CalendarEvent } from "../stores/calendarStore";
+import { computed, onMounted } from "vue";
+import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useCalendarEventInteractions } from "@/composables/useCalendarEventInteractions";
+import { useTimezone } from "@/composables/useTimezone";
 
 interface EventComponentProps {
   /**
@@ -139,17 +139,20 @@ interface EventComponentProps {
   pxPerHour?: number;
 
   /**
-   * Timezone for displaying event times
-   * @default 'UTC'
+   * Time format preference (12h or 24h)
+   * @default '24h'
    */
-  timeZone?: string;
+  timeFormat?: '12h' | '24h';
 }
 
 const props = withDefaults(defineProps<EventComponentProps>(), {
   resizable: false,
   pxPerHour: 60,
-  timeZone: "UTC",
+  timeFormat: '24h',
 });
+
+const calendarStore = useCalendarStore();
+const { formatTime, formatTime12, formatDate, isToday } = useTimezone();
 
 interface EventComponentEmits {
   /**
@@ -193,23 +196,6 @@ const emit = defineEmits<EventComponentEmits>();
 const wrappedEmit = (event: string, ...args: any[]) => {
   const emitKey = event as keyof EventComponentEmits;
   switch (emitKey) {
-    case "resize":
-      console.log("=== emit resize");
-      emit(
-        emitKey,
-        args[0] as CalendarEvent,
-        args[1] as string,
-        args[2] as string
-      );
-      break;
-    case "resize-end":
-      emit(
-        emitKey,
-        args[0] as CalendarEvent,
-        args[1] as string,
-        args[2] as string
-      );
-      break;
     case "dragstart":
       emit(emitKey, args[0] as DragEvent, args[1] as CalendarEvent);
       break;
@@ -217,17 +203,17 @@ const wrappedEmit = (event: string, ...args: any[]) => {
       emit(emitKey, args[0] as CalendarEvent);
       break;
     default:
-      throw new Error(`Unknown emit event: ${event}`);
+      // No longer emitting resize events - handled by component directly
+      break;
   }
-};
+};  
 
 // Use composable for event interactions
 const {
-  position,
   isResizing,
+  position,
   resizeDirection,
   startResize,
-  handleDragStart,
   handleMouseDown,
   calculatePosition,
 } = useCalendarEventInteractions(wrappedEmit, {
@@ -236,12 +222,12 @@ const {
   pxPerHour: props.pxPerHour,
   snapInterval: 5,
   minHeight: 30,
-  timeZone: props.timeZone,
+  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  viewType: props.viewType,
 });
 
 // Calculate initial position on mount
 onMounted(() => {
-  // console.log(props.containerRef);
   calculatePosition(props.viewType, props.event.order);
 });
 
@@ -254,6 +240,30 @@ const handleClick = (e: MouseEvent) => {
     }
   } catch (error) {
     console.error("Click event failed:", error);
+  }
+};
+
+// Format event time for display based on view type and time format
+const formatEventTime = () => {
+  try {
+    const startTime = props.timeFormat === '12h' 
+      ? formatTime12(props.event.start) 
+      : formatTime(props.event.start);
+    
+    const endTime = props.timeFormat === '12h' 
+      ? formatTime12(props.event.end) 
+      : formatTime(props.event.end);
+
+    // For month view, show date if it's not today
+    if (props.viewType === 'month' && !isToday(props.event.start)) {
+      const date = formatDate(props.event.start);
+      return `${date} ${startTime} - ${endTime}`;
+    }
+
+    return `${startTime} - ${endTime}`;
+  } catch (error) {
+    console.error("Time formatting failed:", error);
+    return "--:-- - --:--";
   }
 };
 
@@ -321,25 +331,5 @@ const getPastelColorBorder = (id: string) => {
   ];
   const hash = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
-};
-
-const formatTime = (dateString: string) => {
-  try {
-    if (!dateString) {
-      throw new Error("Date string is required for formatting");
-    }
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      throw new Error("Invalid date string provided");
-    }
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: props.timeZone || "UTC", // Fallback to UTC if not specified
-    });
-  } catch (error) {
-    console.error("Time formatting failed:", error);
-    return "--:--";
-  }
 };
 </script>

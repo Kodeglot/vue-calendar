@@ -60,6 +60,7 @@
       :is="currentViewComponent"
       :current-date="currentDate"
       :hour-height="60"
+      :time-format="timeFormat"
       v-bind="
         props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
       "
@@ -84,6 +85,7 @@
  *
  * @prop {Date} [initialDate=new Date()] - Initial date to display
  * @prop {string} [initialView="month"] - Initial view mode (month|week|day)
+ * @prop {string} [timeFormat='24h'] - Time format preference for displaying times
  * @prop {boolean} [showControls=true] - Whether to show navigation controls
  * @prop {boolean} [showEventButton=true] - Whether to show the create event button
  * @prop {boolean} [enableDragDrop=true] - Whether to enable drag and drop functionality
@@ -100,8 +102,9 @@
  * @event {string} event-deleted - Emitted when an event is deleted (event ID)
  */
 
-import { ref, computed, watch, type Component, PropType } from "vue";
+import { ref, computed, watch, type Component, PropType, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
+import { useTimezone } from "../composables/useTimezone";
 import CalendarMonthComponent from "../components/CalendarMonthComponent.vue";
 import CalendarWeekComponent from "../components/CalendarWeekComponent.vue";
 import CalendarDayComponent from "../components/CalendarDayComponent.vue";
@@ -141,6 +144,16 @@ const props = defineProps({
     type: String as PropType<'month' | 'week' | 'day'>,
     default: 'month',
     validator: (value: string) => ['month', 'week', 'day'].includes(value),
+  },
+  /** 
+   * Time format preference for displaying times
+   * @default '24h'
+   * @type {'12h' | '24h'}
+   */
+  timeFormat: {
+    type: String as PropType<'12h' | '24h'>,
+    default: '24h',
+    validator: (value: string) => ['12h', '24h'].includes(value),
   },
   /** 
    * Whether to show navigation controls (previous/next buttons, view selector)
@@ -189,6 +202,7 @@ const currentDate = ref<Date>(props.initialDate); // Currently displayed date
 const currentView = ref<CalendarView>(props.initialView as CalendarView); // Current view mode
 const store = useCalendarStore(); // Pinia store for calendar events
 const eventModal = ref<InstanceType<typeof EventModal>>(); // Reference to event modal component
+const { formatMonthYear, formatWeekdayShort, formatFullDate } = useTimezone(); // Timezone utilities
 
 // Mapping of view modes to their corresponding components
 const viewComponents: Record<CalendarView, Component> = {
@@ -213,10 +227,7 @@ const currentViewComponent = computed(() => viewComponents[currentView.value]);
  */
 const headerDate = computed(() => {
   if (currentView.value === "month") {
-    return currentDate.value.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
+    return formatMonthYear(currentDate.value);
   }
 
   if (currentView.value === "week") {
@@ -225,22 +236,13 @@ const headerDate = computed(() => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(endOfWeek.getDate() + 6);
 
-    return `${startOfWeek.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    })} - ${endOfWeek.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })}`;
+    const startFormatted = formatWeekdayShort(startOfWeek) + ' ' + startOfWeek.getDate();
+    const endFormatted = formatWeekdayShort(endOfWeek) + ' ' + endOfWeek.getDate() + ', ' + endOfWeek.getFullYear();
+
+    return `${startFormatted} - ${endFormatted}`;
   }
 
-  return currentDate.value.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatFullDate(currentDate.value);
 });
 
 /**
@@ -323,4 +325,52 @@ const toggleNewEventForm = () => {
   eventModal.value?.openModal(date);
   emit('openEventModal', date);
 };
+
+// Add sample events on component mount
+onMounted(() => {
+  // Add sample events for testing drag and drop
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const sampleEvents: CalendarEvent[] = [
+    {
+      id: 'sample-1',
+      title: 'Team Meeting',
+      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0).toISOString(),
+      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 30).toISOString(),
+      tailwindColor: 'blue',
+      allDay: false,
+    },
+    {
+      id: 'sample-2',
+      title: 'Lunch Break',
+      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0).toISOString(),
+      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 0).toISOString(),
+      tailwindColor: 'green',
+      allDay: false,
+    },
+    {
+      id: 'sample-3',
+      title: 'Project Review',
+      start: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 14, 0).toISOString(),
+      end: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 15, 30).toISOString(),
+      tailwindColor: 'purple',
+      allDay: false,
+    },
+    {
+      id: 'sample-4',
+      title: 'All Day Event',
+      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0).toISOString(),
+      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59).toISOString(),
+      tailwindColor: 'orange',
+      allDay: true,
+    }
+  ];
+  
+  // Add events to store
+  sampleEvents.forEach(event => {
+    store.addEvent(event);
+  });
+});
 </script>

@@ -41,8 +41,8 @@
     <div class="flex flex-row">
       <div
         ref="dayGrid"
-        @dragover.prevent="handleDragOver"
-        @drop="handleDrop"
+        @dragover.prevent
+      
         class="w-20 h-24 text-center"
       >
         <!-- Hour Indicators -->
@@ -66,7 +66,12 @@
 
       <div class="flex-1 overflow-auto" role="rowgroup">
         <!-- Main Time Grid -->
-        <TimeGridComponent :hourHeight="hourHeight" :timeFormat="timeFormat">
+        <TimeGridComponent 
+          :hourHeight="hourHeight" 
+          :timeFormat="props.timeFormat === '24h' 
+            ? { hour: '2-digit', minute: '2-digit', hour12: false }
+            : { hour: 'numeric', minute: '2-digit', hour12: true }"
+        >
           <!-- Calendar Events -->
           <template v-if="dayGrid">
             <CalendarEventComponent
@@ -75,8 +80,7 @@
               :event="event"
               :resizable="true"
               :container-ref="dayGrid"
-              @resize="handleResize"
-              @dragstart="handleEventDragStart"
+              :timeFormat="props.timeFormat"
               class="absolute"
               :viewType="'day'"
             />
@@ -92,6 +96,7 @@ import { ref, computed, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
+// import { useCalendarEventInteractions } from "../composables/useCalendarEventInteractions";
 
 /**
  * Reference to the day grid container
@@ -104,11 +109,6 @@ onMounted(() => {
   isMounted.value = true;
 });
 
-/**
- * Currently dragged event reference
- * @type {Ref<CalendarEvent | null>}
- */
-const draggedEvent = ref<CalendarEvent | null>(null);
 
 /**
  * CalendarDayComponent - Displays a single day view with time slots and events
@@ -132,25 +132,32 @@ const draggedEvent = ref<CalendarEvent | null>(null);
  */
 interface Props {
   /**
-   * The current date to display
+   * Current date to display
    * @required
    * @type {Date}
    */
   currentDate: Date;
 
   /**
-   * Height in pixels for each hour slot
+   * Height of each hour slot in pixels
    * @default 60
    * @type {number}
    */
   hourHeight?: number;
 
   /**
+   * Time format preference for displaying times
+   * @default '24h'
+   * @type {'12h' | '24h'}
+   */
+  timeFormat?: '12h' | '24h';
+
+  /**
    * Time display format options
-   * @default { hour: 'numeric', minute: '2-digit' }
+   * @default { hour: '2-digit', minute: '2-digit', hour12: false }
    * @type {Intl.DateTimeFormatOptions}
    */
-  timeFormat?: Intl.DateTimeFormatOptions;
+  timeFormatOptions?: Intl.DateTimeFormatOptions;
 
   /**
    * Date display format options
@@ -187,15 +194,24 @@ interface Emits {
    * @param date - The date/time that was clicked
    */
   (e: "dayClick", date: Date): void;
+
+  /**
+   * Emitted when an event is dropped on the calendar
+   * @param eventId - The ID of the dropped event
+   * @param date - The date/time the event was dropped on
+   */
+  (e: "eventDrop", eventId: string, date: Date): void;
 }
 
 const emit = defineEmits<Emits>();
 
 const props = withDefaults(defineProps<Props>(), {
   hourHeight: 60,
-  timeFormat: () => ({
-    hour: "numeric",
+  timeFormat: '24h',
+  timeFormatOptions: () => ({
+    hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   }),
   dateFormat: () => ({
     weekday: "long",
@@ -216,25 +232,38 @@ const store = useCalendarStore();
  * @type {number[]}
  */
 const hours = Array.from({ length: 24 }, (_, i) => i);
-const pxPerHour = ref(props.hourHeight);
 
-const handleDayClick = (event: MouseEvent, hour: number) => {
-  const target = event.currentTarget as HTMLElement;
-  const rect = target.getBoundingClientRect();
-  if (!rect) return;
-
-  // Calculate minutes based on click position
-  const clickY = event.clientY - rect.top;
-  const minutes = Math.round((clickY / pxPerHour.value) * 60);
-
-  // Create new date from current day + clicked time
-  const clickedDate = new Date(props.currentDate);
-  clickedDate.setHours(hour);
-  clickedDate.setMinutes(minutes);
-
-  // Emit event with clicked date/time
-  emit("dayClick", clickedDate);
+// Setup event interactions composable
+const dummyEvent: CalendarEvent = {
+  id: 'dummy',
+  title: '',
+  start: props.currentDate.toISOString(),
+  end: new Date(props.currentDate.getTime() + 3600000).toISOString(),
+  tailwindColor: 'bg-white',
+  allDay: false
 };
+
+// const eventInteractions = useCalendarEventInteractions(
+//   (event: string, ...args: any[]) => {
+//     if (event === 'dayClick') {
+//       emit('dayClick', args[0] as Date);
+//     } else if (event === 'resize' || event === 'resize-end') {
+//       const [event, newStart, newEnd] = args as [
+//         CalendarEvent,
+//         string,
+//         string
+//       ];
+//       // Handle resize events if needed
+//     }
+//   },
+//   {
+//     event: dummyEvent,
+//     pxPerHour: props.hourHeight,
+//     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+//     containerRef: dayGrid.value as HTMLElement,
+//     viewType: 'day'
+//   }
+// );
 
 /**
  * Get all-day events for a specific date
@@ -293,23 +322,6 @@ const currentDay = computed(() => {
 });
 
 /**
- * Calculate event position and height
- * @param {CalendarEvent} event - The event to position
- * @returns {EventPosition} Object with top and height properties
- */
-const eventPosition = (event: CalendarEvent): EventPosition => {
-  const start = new Date(event.start);
-  const end = new Date(event.end);
-  const startHours = start.getHours() + start.getMinutes() / 60;
-  const durationHours = (end.getTime() - start.getTime()) / 3600000;
-
-  return {
-    top: `${startHours * props.hourHeight}px`,
-    height: `${durationHours * props.hourHeight}px`,
-  };
-};
-
-/**
  * Calculate event positions and prevent overlaps
  * @param {CalendarEvent[]} events - Array of events to position
  * @returns {CalendarEvent[]} Events with position data
@@ -354,94 +366,17 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
 /**
  * Format hour display
  * @param {number} hour - The hour to format (0-23)
- * @returns {string} Formatted time string (e.g., "2 PM")
+ * @returns {string} Formatted time string in selected format (e.g., "14:00" or "2 PM")
  */
 const formatHour = (hour: number) => {
   return new Date(2023, 0, 1, hour).toLocaleTimeString(
     "en-US",
-    props.timeFormat
+    {
+      hour: props.timeFormat === '24h' ? "2-digit" : "numeric",
+      minute: "2-digit",
+      hour12: props.timeFormat === '12h',
+    }
   );
 };
 
-/**
- * Handle event drag start
- * @param {DragEvent} e - Drag event
- * @param {CalendarEvent} event - The event being dragged
- */
-const handleEventDragStart = (e: DragEvent, event: CalendarEvent) => {
-  draggedEvent.value = event;
-  e.dataTransfer!.effectAllowed = "move";
-};
-
-/**
- * Handle drag over event
- * @param {DragEvent} e - Drag event
- */
-const handleDragOver = (e: DragEvent) => {
-  e.preventDefault();
-  if (!draggedEvent.value) return;
-  e.dataTransfer!.dropEffect = "move";
-};
-
-/**
- * Handle drop event to update event time
- * @param {DragEvent} e - Drop event
- */
-const handleDrop = (e: DragEvent) => {
-  if (!draggedEvent.value || !dayGrid.value) return;
-
-  try {
-    // Calculate drop position
-    const rect = dayGrid.value.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const hours = y / props.hourHeight; // Convert pixels to hours
-
-    // Update event time
-    const newDate = new Date(props.currentDate);
-    newDate.setHours(Math.floor(hours));
-    newDate.setMinutes((hours % 1) * 60);
-
-    store.updateEventDate(draggedEvent.value.id, newDate);
-    draggedEvent.value = null;
-  } catch (error) {
-    console.error("Error handling drop:", error);
-  }
-};
-
-/**
- * Handle event resize to update duration
- * @param {CalendarEvent} event - The event being resized
- * @param {Date} newStart - New start time
- * @param {Date} newEnd - New end time
- */
-const handleResize = (
-  event: CalendarEvent,
-  newStart: string | Date,
-  newEnd: string | Date
-) => {
-  console.log("=== daycomponentn handleresize");
-  try {
-    // Convert inputs to Date objects if they aren't already
-    const startDate = newStart instanceof Date ? newStart : new Date(newStart);
-    const endDate = newEnd instanceof Date ? newEnd : new Date(newEnd);
-
-    // Convert pixel deltas to time values using hourHeight
-    const startDelta =
-      (startDate.getTime() - new Date(event.start).getTime()) / 1000 / 60;
-    const endDelta =
-      (endDate.getTime() - new Date(event.end).getTime()) / 1000 / 60;
-
-    // Calculate new positions based on pixel-per-minute scale
-    const newStartTime = new Date(event.start);
-    newStartTime.setMinutes(newStartTime.getMinutes() + startDelta);
-
-    const newEndTime = new Date(event.end);
-    newEndTime.setMinutes(newEndTime.getMinutes() + endDelta);
-
-    console.log(store.events);
-    store.updateEventDuration(event.id, newStartTime, newEndTime);
-  } catch (error) {
-    console.error("Error resizing event:", error);
-  }
-};
 </script>

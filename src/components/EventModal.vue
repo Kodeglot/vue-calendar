@@ -23,21 +23,27 @@
             <div>
               <label class="block text-sm font-medium mb-1">Start Time</label>
               <input
-                v-model="event.start"
+                v-model="localStartTime"
                 type="datetime-local"
                 required
                 class="w-full px-3 py-2 border rounded-lg"
               />
+              <p class="text-xs text-gray-500 mt-1">
+                Your timezone: {{ userTimezone }}
+              </p>
             </div>
 
             <div>
               <label class="block text-sm font-medium mb-1">End Time</label>
               <input
-                v-model="event.end"
+                v-model="localEndTime"
                 type="datetime-local"
                 required
                 class="w-full px-3 py-2 border rounded-lg"
               />
+              <p class="text-xs text-gray-500 mt-1">
+                Your timezone: {{ userTimezone }}
+              </p>
             </div>
 
             <div>
@@ -106,8 +112,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useCalendarStore } from "../stores/calendarStore";
+import { useTimezone } from "../composables/useTimezone";
 
 const emit = defineEmits(["close", "save"]);
 const isOpen = ref(false);
@@ -121,13 +128,24 @@ const event = ref({
 });
 
 const store = useCalendarStore();
+const { userTimezone, toUTC, toISOString, toUserTimezone } = useTimezone();
+
+// Local time inputs for the form (in user's timezone)
+const localStartTime = ref("");
+const localEndTime = ref("");
 
 function openModal(time: Date) {
   selectedTime.value = time;
-  event.value.start = time.toISOString().slice(0, 16);
-  const endTime = new Date(time);
-  endTime.setHours(time.getHours() + 1);
-  event.value.end = endTime.toISOString().slice(0, 16);
+  
+  // Convert the selected time to user's timezone for display
+  const userTime = toUserTimezone(time);
+  const endTime = new Date(userTime);
+  endTime.setHours(userTime.getHours() + 1);
+  
+  // Format for datetime-local input (YYYY-MM-DDTHH:mm)
+  localStartTime.value = formatForDateTimeLocal(userTime);
+  localEndTime.value = formatForDateTimeLocal(endTime);
+  
   isOpen.value = true;
 }
 
@@ -137,16 +155,54 @@ function closeModal() {
 }
 
 function handleSubmit() {
-  const newEvent = {
-    id: crypto.randomUUID(),
-    title: event.value.title,
-    start: new Date(event.value.start).toISOString(),
-    end: new Date(event.value.end).toISOString(),
-    tailwindColor: event.value.tailwindColor,
-  };
+  try {
+    // Convert local times back to UTC for storage
+    const startDate = parseDateTimeLocal(localStartTime.value);
+    const endDate = parseDateTimeLocal(localEndTime.value);
+    
+    // Convert to UTC and then to ISO string
+    const utcStart = toUTC(startDate);
+    const utcEnd = toUTC(endDate);
+    
+    const newEvent = {
+      id: crypto.randomUUID(),
+      title: event.value.title,
+      start: toISOString(utcStart),
+      end: toISOString(utcEnd),
+      tailwindColor: event.value.tailwindColor,
+    };
 
-  emit("save", newEvent);
-  closeModal();
+    emit("save", newEvent);
+    closeModal();
+  } catch (error) {
+    console.error("Error creating event:", error);
+    alert("Error creating event. Please check your date/time inputs.");
+  }
+}
+
+// Helper function to format date for datetime-local input
+function formatForDateTimeLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Helper function to parse datetime-local input
+function parseDateTimeLocal(dateTimeString: string): Date {
+  if (!dateTimeString) {
+    throw new Error("Date/time string is required");
+  }
+  
+  const date = new Date(dateTimeString);
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date/time format");
+  }
+  
+  return date;
 }
 
 const getTailwindColor = (color: string) => {
