@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2025-01-27
 
 ### Added
 - **Configurable time format support** - Choose between 12-hour (AM/PM) and 24-hour formats
@@ -105,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-### Current Status (v0.2.0+)
+### Current Status (v1.0.0)
 The Vue Calendar component is now a **production-ready, feature-complete calendar solution** with:
 
 - ✅ **Three view modes** (month, week, day)
@@ -120,8 +120,9 @@ The Vue Calendar component is now a **production-ready, feature-complete calenda
 - ✅ **Configurable time formats** (12h/24h)
 - ✅ **Timezone-aware date handling**
 - ✅ **Library build system** for npm distribution
+- ✅ **NPM package** - Published as @kodeglot/vue-calendar
 
-### Planned for Next Release (v0.3.0)
+### Planned for Next Release (v1.1.0)
 - 🔄 **Recurring events** support
 - 🔄 **Enhanced timezone handling** with user preference storage
 - 🔄 **Export/import functionality**
@@ -129,7 +130,7 @@ The Vue Calendar component is now a **production-ready, feature-complete calenda
 - 🔄 **Performance optimizations** for large datasets
 - 🔄 **Custom time format patterns**
 
-### Future Roadmap (v1.0.0)
+### Future Roadmap (v2.0.0)
 - 🎯 **Year view** implementation
 - 🎯 **Resource scheduling** support
 - 🎯 **Timeline view** layout
