@@ -1,6 +1,6 @@
 # Vue Calendar 🗓️
 
-[![npm version](https://img.shields.io/npm/v/vue-calendar.svg)](https://www.npmjs.com/package/vue-calendar)
+[![npm version](https://img.shields.io/npm/v/@kodeglot/vue-calendar.svg)](https://www.npmjs.com/package/@kodeglot/vue-calendar)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/Kodeglot/vue-calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/Kodeglot/vue-calendar/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/Kodeglot/vue-calendar)](https://codecov.io/gh/Kodeglot/vue-calendar)
@@ -41,23 +41,23 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 
 ### Using npm
 ```bash
-npm install vue-calendar date-fns date-fns-tz
+npm install @kodeglot/vue-calendar date-fns date-fns-tz
 ```
 
 ### Using yarn
 ```bash
-yarn add vue-calendar date-fns date-fns-tz
+yarn add @kodeglot/vue-calendar date-fns date-fns-tz
 ```
 
 ### Using pnpm
 ```bash
-pnpm add vue-calendar date-fns date-fns-tz
+pnpm add @kodeglot/vue-calendar date-fns date-fns-tz
 ```
 
 ### CDN
 Add the following script tag to your HTML:
 ```html
-<script src="https://unpkg.com/vue-calendar/dist/vue-calendar.umd.js"></script>
+<script src="https://unpkg.com/@kodeglot/vue-calendar/dist/vue-calendar.umd.js"></script>
 ```
 
 ## Quick Start
@@ -65,7 +65,7 @@ Add the following script tag to your HTML:
 ### 1. Install Dependencies
 
 ```bash
-npm install vue-calendar pinia date-fns date-fns-tz
+npm install @kodeglot/vue-calendar pinia date-fns date-fns-tz
 ```
 
 ### 2. Setup Pinia Store
@@ -167,7 +167,7 @@ app.mount('#app')
 </template>
 
 <script setup lang="ts">
-import { CalendarView, useCalendarStore, type CalendarEvent } from 'vue-calendar'
+import { CalendarView, useCalendarStore, type CalendarEvent } from '@kodeglot/vue-calendar'
 
 const store = useCalendarStore()
 
@@ -191,7 +191,7 @@ If you want to use the default styles, import the CSS:
 
 ```typescript
 // main.ts
-import 'vue-calendar/dist/style.css'
+import '@kodeglot/vue-calendar/dist/style.css'
 ```
 
 ## Timezone Support
@@ -207,7 +207,7 @@ Vue Calendar includes comprehensive timezone support:
 
 ```vue
 <script setup lang="ts">
-import { useTimezone } from 'vue-calendar'
+import { useTimezone } from '@kodeglot/vue-calendar'
 
 const { 
   formatTime, 
@@ -385,7 +385,7 @@ The calendar supports 22 Tailwind colors for events:
 </template>
 
 <script setup lang="ts">
-import { CalendarView } from 'vue-calendar'
+import { CalendarView } from '@kodeglot/vue-calendar'
 </script>
 ```
 
@@ -407,7 +407,7 @@ import { CalendarView } from 'vue-calendar'
 </template>
 
 <script setup lang="ts">
-import { CalendarView } from 'vue-calendar'
+import { CalendarView } from '@kodeglot/vue-calendar'
 </script>
 ```
 
@@ -425,7 +425,7 @@ import { CalendarView } from 'vue-calendar'
 </template>
 
 <script setup lang="ts">
-import { CalendarView, useCalendarStore, type CalendarEvent } from 'vue-calendar'
+import { CalendarView, useCalendarStore, type CalendarEvent } from '@kodeglot/vue-calendar'
 
 const store = useCalendarStore()
 
@@ -460,7 +460,7 @@ function handleEventDeleted(eventId: string) {
 </template>
 
 <script setup lang="ts">
-import { CalendarView, useCalendarStore } from 'vue-calendar'
+import { CalendarView, useCalendarStore } from '@kodeglot/vue-calendar'
 
 const store = useCalendarStore()
 
@@ -490,7 +490,7 @@ import {
   CalendarMonthComponent, 
   CalendarWeekComponent, 
   CalendarDayComponent 
-} from 'vue-calendar'
+} from '@kodeglot/vue-calendar'
 
 const currentDate = new Date()
 </script>
@@ -518,7 +518,7 @@ const currentDate = new Date()
 </template>
 
 <script setup lang="ts">
-import { CalendarView } from 'vue-calendar'
+import { CalendarView } from '@kodeglot/vue-calendar'
 </script>
 ```
 
@@ -641,16 +641,12 @@ See [CHANGELOG.md](CHANGELOG.md) for a history of changes and releases.
 - [ ] **Resource View** - Support for resource scheduling
 - [ ] **Timeline View** - Horizontal timeline layout
 - [ ] **Recurring Events** - Built-in recurrence rules
-- [ ] **Timezone Support** - Enhanced timezone handling
+- [x] **Timezone Support** - Enhanced timezone handling
 - [ ] **Export/Import** - Calendar data persistence
 - [ ] **Event Templates** - Predefined event templates
 - [ ] **Advanced Filtering** - Event filtering and search
 - [ ] **Performance Optimization** - Virtual scrolling for large datasets
 
-## Documentation
-
-For full documentation and examples, visit [GitHub](https://github.com/Kodeglot/vue-calendar)
-
 ## License
 
-MIT © [Kodeglot](https://github.com/Kodeglot)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
