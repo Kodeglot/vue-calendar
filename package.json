@@ -8,9 +8,9 @@
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/vue-calendar.es.js",
-      "require": "./dist/vue-calendar.umd.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/vue-calendar.umd.js"
     },
     "./dist/style.css": "./dist/style.css"
   },
@@ -21,6 +21,7 @@
   "scripts": {
     "dev": "vite",
     "demo": "vite --config vite.config.demo.ts",
+    "demo:standalone": "npm run build && open demo/standalone.html",
     "build": "npm run build:lib && npm run build:types",
     "build:lib": "vite build --config vite.config.lib.ts",
     "build:types": "vite build --config vite.config.types.ts",
