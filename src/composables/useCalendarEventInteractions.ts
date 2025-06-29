@@ -1,5 +1,5 @@
 import { ref, onUnmounted, type Ref } from 'vue'
-import { useCalendarStore, type CalendarEvent } from '../stores/calendarStore'
+import { type CalendarEvent } from '../stores/calendarStore'
 
 interface UseCalendarEventInteractionsOptions {
   /**
@@ -378,7 +378,6 @@ export function useCalendarEventInteractions(
   }
 
   const stopDrag = () => {
-    const wasDragging = isDragging.value
     try {
       // Clean up listeners first to prevent any race conditions
       document.removeEventListener('mousemove', handleDragMove)

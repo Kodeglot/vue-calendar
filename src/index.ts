@@ -16,9 +16,6 @@ export { useCalendarStore, type CalendarEvent, type CalendarPlugin, type DateRan
 export { useCalendarEventInteractions } from './composables/useCalendarEventInteractions'
 export { useTimezone } from './composables/useTimezone'
 
-// Export types
-export type { CalendarView as CalendarViewType } from './views/CalendarView.vue'
-
 // Default export for convenience
 import CalendarView from './views/CalendarView.vue'
 export default CalendarView 

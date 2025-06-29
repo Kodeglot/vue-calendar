@@ -19,12 +19,13 @@
     "demo"
   ],
   "scripts": {
+    "clean": "rm -rf dist",
     "dev": "vite",
     "demo": "vite --config vite.config.demo.ts",
     "demo:standalone": "npm run build && open demo/standalone.html",
-    "build": "npm run build:lib && npm run build:types",
+    "build": "npm run clean && npm run build:lib && npm run build:types",
     "build:lib": "vite build --config vite.config.lib.ts",
-    "build:types": "vite build --config vite.config.types.ts",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist/types --project tsconfig.app.json",
     "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -34,10 +35,10 @@
     "type-check": "vue-tsc --noEmit"
   },
   "peerDependencies": {
-    "vue": "^3.3.0",
-    "pinia": "^3.0.0",
     "date-fns": "^3.0.0",
-    "date-fns-tz": "^3.0.0"
+    "date-fns-tz": "^3.0.0",
+    "pinia": "^3.0.0",
+    "vue": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
@@ -60,7 +61,7 @@
     "typescript": "^5.0.0",
     "uuid": "^11.1.0",
     "vite": "^6.2.2",
-    "vite-plugin-dts": "^4.5.3",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.0.9",
     "vue-tsc": "^2.2.8"
   },
@@ -92,8 +93,8 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.15",
-    "date-fns": "^3.6.0",
+    "date-fns": "^3.0.0",
     "date-fns-tz": "^3.0.0",
-    "pinia": "^3.0.1"
+    "pinia": "^3.0.0"
   }
 }
