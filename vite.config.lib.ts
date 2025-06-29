@@ -26,7 +26,7 @@ export default defineConfig({
           'date-fns-tz': 'dateFnsTz'
         },
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'style.css') {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             return 'style.css'
           }
           return assetInfo.name
