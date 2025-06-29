@@ -1,5 +1,5 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Plugins */
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography'
+/* Custom calendar styles can be added below */

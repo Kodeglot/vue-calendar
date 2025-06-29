@@ -1,5 +1,7 @@
 // Main entry point for the vue-calendar npm package
 
+import './style.css'
+
 // Export main components
 export { default as CalendarView } from './views/CalendarView.vue'
 export { default as CalendarMonthComponent } from './components/CalendarMonthComponent.vue'
