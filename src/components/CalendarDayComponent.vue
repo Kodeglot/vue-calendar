@@ -9,7 +9,7 @@
       <div class="w-20 min-h-10"></div>
       <div class="flex-1">
         <!-- Day Headers -->
-        <div class="bg-gray-200">
+        <div class="bg-gray-200 sticky top-0 z-10">
           <!-- Day Headers -->
           <div class="bg-white p-2 font-semibold text-center">
             {{ currentDay }}
@@ -232,38 +232,6 @@ const store = useCalendarStore();
  * @type {number[]}
  */
 const hours = Array.from({ length: 24 }, (_, i) => i);
-
-// Setup event interactions composable
-const dummyEvent: CalendarEvent = {
-  id: 'dummy',
-  title: '',
-  start: props.currentDate.toISOString(),
-  end: new Date(props.currentDate.getTime() + 3600000).toISOString(),
-  tailwindColor: 'bg-white',
-  allDay: false
-};
-
-// const eventInteractions = useCalendarEventInteractions(
-//   (event: string, ...args: any[]) => {
-//     if (event === 'dayClick') {
-//       emit('dayClick', args[0] as Date);
-//     } else if (event === 'resize' || event === 'resize-end') {
-//       const [event, newStart, newEnd] = args as [
-//         CalendarEvent,
-//         string,
-//         string
-//       ];
-//       // Handle resize events if needed
-//     }
-//   },
-//   {
-//     event: dummyEvent,
-//     pxPerHour: props.hourHeight,
-//     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-//     containerRef: dayGrid.value as HTMLElement,
-//     viewType: 'day'
-//   }
-// );
 
 /**
  * Get all-day events for a specific date

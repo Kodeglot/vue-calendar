@@ -9,7 +9,7 @@
   <div class="grow flex flex-col w-full">
 
     <!-- Day Headers -->
-    <div class="grid grid-cols-7 gap-px bg-gray-200 border-t">
+    <div class="grid grid-cols-7 gap-px bg-gray-200 border-t sticky top-0 z-10">
       <!-- Day Headers -->
       <div
         v-for="day in days"
