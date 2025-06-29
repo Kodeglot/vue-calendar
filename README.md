@@ -253,13 +253,11 @@ The calendar supports both 12-hour and 24-hour time formats:
 
 ## Demo
 
-### Live Demo
-Check out the live demo to see Vue Calendar in action:
-- **CDN Demo**: Open `demo/index.html` in your browser
-- **Development Demo**: Run `npm run demo` to start the interactive demo
+### Demo Options
 
-### Running the Demo Locally
+Vue Calendar provides multiple ways to try out the component:
 
+#### 1. Development Demo (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/Kodeglot/vue-calendar.git
@@ -268,17 +266,57 @@ cd vue-calendar
 # Install dependencies
 npm install
 
-# Start the demo
+# Build the component
+npm run build
+
+# Start the interactive demo
 npm run demo
 ```
 
-The demo will open at `http://localhost:3001` and showcase all the calendar features including:
-- Month, week, and day views
+The development demo will open at `http://localhost:3001` and provides:
+- Hot reloading for development
+- All calendar features including drag & drop
+- Time format switching (12h/24h)
 - Event creation and editing
-- Drag and drop functionality
-- Event resizing
-- Color customization
-- Responsive design
+- Responsive design testing
+
+#### 2. Standalone Demo
+For a production-like experience without build tools:
+```bash
+# After building the component
+npm run build
+
+# Open the standalone demo
+open demo/standalone.html
+```
+
+**Note**: The standalone demo requires the component to be built first (`npm run build`).
+
+### Demo Features
+
+Both demos showcase:
+- **Multiple Views**: Month, week, and day views
+- **Event Management**: Create, edit, and delete events
+- **Drag & Drop**: Move events between dates and times
+- **Event Resizing**: Resize events to change duration
+- **Color Customization**: 22 Tailwind color options
+- **Time Format**: Switch between 12-hour and 24-hour formats
+- **Responsive Design**: Works on all screen sizes
+- **Timezone Support**: Proper timezone handling
+
+### Troubleshooting Demo Issues
+
+If you encounter issues with the demo:
+
+1. **"devtoolsApi is not defined"**: This is a harmless warning from Pinia's devtools. The demo will work normally.
+
+2. **"Cannot destructure property 'createPinia'"**: Make sure you've run `npm run build` before starting the demo.
+
+3. **Component not loading**: Check that the UMD build was created successfully in the `dist/` folder.
+
+4. **Tailwind CDN warning**: This is expected in development. For production, install Tailwind CSS as a PostCSS plugin.
+
+5. **File not found errors**: Ensure you're running the demo from the project root directory.
 
 ## API Reference
 
