@@ -1,11 +1,12 @@
 <template>
   <div
     :class="[
-      'grow w-full flex flex-col h-full',
+      'grow w-full flex flex-col',
       'bg-white rounded-xl shadow-lg overflow-hidden',
       'border border-gray-200',
       customClasses?.container,
     ]"
+    :style="{ height: height }"
   >
     <!-- Calendar Header -->
     <div
@@ -55,17 +56,19 @@
       </div>
     </div>
 
-    <!-- Dynamic View Component -->
-    <component
-      :is="currentViewComponent"
-      :current-date="currentDate"
-      :hour-height="60"
-      :time-format="timeFormat"
-      v-bind="
-        props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
-      "
-      @dayClick="handleDayClick"
-    />
+    <!-- Scrollable Calendar Content -->
+    <div class="flex-1 overflow-auto">
+      <component
+        :is="currentViewComponent"
+        :current-date="currentDate"
+        :hour-height="60"
+        :time-format="timeFormat"
+        v-bind="
+          props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
+        "
+        @dayClick="handleDayClick"
+      />
+    </div>
 
     <!-- Event Modal -->
     <EventModal ref="eventModal" @save="handleEventSave" />
@@ -95,6 +98,7 @@
  *   @prop {string} [customClasses.controls] - Class for navigation controls
  *   @prop {string} [customClasses.viewSelector] - Class for view selector
  *   @prop {string} [customClasses.eventButton] - Class for event creation button
+ * @prop {string} [height='100%'] - Height of the calendar (e.g. '600px', '80vh', '100%')
  *
  * @event {Date} date-change - Emitted when the displayed date changes
  * @event {CalendarEvent} event-created - Emitted when a new event is created
@@ -127,6 +131,14 @@ interface CustomClasses {
 }
 
 const props = defineProps({
+  /**
+   * Height of the calendar (e.g. '600px', '80vh', '100%')
+   * @default '100%'
+   */
+  height: {
+    type: String,
+    default: '100%'
+  },
   /** 
    * Initial date to display in the calendar
    * @default Current date
