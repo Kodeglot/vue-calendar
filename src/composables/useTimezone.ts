@@ -166,14 +166,6 @@ export function useTimezone() {
   })
 
   /**
-   * Get current date in UTC for storage
-   * @returns Current date in UTC
-   */
-  const nowUTC = computed(() => {
-    return toUTC(now.value)
-  })
-
-  /**
    * Check if a date is today
    * @param date - Date string in ISO format or Date object
    * @returns True if the date is today
@@ -241,7 +233,6 @@ export function useTimezone() {
     
     // Utility functions
     now,
-    nowUTC,
     isToday,
     isSameDay,
     startOfDay,
