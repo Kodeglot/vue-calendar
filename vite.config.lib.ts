@@ -17,12 +17,11 @@ export default defineConfig({
       formats: ['es', 'umd']
     },
     rollupOptions: {
-      external: ['vue', 'pinia', 'uuid', 'date-fns', 'date-fns-tz'],
+      external: ['vue', 'pinia', 'date-fns', 'date-fns-tz'],
       output: {
         globals: {
           vue: 'Vue',
           pinia: 'Pinia',
-          uuid: 'uuid',
           'date-fns': 'dateFns',
           'date-fns-tz': 'dateFnsTz'
         },
