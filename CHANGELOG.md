@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Comprehensive timezone utilities** - useTimezone composable for date conversions
 - **Plugin system** - Extensible architecture for calendar functionality
 - **Advanced event positioning** - Improved stacking algorithms with width/left properties
+- **Standalone demo and new demo files** - Added `demo/App.vue`, `demo/main.js`, and `demo/standalone.html` for improved demo and standalone usage
+- **Configurable calendar height** - New `height` prop for `CalendarView` allows setting custom calendar height (e.g., `600px`, `8vh`, `100%`)
 
 ### Changed
 - **Default time format** - Now defaults to 24-hour format with option to switch to 12-hour
@@ -25,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build system** - Separate Vite configs for library, demo, and types
 - **Package exports** - Proper entry points for ES modules and CommonJS
 - **Documentation** - Updated README with time format examples and API reference
+- **Sticky headers** - Day and month headers are now sticky for improved navigation in calendar views
+- **Vite config improvements** - Added alias support, improved file naming, and set publicDir for demo builds
 
 ### Fixed
 - **Week view drag and drop** - Fixed missing variables and improved horizontal/vertical movement
@@ -32,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Time display consistency** - All time displays now respect the selected format
 - **Timezone conversions** - Proper handling of UTC storage and local display
 - **Build warnings** - Resolved package.json export condition warnings
+- **Timezone composable cleanup** - Removed unused nowUTC computed and related export
 
 ### Technical Improvements
 - **Performance optimization** - Efficient timezone calculations and position updates
