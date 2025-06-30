@@ -19,6 +19,15 @@ export { useCalendarStore, type CalendarEvent, type CalendarPlugin, type DateRan
 export { useCalendarEventInteractions } from './composables/useCalendarEventInteractions'
 export { useTimezone } from './composables/useTimezone'
 
+// Export slot prop interfaces for TypeScript support
+export type {
+  CalendarView as CalendarViewType,
+  NavigationSlotProps,
+  ControlsSlotProps,
+  ViewSelectorSlotProps,
+  EventButtonSlotProps
+} from './types/calendar'
+
 // Default export for convenience
 import CalendarView from './views/CalendarView.vue'
 export default CalendarView 

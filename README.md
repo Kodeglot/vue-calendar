@@ -439,6 +439,201 @@ import { CalendarView } from '@kodeglot/vue-calendar'
 </script>
 ```
 
+### Custom Controls and Navigation
+
+The calendar now supports fully customizable controls through slots. You can replace the default navigation, view selector, and event creation components with your own:
+
+```vue
+<template>
+  <CalendarView
+    :initial-date="new Date()"
+    :initial-view="'month'"
+    :show-controls="true"
+    :show-event-button="false"
+  >
+    <!-- Custom Navigation -->
+    <template #navigation="{ currentDate, currentView, previousPeriod, nextPeriod, headerDate }">
+      <div class="flex items-center gap-4">
+        <button 
+          @click="previousPeriod"
+          class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+        >
+          <ChevronLeftIcon class="w-5 h-5" />
+        </button>
+        
+        <div class="text-center">
+          <h2 class="text-xl font-bold">{{ headerDate }}</h2>
+          <p class="text-sm text-gray-500">{{ currentView }} view</p>
+        </div>
+        
+        <button 
+          @click="nextPeriod"
+          class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+        >
+          <ChevronRightIcon class="w-5 h-5" />
+        </button>
+      </div>
+    </template>
+
+    <!-- Custom View Selector -->
+    <template #view-selector="{ currentView, setView, currentDate }">
+      <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <button
+          @click="setView('month')"
+          :class="[
+            'px-3 py-1 rounded text-sm font-medium transition-colors',
+            currentView === 'month' 
+              ? 'bg-white text-blue-600 shadow-sm' 
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          Month
+        </button>
+        <button
+          @click="setView('week')"
+          :class="[
+            'px-3 py-1 rounded text-sm font-medium transition-colors',
+            currentView === 'week' 
+              ? 'bg-white text-blue-600 shadow-sm' 
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          Week
+        </button>
+        <button
+          @click="setView('day')"
+          :class="[
+            'px-3 py-1 rounded text-sm font-medium transition-colors',
+            currentView === 'day' 
+              ? 'bg-white text-blue-600 shadow-sm' 
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          Day
+        </button>
+      </div>
+    </template>
+
+    <!-- Custom Event Button -->
+    <template #event-button="{ toggleNewEventForm, currentDate }">
+      <button
+        @click="handleCustomEventCreation"
+        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+      >
+        <PlusIcon class="w-4 h-4" />
+        Add Event
+      </button>
+    </template>
+  </CalendarView>
+</template>
+
+<script setup lang="ts">
+import { CalendarView, type CalendarEvent } from '@kodeglot/vue-calendar'
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@heroicons/vue/24/outline'
+
+function handleCustomEventCreation() {
+  // Your custom event creation logic
+  console.log('Custom event creation triggered')
+  // You could open your own modal, navigate to a form, etc.
+}
+</script>
+```
+
+### TypeScript Support for Custom Controls
+
+The calendar provides full TypeScript support for slot props:
+
+```typescript
+import type { 
+  NavigationSlotProps, 
+  ControlsSlotProps, 
+  ViewSelectorSlotProps, 
+  EventButtonSlotProps 
+} from '@kodeglot/vue-calendar'
+
+// Navigation slot props
+interface NavigationSlotProps {
+  currentDate: Date
+  currentView: 'month' | 'week' | 'day'
+  previousPeriod: () => void
+  nextPeriod: () => void
+  headerDate: string
+}
+
+// Controls slot props
+interface ControlsSlotProps {
+  currentDate: Date
+  currentView: 'month' | 'week' | 'day'
+  timeFormat: '12h' | '24h'
+  toggleNewEventForm: () => void
+}
+
+// View selector slot props
+interface ViewSelectorSlotProps {
+  currentView: 'month' | 'week' | 'day'
+  currentDate: Date
+}
+
+// Event button slot props
+interface EventButtonSlotProps {
+  toggleNewEventForm: () => void
+  currentDate: Date
+}
+```
+
+### Minimal Calendar (No Default Controls)
+
+You can create a minimal calendar with no default controls:
+
+```vue
+<template>
+  <CalendarView
+    :initial-date="new Date()"
+    :initial-view="'month'"
+    :show-controls="false"
+    :show-event-button="false"
+  />
+</template>
+
+<script setup lang="ts">
+import { CalendarView } from '@kodeglot/vue-calendar'
+</script>
+```
+
+### Custom Controls Only
+
+Or provide only specific custom controls while keeping others default:
+
+```vue
+<template>
+  <CalendarView
+    :initial-date="new Date()"
+    :initial-view="'month'"
+    :show-controls="true"
+    :show-event-button="false"
+  >
+    <!-- Only customize the event button, keep default navigation and view selector -->
+    <template #event-button="{ toggleNewEventForm, currentDate }">
+      <button
+        @click="openMyCustomModal"
+        class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
+      >
+        Create New Event
+      </button>
+    </template>
+  </CalendarView>
+</template>
+
+<script setup lang="ts">
+import { CalendarView } from '@kodeglot/vue-calendar'
+
+function openMyCustomModal() {
+  // Your custom modal logic
+  console.log('Opening custom modal')
+}
+</script>
+```
+
 ### Event Handling
 
 ```vue

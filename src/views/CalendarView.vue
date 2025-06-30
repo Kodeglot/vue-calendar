@@ -13,47 +13,60 @@
       v-if="props.showControls"
       class="p-4 flex flex-col md:flex-row justify-between items-center gap-4 text-base/7"
     >
-      <!-- Navigation Controls -->
-      <div class="flex items-center gap-2">
-        <button
-          @click="previousPeriod"
-          class="px-2 hover:bg-gray-100 rounded"
-          aria-label="Previous period"
-        >
-          ←
-        </button>
-        <h2 class="text-base/7 font-bold whitespace-nowrap">
-          {{ headerDate }}
-        </h2>
-        <button
-          @click="nextPeriod"
-          class="px-2 hover:bg-gray-100 rounded"
-          aria-label="Next period"
-        >
-          →
-        </button>
-      </div>
+      <!-- Custom Navigation Controls Slot -->
+      <slot name="navigation" :current-date="currentDate" :current-view="currentView" :set-view="setView" :previous-period="previousPeriod" :next-period="nextPeriod" :header-date="headerDate">
+        <!-- Default Navigation Controls -->
+        <div class="flex items-center gap-2">
+          <button
+            @click="previousPeriod"
+            class="px-2 hover:bg-gray-100 rounded"
+            aria-label="Previous period"
+          >
+            ←
+          </button>
+          <h2 class="text-base/7 font-bold whitespace-nowrap">
+            {{ headerDate }}
+          </h2>
+          <button
+            @click="nextPeriod"
+            class="px-2 hover:bg-gray-100 rounded"
+            aria-label="Next period"
+          >
+            →
+          </button>
+        </div>
+      </slot>
 
-      <!-- View Selection & New Event Button -->
-      <div class="flex gap-2 text-base/7">
-        <select
-          v-model="currentView"
-          class="border px-4 rounded-md"
-          aria-label="Select calendar view"
-        >
-          <option value="month">Month</option>
-          <option value="week">Week</option>
-          <option value="day">Day</option>
-        </select>
-        <button
-          v-if="props.showEventButton"
-          @click="toggleNewEventForm"
-          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-base/7"
-          aria-label="Create new event"
-        >
-          + Create Event
-        </button>
-      </div>
+      <!-- Custom Controls Slot -->
+      <slot name="controls" :current-date="currentDate" :current-view="currentView" :set-view="setView" :time-format="timeFormat" :toggle-new-event-form="toggleNewEventForm">
+        <!-- Default View Selection & New Event Button -->
+        <div class="flex gap-2 text-base/7">
+          <!-- Custom View Selector Slot -->
+          <slot name="view-selector" :current-view="currentView" :set-view="setView" :current-date="currentDate">
+            <select
+              v-model="currentView"
+              class="border px-4 rounded-md"
+              aria-label="Select calendar view"
+            >
+              <option value="month">Month</option>
+              <option value="week">Week</option>
+              <option value="day">Day</option>
+            </select>
+          </slot>
+          
+          <!-- Custom Event Button Slot -->
+          <slot name="event-button" :toggle-new-event-form="toggleNewEventForm" :current-date="currentDate">
+            <button
+              v-if="props.showEventButton"
+              @click="toggleNewEventForm"
+              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-base/7"
+              aria-label="Create new event"
+            >
+              + Create Event
+            </button>
+          </slot>
+        </div>
+      </slot>
     </div>
 
     <!-- Scrollable Calendar Content -->
@@ -85,6 +98,7 @@
  * - Drag and drop support for events
  * - Responsive design
  * - Customizable styling through props
+ * - Custom slots for navigation, view selector, and event creation
  *
  * @prop {Date} [initialDate=new Date()] - Initial date to display
  * @prop {string} [initialView="month"] - Initial view mode (month|week|day)
@@ -100,10 +114,32 @@
  *   @prop {string} [customClasses.eventButton] - Class for event creation button
  * @prop {string} [height='100%'] - Height of the calendar (e.g. '600px', '80vh', '100%')
  *
+ * @slot navigation - Custom navigation controls
+ *   @param {Date} currentDate - Currently displayed date
+ *   @param {string} currentView - Current view mode (month|week|day)
+ *   @param {Function} previousPeriod - Function to navigate to previous period
+ *   @param {Function} nextPeriod - Function to navigate to next period
+ *   @param {string} headerDate - Formatted header date string
+ *
+ * @slot controls - Custom controls container
+ *   @param {Date} currentDate - Currently displayed date
+ *   @param {string} currentView - Current view mode (month|week|day)
+ *   @param {string} timeFormat - Current time format (12h|24h)
+ *   @param {Function} toggleNewEventForm - Function to open event creation modal
+ *
+ * @slot view-selector - Custom view selector component
+ *   @param {string} currentView - Current view mode (month|week|day)
+ *   @param {Date} currentDate - Currently displayed date
+ *
+ * @slot event-button - Custom event creation button
+ *   @param {Function} toggleNewEventForm - Function to open event creation modal
+ *   @param {Date} currentDate - Currently displayed date
+ *
  * @event {Date} date-change - Emitted when the displayed date changes
  * @event {CalendarEvent} event-created - Emitted when a new event is created
  * @event {CalendarEvent} event-updated - Emitted when an event is updated
  * @event {string} event-deleted - Emitted when an event is deleted (event ID)
+ * @event {Date} openEventModal - Emitted when event modal is opened
  */
 
 import { ref, computed, watch, type Component, PropType, onMounted } from "vue";
@@ -114,8 +150,13 @@ import CalendarWeekComponent from "../components/CalendarWeekComponent.vue";
 import CalendarDayComponent from "../components/CalendarDayComponent.vue";
 import CalendarEventComponent from "@/components/CalendarEventComponent.vue";
 import EventModal from "@/components/EventModal.vue";
-
-type CalendarView = "month" | "week" | "day";
+import type { 
+  CalendarView, 
+  NavigationSlotProps, 
+  ControlsSlotProps, 
+  ViewSelectorSlotProps, 
+  EventButtonSlotProps 
+} from "../types/calendar";
 
 interface CustomClasses {
   /** Custom class for the main container */
@@ -283,6 +324,7 @@ const previousPeriod = () => {
       break;
   }
   currentDate.value = newDate;
+  emit("date-change", newDate);
 };
 
 /**
@@ -305,6 +347,7 @@ const nextPeriod = () => {
       break;
   }
   currentDate.value = newDate;
+  emit("date-change", newDate);
 };
 
 /**
@@ -344,6 +387,21 @@ const toggleNewEventForm = () => {
   eventModal.value?.openModal(date);
   emit("openEventModal", date);
 };
+
+const setView = (view: CalendarView) => {
+  currentView.value = view;
+};
+
+// Watch for changes in currentDate and emit events
+watch(currentDate, (newDate) => {
+  emit("date-change", newDate);
+});
+
+// Watch for changes in currentView and emit events
+watch(currentView, (newView) => {
+  // Re-emit date change when view changes to ensure proper updates
+  emit("date-change", currentDate.value);
+});
 
 // Add sample events on component mount
 onMounted(() => {
