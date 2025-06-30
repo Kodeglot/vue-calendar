@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-06-30
+
+### Added
+- **Custom controls/navigation slots**: You can now fully customize the calendar's navigation, view selector, and event creation button using named slots (`navigation`, `controls`, `view-selector`, `event-button`).
+- **TypeScript slot prop interfaces**: All slot props are strictly typed and exported for use in TypeScript projects.
+
+### Fixed
+- **Custom view selector bug**: Added a `setView(view)` function to slot props so custom controls can change the calendar view correctly.
+
+### Changed
+- **README and demo**: Updated with clear examples for using the new slot API and `setView` function.
+
 ## [1.0.5] - 2025-06-30
 
 ### Fixed
@@ -124,18 +136,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Basic project structure**
 - **Development environment setup**
 - **Initial documentation framework**
-
-## [1.0.6] - 2025-06-30
-
-### Added
-- **Custom controls/navigation slots**: You can now fully customize the calendar's navigation, view selector, and event creation button using named slots (`navigation`, `controls`, `view-selector`, `event-button`).
-- **TypeScript slot prop interfaces**: All slot props are strictly typed and exported for use in TypeScript projects.
-
-### Fixed
-- **Custom view selector bug**: Added a `setView(view)` function to slot props so custom controls can change the calendar view correctly.
-
-### Changed
-- **README and demo**: Updated with clear examples for using the new slot API and `setView` function.
 
 ---
 
