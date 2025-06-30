@@ -216,11 +216,140 @@ If the calendar appears unstyled or broken, make sure you've imported the CSS:
    <link rel="stylesheet" href="https://unpkg.com/@kodeglot/vue-calendar/dist/style.css">
    ```
 
+### Missing Colors or Resize Handles?
+
+If you're experiencing issues with:
+- **Missing event colors** (orange, purple, etc.)
+- **Resize handles not visible**
+- **Hover effects not working**
+- **Cursor changes not appearing**
+
+This is likely a **CSS purging issue** in your implementing app. The calendar uses dynamic Tailwind classes that may be purged during your app's build process.
+
+#### Solution: Add to Your App's Tailwind Config
+
+Add this comprehensive safelist to your implementing app's `tailwind.config.js`:
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    // ... your content paths
+  ],
+  safelist: [
+    // Background colors - ALL variants
+    'bg-red-50', 'bg-red-100', 'bg-red-200', 'bg-red-300', 'bg-red-400', 'bg-red-500', 'bg-red-600', 'bg-red-700', 'bg-red-800', 'bg-red-900',
+    'bg-orange-50', 'bg-orange-100', 'bg-orange-200', 'bg-orange-300', 'bg-orange-400', 'bg-orange-500', 'bg-orange-600', 'bg-orange-700', 'bg-orange-800', 'bg-orange-900',
+    'bg-amber-50', 'bg-amber-100', 'bg-amber-200', 'bg-amber-300', 'bg-amber-400', 'bg-amber-500', 'bg-amber-600', 'bg-amber-700', 'bg-amber-800', 'bg-amber-900',
+    'bg-yellow-50', 'bg-yellow-100', 'bg-yellow-200', 'bg-yellow-300', 'bg-yellow-400', 'bg-yellow-500', 'bg-yellow-600', 'bg-yellow-700', 'bg-yellow-800', 'bg-yellow-900',
+    'bg-lime-50', 'bg-lime-100', 'bg-lime-200', 'bg-lime-300', 'bg-lime-400', 'bg-lime-500', 'bg-lime-600', 'bg-lime-700', 'bg-lime-800', 'bg-lime-900',
+    'bg-green-50', 'bg-green-100', 'bg-green-200', 'bg-green-300', 'bg-green-400', 'bg-green-500', 'bg-green-600', 'bg-green-700', 'bg-green-800', 'bg-green-900',
+    'bg-emerald-50', 'bg-emerald-100', 'bg-emerald-200', 'bg-emerald-300', 'bg-emerald-400', 'bg-emerald-500', 'bg-emerald-600', 'bg-emerald-700', 'bg-emerald-800', 'bg-emerald-900',
+    'bg-teal-50', 'bg-teal-100', 'bg-teal-200', 'bg-teal-300', 'bg-teal-400', 'bg-teal-500', 'bg-teal-600', 'bg-teal-700', 'bg-teal-800', 'bg-teal-900',
+    'bg-cyan-50', 'bg-cyan-100', 'bg-cyan-200', 'bg-cyan-300', 'bg-cyan-400', 'bg-cyan-500', 'bg-cyan-600', 'bg-cyan-700', 'bg-cyan-800', 'bg-cyan-900',
+    'bg-sky-50', 'bg-sky-100', 'bg-sky-200', 'bg-sky-300', 'bg-sky-400', 'bg-sky-500', 'bg-sky-600', 'bg-sky-700', 'bg-sky-800', 'bg-sky-900',
+    'bg-blue-50', 'bg-blue-100', 'bg-blue-200', 'bg-blue-300', 'bg-blue-400', 'bg-blue-500', 'bg-blue-600', 'bg-blue-700', 'bg-blue-800', 'bg-blue-900',
+    'bg-indigo-50', 'bg-indigo-100', 'bg-indigo-200', 'bg-indigo-300', 'bg-indigo-400', 'bg-indigo-500', 'bg-indigo-600', 'bg-indigo-700', 'bg-indigo-800', 'bg-indigo-900',
+    'bg-violet-50', 'bg-violet-100', 'bg-violet-200', 'bg-violet-300', 'bg-violet-400', 'bg-violet-500', 'bg-violet-600', 'bg-violet-700', 'bg-violet-800', 'bg-violet-900',
+    'bg-purple-50', 'bg-purple-100', 'bg-purple-200', 'bg-purple-300', 'bg-purple-400', 'bg-purple-500', 'bg-purple-600', 'bg-purple-700', 'bg-purple-800', 'bg-purple-900',
+    'bg-fuchsia-50', 'bg-fuchsia-100', 'bg-fuchsia-200', 'bg-fuchsia-300', 'bg-fuchsia-400', 'bg-fuchsia-500', 'bg-fuchsia-600', 'bg-fuchsia-700', 'bg-fuchsia-800', 'bg-fuchsia-900',
+    'bg-pink-50', 'bg-pink-100', 'bg-pink-200', 'bg-pink-300', 'bg-pink-400', 'bg-pink-500', 'bg-pink-600', 'bg-pink-700', 'bg-pink-800', 'bg-pink-900',
+    'bg-rose-50', 'bg-rose-100', 'bg-rose-200', 'bg-rose-300', 'bg-rose-400', 'bg-rose-500', 'bg-rose-600', 'bg-rose-700', 'bg-rose-800', 'bg-rose-900',
+    'bg-slate-50', 'bg-slate-100', 'bg-slate-200', 'bg-slate-300', 'bg-slate-400', 'bg-slate-500', 'bg-slate-600', 'bg-slate-700', 'bg-slate-800', 'bg-slate-900',
+    'bg-gray-50', 'bg-gray-100', 'bg-gray-200', 'bg-gray-300', 'bg-gray-400', 'bg-gray-500', 'bg-gray-600', 'bg-gray-700', 'bg-gray-800', 'bg-gray-900',
+    'bg-zinc-50', 'bg-zinc-100', 'bg-zinc-200', 'bg-zinc-300', 'bg-zinc-400', 'bg-zinc-500', 'bg-zinc-600', 'bg-zinc-700', 'bg-zinc-800', 'bg-zinc-900',
+    'bg-neutral-50', 'bg-neutral-100', 'bg-neutral-200', 'bg-neutral-300', 'bg-neutral-400', 'bg-neutral-500', 'bg-neutral-600', 'bg-neutral-700', 'bg-neutral-800', 'bg-neutral-900',
+    'bg-stone-50', 'bg-stone-100', 'bg-stone-200', 'bg-stone-300', 'bg-stone-400', 'bg-stone-500', 'bg-stone-600', 'bg-stone-700', 'bg-stone-800', 'bg-stone-900',
+    
+    // Left border colors specifically
+    'border-l-red-50', 'border-l-red-100', 'border-l-red-200', 'border-l-red-300', 'border-l-red-400', 'border-l-red-500', 'border-l-red-600', 'border-l-red-700', 'border-l-red-800', 'border-l-red-900',
+    'border-l-orange-50', 'border-l-orange-100', 'border-l-orange-200', 'border-l-orange-300', 'border-l-orange-400', 'border-l-orange-500', 'border-l-orange-600', 'border-l-orange-700', 'border-l-orange-800', 'border-l-orange-900',
+    'border-l-amber-50', 'border-l-amber-100', 'border-l-amber-200', 'border-l-amber-300', 'border-l-amber-400', 'border-l-amber-500', 'border-l-amber-600', 'border-l-amber-700', 'border-l-amber-800', 'border-l-amber-900',
+    'border-l-yellow-50', 'border-l-yellow-100', 'border-l-yellow-200', 'border-l-yellow-300', 'border-l-yellow-400', 'border-l-yellow-500', 'border-l-yellow-600', 'border-l-yellow-700', 'border-l-yellow-800', 'border-l-yellow-900',
+    'border-l-lime-50', 'border-l-lime-100', 'border-l-lime-200', 'border-l-lime-300', 'border-l-lime-400', 'border-l-lime-500', 'border-l-lime-600', 'border-l-lime-700', 'border-l-lime-800', 'border-l-lime-900',
+    'border-l-green-50', 'border-l-green-100', 'border-l-green-200', 'border-l-green-300', 'border-l-green-400', 'border-l-green-500', 'border-l-green-600', 'border-l-green-700', 'border-l-green-800', 'border-l-green-900',
+    'border-l-emerald-50', 'border-l-emerald-100', 'border-l-emerald-200', 'border-l-emerald-300', 'border-l-emerald-400', 'border-l-emerald-500', 'border-l-emerald-600', 'border-l-emerald-700', 'border-l-emerald-800', 'border-l-emerald-900',
+    'border-l-teal-50', 'border-l-teal-100', 'border-l-teal-200', 'border-l-teal-300', 'border-l-teal-400', 'border-l-teal-500', 'border-l-teal-600', 'border-l-teal-700', 'border-l-teal-800', 'border-l-teal-900',
+    'border-l-cyan-50', 'border-l-cyan-100', 'border-l-cyan-200', 'border-l-cyan-300', 'border-l-cyan-400', 'border-l-cyan-500', 'border-l-cyan-600', 'border-l-cyan-700', 'border-l-cyan-800', 'border-l-cyan-900',
+    'border-l-sky-50', 'border-l-sky-100', 'border-l-sky-200', 'border-l-sky-300', 'border-l-sky-400', 'border-l-sky-500', 'border-l-sky-600', 'border-l-sky-700', 'border-l-sky-800', 'border-l-sky-900',
+    'border-l-blue-50', 'border-l-blue-100', 'border-l-blue-200', 'border-l-blue-300', 'border-l-blue-400', 'border-l-blue-500', 'border-l-blue-600', 'border-l-blue-700', 'border-l-blue-800', 'border-l-blue-900',
+    'border-l-indigo-50', 'border-l-indigo-100', 'border-l-indigo-200', 'border-l-indigo-300', 'border-l-indigo-400', 'border-l-indigo-500', 'border-l-indigo-600', 'border-l-indigo-700', 'border-l-indigo-800', 'border-l-indigo-900',
+    'border-l-violet-50', 'border-l-violet-100', 'border-l-violet-200', 'border-l-violet-300', 'border-l-violet-400', 'border-l-violet-500', 'border-l-violet-600', 'border-l-violet-700', 'border-l-violet-800', 'border-l-violet-900',
+    'border-l-purple-50', 'border-l-purple-100', 'border-l-purple-200', 'border-l-purple-300', 'border-l-purple-400', 'border-l-purple-500', 'border-l-purple-600', 'border-l-purple-700', 'border-l-purple-800', 'border-l-purple-900',
+    'border-l-fuchsia-50', 'border-l-fuchsia-100', 'border-l-fuchsia-200', 'border-l-fuchsia-300', 'border-l-fuchsia-400', 'border-l-fuchsia-500', 'border-l-fuchsia-600', 'border-l-fuchsia-700', 'border-l-fuchsia-800', 'border-l-fuchsia-900',
+    'border-l-pink-50', 'border-l-pink-100', 'border-l-pink-200', 'border-l-pink-300', 'border-l-pink-400', 'border-l-pink-500', 'border-l-pink-600', 'border-l-pink-700', 'border-l-pink-800', 'border-l-pink-900',
+    'border-l-rose-50', 'border-l-rose-100', 'border-l-rose-200', 'border-l-rose-300', 'border-l-rose-400', 'border-l-rose-500', 'border-l-rose-600', 'border-l-rose-700', 'border-l-rose-800', 'border-l-rose-900',
+    'border-l-slate-50', 'border-l-slate-100', 'border-l-slate-200', 'border-l-slate-300', 'border-l-slate-400', 'border-l-slate-500', 'border-l-slate-600', 'border-l-slate-700', 'border-l-slate-800', 'border-l-slate-900',
+    'border-l-gray-50', 'border-l-gray-100', 'border-l-gray-200', 'border-l-gray-300', 'border-l-gray-400', 'border-l-gray-500', 'border-l-gray-600', 'border-l-gray-700', 'border-l-gray-800', 'border-l-gray-900',
+    'border-l-zinc-50', 'border-l-zinc-100', 'border-l-zinc-200', 'border-l-zinc-300', 'border-l-zinc-400', 'border-l-zinc-500', 'border-l-zinc-600', 'border-l-zinc-700', 'border-l-zinc-800', 'border-l-zinc-900',
+    'border-l-neutral-50', 'border-l-neutral-100', 'border-l-neutral-200', 'border-l-neutral-300', 'border-l-neutral-400', 'border-l-neutral-500', 'border-l-neutral-600', 'border-l-neutral-700', 'border-l-neutral-800', 'border-l-neutral-900',
+    'border-l-stone-50', 'border-l-stone-100', 'border-l-stone-200', 'border-l-stone-300', 'border-l-stone-400', 'border-l-stone-500', 'border-l-stone-600', 'border-l-stone-700', 'border-l-stone-800', 'border-l-stone-900',
+    
+    // Resize handle and interaction classes
+    'bg-gray-300', 'bg-gray-400', 'bg-gray-500',
+    'cursor-row-resize', 'cursor-col-resize', 'cursor-move', 'cursor-pointer',
+    'transition-opacity', 'transition-all', 'duration-200', 'opacity-0', 'opacity-100',
+    'group-hover:opacity-100',
+    
+    // Common utility classes
+    'absolute', 'relative', 'fixed', 'sticky', 'top-0', 'bottom-0', 'left-0', 'right-0', 'inset-0',
+    'z-10', 'z-20', 'z-30', 'z-40', 'z-50',
+    'flex', 'flex-col', 'flex-row', 'flex-wrap', 'flex-nowrap', 'items-center', 'items-start', 'items-end',
+    'justify-center', 'justify-between', 'justify-start', 'justify-end', 'grow', 'shrink',
+    'grid', 'grid-cols-1', 'grid-cols-2', 'grid-cols-3', 'grid-cols-4', 'grid-cols-5', 'grid-cols-6', 'grid-cols-7',
+    'p-1', 'p-2', 'p-3', 'p-4', 'px-1', 'px-2', 'px-3', 'px-4', 'py-1', 'py-2', 'py-3', 'py-4',
+    'm-1', 'm-2', 'm-3', 'm-4', 'mb-1', 'mb-2', 'mb-3', 'mb-4', 'mt-1', 'mt-2', 'mt-3', 'mt-4',
+    'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl',
+    'font-light', 'font-normal', 'font-medium', 'font-semibold', 'font-bold', 'font-extrabold',
+    'text-center', 'text-left', 'text-right', 'whitespace-nowrap', 'truncate',
+    'border', 'border-t', 'border-b', 'border-l', 'border-r', 'border-0', 'border-2', 'border-4',
+    'rounded', 'rounded-lg', 'rounded-md', 'rounded-sm', 'rounded-full',
+    'shadow', 'shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-xl',
+    'opacity-0', 'opacity-10', 'opacity-20', 'opacity-30', 'opacity-40', 'opacity-50', 'opacity-60', 'opacity-70', 'opacity-80', 'opacity-90', 'opacity-100',
+    'transition', 'transition-all', 'transition-opacity', 'transition-colors',
+    'duration-75', 'duration-100', 'duration-150', 'duration-200', 'duration-300', 'duration-500', 'duration-700', 'duration-1000',
+    'overflow-auto', 'overflow-hidden', 'overflow-visible', 'overflow-scroll',
+    'min-h-screen', 'min-h-32', 'h-24', 'h-2', 'h-8', 'w-20', 'w-8', 'w-full',
+    'gap-px', 'gap-1', 'gap-2', 'gap-3', 'gap-4', 'gap-y-1', 'gap-y-2', 'gap-y-3', 'gap-y-4',
+    'hover:bg-gray-100', 'hover:bg-blue-600', 'hover:bg-blue-700', 'hover:shadow-sm',
+    'focus:outline-none', 'focus:ring-2', 'focus:ring-primary-500',
+    'group-hover:opacity-100',
+    'event-transition', 'bg-opacity-10', 'pointer-events-none', 'container', 'mx-auto'
+  ],
+  // ... rest of your config
+}
+```
+
+#### Alternative: Disable CSS Purging (Development Only)
+
+For development, you can temporarily disable CSS purging:
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    // ... your content paths
+  ],
+  // Temporarily disable purging for development
+  safelist: [
+    {
+      pattern: /.*/, // This will keep ALL classes (use only in development!)
+    }
+  ],
+  // ... rest of your config
+}
+```
+
+**⚠️ Warning**: The pattern approach should only be used in development as it will significantly increase your CSS bundle size.
+
 ### Common Issues
 
 - **"Calendar looks broken"**: Missing CSS import
 - **"Tailwind classes not working"**: CSS not imported or Tailwind not configured in consuming app
 - **"Events not visible"**: Check that Pinia store is properly set up
+- **"Missing colors"**: Add comprehensive safelist to your Tailwind config
+- **"Resize handles not working"**: Add cursor and opacity classes to safelist
+- **"Hover effects missing"**: Add group-hover and transition classes to safelist
 
 ## Timezone Support
 

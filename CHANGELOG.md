@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2025-01-27
+
+### Added
+- **Comprehensive troubleshooting guide** - Added detailed documentation for CSS purging issues
+- **Missing colors troubleshooting** - Step-by-step guide to fix missing event colors (orange, purple, etc.)
+- **Resize handles troubleshooting** - Instructions to fix invisible resize handles and hover effects
+- **Tailwind safelist examples** - Complete safelist configuration for implementing apps
+- **Development vs production solutions** - Different approaches for development and production environments
+
+### Changed
+- **Enhanced README troubleshooting section** - Expanded with comprehensive CSS purging solutions
+- **Better user guidance** - Clear instructions for fixing common styling issues in consuming applications
+
+### Documentation
+- **CSS purging solutions** - Added complete Tailwind safelist examples for all color variants
+- **Interactive elements troubleshooting** - Guide for fixing cursor changes, hover effects, and opacity transitions
+- **Alternative development approaches** - Temporary solutions for development environments
+
 ## [1.0.8] - 2025-01-27
 
 ### Fixed
