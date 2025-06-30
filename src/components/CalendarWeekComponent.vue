@@ -58,13 +58,13 @@
         <div
           v-for="hour in hours"
           :key="hour"
-          class="relative text-center w-full border-t"
+          class="relative text-center w-full"
           :style="{ height: `${hourHeight}px` }"
           role="row"
         >
           <div
             v-if="hour !== 0"
-            class="absolute -top-3 left-2 text-sm text-gray-500"
+            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full"
             role="time"
             :aria-label="formatHour(hour)"
           >
