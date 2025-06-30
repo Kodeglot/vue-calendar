@@ -1,5 +1,6 @@
 // Main entry point for the vue-calendar npm package
 
+// Import styles - this ensures they're included in the build
 import './style.css'
 
 // Export main components
