@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2025-01-27
+
+### Fixed
+- **Week view time grid duplication** - Fixed issue where hour labels were showing twice in week view (left column and first day column)
+- **Time column layout** - Improved time column structure with proper flex-shrink-0 and border styling for better alignment
+- **Hour labels visibility** - Restored hour labels functionality in TimeGridComponent that was accidentally removed
+
+### Changed
+- **Week view layout** - Set showHourLabels to false for all day columns since the left time column already shows hour labels
+- **Time column styling** - Enhanced time column with better CSS classes for consistent layout and alignment
+
+### Technical Improvements
+- **Layout consistency** - Fixed flex layout issues in week view time column
+- **Visual alignment** - Improved hour label positioning and time column borders
+
+## [1.0.7] - 2025-01-27
+
+### Fixed
+- **Hour labels visibility** - Restored hour labels functionality in TimeGridComponent that was accidentally removed
+- **Resize handles styling** - Enhanced resize handle visibility and interaction feedback with improved hover states
+- **Color availability** - Comprehensive Tailwind safelist update ensures all color classes are properly included in builds
+
+### Changed
+- **Tailwind configuration** - Enhanced safelist with extensive color patterns and utility classes for better CSS coverage
+- **Performance optimizations** - Cached date formatter and hours array to improve rendering performance
+- **Resize handle UX** - Improved visual feedback during resize operations with better opacity transitions
+
+### Technical Improvements
+- **CSS class coverage** - Added comprehensive safelist patterns for all Tailwind color variants and utility classes
+- **Event interaction feedback** - Better visual states for resize handles and drag operations
+- **Memory optimization** - Reduced object recreation in time formatting and hour calculations
+
 ## [1.0.6] - 2025-06-30
 
 ### Added
