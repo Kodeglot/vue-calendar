@@ -68,7 +68,30 @@ Add the following script tag to your HTML:
 npm install @kodeglot/vue-calendar pinia date-fns date-fns-tz
 ```
 
-### 2. Setup Pinia Store
+### 2. Import Styles (REQUIRED)
+
+**Important**: You must import the CSS file for the calendar to display correctly:
+
+```typescript
+// main.ts
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+
+// Import the calendar styles - THIS IS REQUIRED!
+import '@kodeglot/vue-calendar/style.css'
+
+const app = createApp(App)
+app.use(createPinia())
+app.mount('#app')
+```
+
+**Alternative import path** (if the above doesn't work):
+```typescript
+import '@kodeglot/vue-calendar/dist/style.css'
+```
+
+### 3. Setup Pinia Store
 
 Create your calendar store using Pinia:
 
@@ -136,20 +159,6 @@ export const useCalendarStore = defineStore('calendar', () => {
 })
 ```
 
-### 3. Setup Vue App
-
-```typescript
-// main.ts
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import './style.css'
-
-const app = createApp(App)
-app.use(createPinia())
-app.mount('#app')
-```
-
 ### 4. Use the Calendar Component
 
 ```vue
@@ -183,16 +192,35 @@ function handleEventDeleted(eventId: string) {
   console.log('Event deleted:', eventId)
 }
 </script>
-```
 
-### 5. Import Styles (Optional)
+## Troubleshooting
 
-If you want to use the default styles, import the CSS:
+### Calendar Not Styling Correctly?
 
-```typescript
-// main.ts
-import '@kodeglot/vue-calendar/dist/style.css'
-```
+If the calendar appears unstyled or broken, make sure you've imported the CSS:
+
+1. **Check your main.ts/main.js file** - ensure you have:
+   ```typescript
+   import '@kodeglot/vue-calendar/style.css'
+   ```
+
+2. **Try the alternative import path**:
+   ```typescript
+   import '@kodeglot/vue-calendar/dist/style.css'
+   ```
+
+3. **If using a bundler**, make sure it's configured to handle CSS imports
+
+4. **For CDN usage**, include the CSS file:
+   ```html
+   <link rel="stylesheet" href="https://unpkg.com/@kodeglot/vue-calendar/dist/style.css">
+   ```
+
+### Common Issues
+
+- **"Calendar looks broken"**: Missing CSS import
+- **"Tailwind classes not working"**: CSS not imported or Tailwind not configured in consuming app
+- **"Events not visible"**: Check that Pinia store is properly set up
 
 ## Timezone Support
 
