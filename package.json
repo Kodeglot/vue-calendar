@@ -1,6 +1,6 @@
 {
   "name": "@kodeglot/vue-calendar",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A fully-featured, customizable calendar component for Vue 3 with Tailwind CSS support",
   "type": "module",
   "main": "./dist/vue-calendar.umd.js",

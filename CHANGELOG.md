@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2025-01-27
+
+### Fixed
+- **CSS purging compatibility** - Replaced pattern-based safelist with explicit class names for better compatibility with consuming apps
+- **Tailwind safelist reliability** - Explicit class names ensure all color variants are properly included in builds
+
+### Changed
+- **Tailwind configuration** - Updated safelist from regex patterns to explicit class names for all color variants
+- **Build reliability** - More predictable CSS output that works better with different bundler configurations
+
+### Technical Improvements
+- **Explicit class coverage** - All 22 color variants with 10 shades each are now explicitly listed
+- **Better bundler compatibility** - Explicit class names work more reliably across different build tools
+- **Reduced build complexity** - Eliminates potential regex pattern matching issues
+
 ## [1.0.9] - 2025-01-27
 
 ### Added
