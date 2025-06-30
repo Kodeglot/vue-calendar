@@ -58,6 +58,7 @@
     "@vue/tsconfig": "^0.7.0",
     "happy-dom": "^17.4.4",
     "node-releases": "^2.0.19",
+    "source-map-js": "^1.2.1",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.0.0",
     "vite": "^6.2.2",
