@@ -53,18 +53,18 @@
     </div>
 
     <div class="flex flex-row">
-      <div class="w-20 h-24 text-center" @dragover.prevent="handleDragOver">
+      <div class="w-20 flex-shrink-0" @dragover.prevent="handleDragOver">
         <!-- Hour Indicators -->
         <div
           v-for="hour in hours"
           :key="hour"
-          class="relative text-center w-full"
+          class="relative text-center w-full border-t"
           :style="{ height: `${hourHeight}px` }"
           role="row"
         >
           <div
-            v-if="hour != 0"
-            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full"
+            v-if="hour !== 0"
+            class="absolute -top-3 left-2 text-sm text-gray-500"
             role="time"
             :aria-label="formatHour(hour)"
           >
@@ -93,7 +93,7 @@
               :timeFormat="props.timeFormat === '24h' 
                 ? { hour: '2-digit', minute: '2-digit', hour12: false }
                 : { hour: 'numeric', minute: '2-digit', hour12: true }"
-              :showHourLabels="index === 0"
+              :showHourLabels="false"
               @timeClick="handleTimeClick"
             >
               <!-- Calendar Events -->

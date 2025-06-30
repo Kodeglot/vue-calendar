@@ -16,14 +16,14 @@
       :style="{ height: `${hourHeight}px` }"
       role="row"
     >
-      <!-- <div
+      <div
         v-if="showHourLabels"
         class="absolute -top-3 left-2 text-sm text-gray-500"
         role="time"
         :aria-label="formatHour(hour)"
       >
         {{ formatHour(hour) }}
-      </div> -->
+      </div>
     </div>
 
     <!-- Events -->
@@ -42,7 +42,7 @@ interface Props {
   showHourLabels?: boolean;
 }
 
-const { hourHeight, timeFormat, showHourLabels = true } = defineProps<Props>();
+const { hourHeight, timeFormat, showHourLabels = false } = defineProps<Props>();
 
 // Cache hours array to avoid recreation on every render
 const hours = Array.from({ length: 24 }, (_, i) => i);
