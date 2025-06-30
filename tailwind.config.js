@@ -7,21 +7,32 @@ export default {
     './demo/**/*.{vue,js,ts,jsx,tsx}'
   ],
   safelist: [
-    // Background colors for events
+    // Background colors for events - comprehensive list
     {
       pattern: /bg-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
       variants: ['hover', 'focus', 'group-hover']
     },
-    // Border colors for events
+    // Border colors for events - comprehensive list
     {
       pattern: /border-(l-)?(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
       variants: ['hover', 'focus', 'group-hover']
     },
-    // Text colors
+    // Text colors - comprehensive list
     {
       pattern: /text-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)/,
       variants: ['hover', 'focus', 'group-hover']
     },
+    // Specific color classes used in color picker
+    'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500', 'bg-lime-500',
+    'bg-green-500', 'bg-emerald-500', 'bg-teal-500', 'bg-cyan-500', 'bg-sky-500',
+    'bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500',
+    'bg-pink-500', 'bg-rose-500', 'bg-slate-500', 'bg-gray-500', 'bg-zinc-500',
+    'bg-neutral-500', 'bg-stone-500',
+    // Resize handle specific classes
+    'bg-gray-300', 'bg-gray-400', 'bg-gray-500',
+    'cursor-row-resize', 'cursor-col-resize', 'cursor-move', 'cursor-pointer',
+    'transition-opacity', 'transition-all', 'duration-200', 'opacity-0', 'opacity-100',
+    'group-hover:opacity-100',
     // Common utility classes
     'bg-white', 'bg-gray-50', 'bg-gray-100', 'bg-gray-200', 'bg-gray-300', 'bg-gray-400', 'bg-gray-500',
     'text-gray-50', 'text-gray-100', 'text-gray-200', 'text-gray-300', 'text-gray-400', 'text-gray-500', 'text-gray-600', 'text-gray-700', 'text-gray-800', 'text-gray-900',

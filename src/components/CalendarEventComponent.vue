@@ -44,9 +44,9 @@
     <div
       v-if="resizable"
       :class="[
-        'absolute top-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 transition-opacity',
+        'absolute top-0 left-0 right-0 h-2 cursor-row-resize bg-gray-400 hover:bg-gray-500 transition-all duration-200',
         isResizing && resizeDirection === 'top'
-          ? 'opacity-100'
+          ? 'opacity-100 bg-gray-500'
           : 'opacity-0 group-hover:opacity-100',
         customClasses?.resizeHandle,
       ]"
@@ -55,9 +55,9 @@
     <div
       v-if="resizable"
       :class="[
-        'absolute bottom-0 left-0 right-0 h-2 cursor-row-resize bg-gray-300 transition-opacity',
+        'absolute bottom-0 left-0 right-0 h-2 cursor-row-resize bg-gray-400 hover:bg-gray-500 transition-all duration-200',
         isResizing && resizeDirection === 'bottom'
-          ? 'opacity-100'
+          ? 'opacity-100 bg-gray-500'
           : 'opacity-0 group-hover:opacity-100',
         customClasses?.resizeHandle,
       ]"
