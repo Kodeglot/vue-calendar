@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-06-30
+
+### Fixed
+- **Tailwind CSS packaging** - Fixed issue where Tailwind styles were not properly included in the package
+- **Build system reliability** - Replaced standalone Tailwind CLI dependency with Vite + PostCSS processing
+- **CSS import requirements** - Added proper CSS exports and import instructions for consumers
+- **Dynamic class inclusion** - Enhanced Tailwind safelist to ensure all dynamic classes are included in the build
+
+### Changed
+- **Build process** - Now uses Vite + PostCSS instead of standalone Tailwind CLI for more reliable builds
+- **Package exports** - Added `./style.css` export for easier CSS imports
+- **Documentation** - Updated README with clear CSS import instructions and troubleshooting guide
+- **Tailwind configuration** - Enhanced safelist to include all necessary utility classes used by components
+
+### Added
+- **PostCSS configuration** - Added `postcss.config.js` for proper Tailwind CSS processing
+- **Troubleshooting guide** - Added comprehensive troubleshooting section in README
+- **Alternative import paths** - Documented multiple ways to import CSS for different bundler configurations
+
+### Technical Improvements
+- **Self-contained builds** - No longer depends on external Tailwind CLI binaries
+- **Better error handling** - Clear error messages when CSS is not imported
+- **Improved developer experience** - More reliable build process and clearer documentation
+
 ## [1.0.0] - 2025-01-27
 
 ### Added
