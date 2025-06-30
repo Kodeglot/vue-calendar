@@ -136,16 +136,16 @@ const localEndTime = ref("");
 
 function openModal(time: Date) {
   selectedTime.value = time;
-  
+
   // Convert the selected time to user's timezone for display
   const userTime = toUserTimezone(time);
   const endTime = new Date(userTime);
   endTime.setHours(userTime.getHours() + 1);
-  
+
   // Format for datetime-local input (YYYY-MM-DDTHH:mm)
   localStartTime.value = formatForDateTimeLocal(userTime);
   localEndTime.value = formatForDateTimeLocal(endTime);
-  
+
   isOpen.value = true;
 }
 
@@ -159,11 +159,11 @@ function handleSubmit() {
     // Convert local times back to UTC for storage
     const startDate = parseDateTimeLocal(localStartTime.value);
     const endDate = parseDateTimeLocal(localEndTime.value);
-    
+
     // Convert to UTC and then to ISO string
     const utcStart = toUTC(startDate);
     const utcEnd = toUTC(endDate);
-    
+
     const newEvent = {
       id: crypto.randomUUID(),
       title: event.value.title,
@@ -183,11 +183,11 @@ function handleSubmit() {
 // Helper function to format date for datetime-local input
 function formatForDateTimeLocal(date: Date): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
@@ -196,12 +196,12 @@ function parseDateTimeLocal(dateTimeString: string): Date {
   if (!dateTimeString) {
     throw new Error("Date/time string is required");
   }
-  
+
   const date = new Date(dateTimeString);
   if (isNaN(date.getTime())) {
     throw new Error("Invalid date/time format");
   }
-  
+
   return date;
 }
 

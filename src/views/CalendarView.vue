@@ -137,9 +137,9 @@ const props = defineProps({
    */
   height: {
     type: String,
-    default: '100%'
+    default: "100%",
   },
-  /** 
+  /**
    * Initial date to display in the calendar
    * @default Current date
    */
@@ -147,27 +147,27 @@ const props = defineProps({
     type: Date,
     default: () => new Date(),
   },
-  /** 
+  /**
    * Initial view mode for the calendar
    * @default 'month'
    * @type {'month' | 'week' | 'day'}
    */
   initialView: {
-    type: String as PropType<'month' | 'week' | 'day'>,
-    default: 'month',
-    validator: (value: string) => ['month', 'week', 'day'].includes(value),
+    type: String as PropType<"month" | "week" | "day">,
+    default: "month",
+    validator: (value: string) => ["month", "week", "day"].includes(value),
   },
-  /** 
+  /**
    * Time format preference for displaying times
    * @default '24h'
    * @type {'12h' | '24h'}
    */
   timeFormat: {
-    type: String as PropType<'12h' | '24h'>,
-    default: '24h',
-    validator: (value: string) => ['12h', '24h'].includes(value),
+    type: String as PropType<"12h" | "24h">,
+    default: "24h",
+    validator: (value: string) => ["12h", "24h"].includes(value),
   },
-  /** 
+  /**
    * Whether to show navigation controls (previous/next buttons, view selector)
    * @default true
    */
@@ -175,7 +175,7 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  /** 
+  /**
    * Whether to show the create event button
    * @default true
    */
@@ -183,7 +183,7 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  /** 
+  /**
    * Whether to enable drag and drop functionality for events
    * @default true
    */
@@ -191,7 +191,7 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  /** 
+  /**
    * Custom CSS classes for styling different parts of the calendar
    * @default {}
    */
@@ -248,8 +248,14 @@ const headerDate = computed(() => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(endOfWeek.getDate() + 6);
 
-    const startFormatted = formatWeekdayShort(startOfWeek) + ' ' + startOfWeek.getDate();
-    const endFormatted = formatWeekdayShort(endOfWeek) + ' ' + endOfWeek.getDate() + ', ' + endOfWeek.getFullYear();
+    const startFormatted =
+      formatWeekdayShort(startOfWeek) + " " + startOfWeek.getDate();
+    const endFormatted =
+      formatWeekdayShort(endOfWeek) +
+      " " +
+      endOfWeek.getDate() +
+      ", " +
+      endOfWeek.getFullYear();
 
     return `${startFormatted} - ${endFormatted}`;
   }
@@ -336,7 +342,7 @@ const handleEventSave = (event: CalendarEvent) => {
 const toggleNewEventForm = () => {
   const date = new Date();
   eventModal.value?.openModal(date);
-  emit('openEventModal', date);
+  emit("openEventModal", date);
 };
 
 // Add sample events on component mount
@@ -345,44 +351,92 @@ onMounted(() => {
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const sampleEvents: CalendarEvent[] = [
     {
-      id: 'sample-1',
-      title: 'Team Meeting',
-      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 0).toISOString(),
-      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 30).toISOString(),
-      tailwindColor: 'blue',
+      id: "sample-1",
+      title: "Team Meeting",
+      start: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        9,
+        0
+      ).toISOString(),
+      end: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        10,
+        30
+      ).toISOString(),
+      tailwindColor: "blue",
       allDay: false,
     },
     {
-      id: 'sample-2',
-      title: 'Lunch Break',
-      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0).toISOString(),
-      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 13, 0).toISOString(),
-      tailwindColor: 'green',
+      id: "sample-2",
+      title: "Lunch Break",
+      start: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        12,
+        0
+      ).toISOString(),
+      end: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        13,
+        0
+      ).toISOString(),
+      tailwindColor: "green",
       allDay: false,
     },
     {
-      id: 'sample-3',
-      title: 'Project Review',
-      start: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 14, 0).toISOString(),
-      end: new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 15, 30).toISOString(),
-      tailwindColor: 'purple',
+      id: "sample-3",
+      title: "Project Review",
+      start: new Date(
+        tomorrow.getFullYear(),
+        tomorrow.getMonth(),
+        tomorrow.getDate(),
+        14,
+        0
+      ).toISOString(),
+      end: new Date(
+        tomorrow.getFullYear(),
+        tomorrow.getMonth(),
+        tomorrow.getDate(),
+        15,
+        30
+      ).toISOString(),
+      tailwindColor: "purple",
       allDay: false,
     },
     {
-      id: 'sample-4',
-      title: 'All Day Event',
-      start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0).toISOString(),
-      end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59).toISOString(),
-      tailwindColor: 'orange',
+      id: "sample-4",
+      title: "All Day Event",
+      start: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0,
+        0
+      ).toISOString(),
+      end: new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23,
+        59
+      ).toISOString(),
+      tailwindColor: "orange",
       allDay: true,
-    }
+    },
   ];
-  
+
   // Add events to store
-  sampleEvents.forEach(event => {
+  sampleEvents.forEach((event) => {
     store.addEvent(event);
   });
 });
