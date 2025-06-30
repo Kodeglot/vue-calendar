@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.11] - 2025-01-27
+
+### Changed
+- **Week view time column styling** - Updated time labels to match day view styling for consistency
+- **Time label appearance** - Added `text-center w-full` classes for better text alignment and width
+- **Removed border lines** - Eliminated `border-t` class that was creating unwanted lines through time labels
+
+### Visual Improvements
+- **Consistent styling** - Week view time column now matches day view appearance
+- **Better text alignment** - Time labels are now properly centered and span full width
+- **Cleaner appearance** - Removed border lines that were visually distracting
+
 ## [1.0.10] - 2025-01-27
 
 ### Fixed
