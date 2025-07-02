@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { debug } from '@/utils/debug'
 
 /**
  * Calendar Event Interface
@@ -80,6 +81,12 @@ export const useCalendarStore = defineStore('calendar', () => {
     if (!event.id) {
       event.id = uuidv4()
     }
+    debug.log('Store: Adding event', {
+      eventId: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end
+    });
     events.value.set(event.id, event)
     plugins.value.forEach(plugin => plugin.onEventAdd?.(event))
   }
@@ -91,11 +98,29 @@ export const useCalendarStore = defineStore('calendar', () => {
       const end = new Date(event.end)
       const duration = end.getTime() - start.getTime()
 
+      // Create new start date with target date but preserve original time
       const newStart = new Date(newDate)
+      newStart.setHours(start.getHours())
+      newStart.setMinutes(start.getMinutes())
+      newStart.setSeconds(start.getSeconds())
+      newStart.setMilliseconds(start.getMilliseconds())
+
       const newEnd = new Date(newStart.getTime() + duration)
+
+      debug.log('Store: Updating event date only', {
+        eventId,
+        oldStart: event.start,
+        newStart: newStart.toISOString(),
+        oldEnd: event.end,
+        newEnd: newEnd.toISOString(),
+        duration: duration,
+        preservedTime: `${start.getHours()}:${start.getMinutes()}:${start.getSeconds()}`
+      });
 
       updateEventTimes(event, newStart, newEnd)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for date update', { eventId });
     }
   }
 
@@ -109,16 +134,36 @@ export const useCalendarStore = defineStore('calendar', () => {
       const newStart = new Date(newDate)
       const newEnd = new Date(newStart.getTime() + duration)
 
+      debug.log('Store: Updating event date', {
+        eventId,
+        oldStart: event.start,
+        newStart: newStart.toISOString(),
+        oldEnd: event.end,
+        newEnd: newEnd.toISOString()
+      });
+
       updateEventTimes(event, newStart, newEnd)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for date update', { eventId });
     }
   }
 
   const updateEventDuration = (eventId: string, newStart: Date, newEnd: Date): void => {
     const event = events.value.get(eventId)
     if (event) {
+      debug.log('Store: Updating event duration', {
+        eventId,
+        oldStart: event.start,
+        newStart: newStart.toISOString(),
+        oldEnd: event.end,
+        newEnd: newEnd.toISOString()
+      });
+
       updateEventTimes(event, newStart, newEnd)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for duration update', { eventId });
     }
   }
 
@@ -136,25 +181,56 @@ export const useCalendarStore = defineStore('calendar', () => {
 
       const newEnd = new Date(start.getTime() + duration)
 
+      debug.log('Store: Updating event time', {
+        eventId,
+        oldStart: event.start,
+        newStart: start.toISOString(),
+        oldEnd: event.end,
+        newEnd: newEnd.toISOString()
+      });
+
       updateEventTimes(event, start, newEnd)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for time update', { eventId });
     }
   }
 
   const updateEvent = (updatedEvent: CalendarEvent): void => {
     const existingEvent = events.value.get(updatedEvent.id)
     if (existingEvent) {
+      debug.log('Store: Updating event', {
+        eventId: updatedEvent.id,
+        oldTitle: existingEvent.title,
+        newTitle: updatedEvent.title,
+        oldStart: existingEvent.start,
+        newStart: updatedEvent.start,
+        oldEnd: existingEvent.end,
+        newEnd: updatedEvent.end
+      });
+
       // Merge the updated event with existing event to preserve any additional properties
       const mergedEvent = { ...existingEvent, ...updatedEvent }
       events.value.set(updatedEvent.id, mergedEvent)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for update', { eventId: updatedEvent.id });
     }
   }
 
   const deleteEvent = (eventId: string): void => {
     if (events.value.has(eventId)) {
+      const event = events.value.get(eventId);
+      debug.log('Store: Deleting event', {
+        eventId,
+        title: event?.title,
+        start: event?.start,
+        end: event?.end
+      });
       events.value.delete(eventId)
       triggerPositionRecalculation();
+    } else {
+      debug.warn('Store: Event not found for deletion', { eventId });
     }
   }
 
