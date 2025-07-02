@@ -15,11 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Production builds remain clean with no debug output by default
 
 ### Fixed
+- **EventModal reference error** - Fixed `titleInput is not defined` error when opening event modal by adding missing template ref and proper focus handling
+- **Month view event click vs date click conflict** - Fixed issue where clicking on events in month view would trigger both event click and date click handlers. Added event propagation stopping to ensure only event click is triggered
+- **Edit modal opening on second click** - Fixed issue where edit modal required two clicks to open by changing modal rendering from `v-if` to `v-show` and adding proper watcher for selected events
 - **Month view drag and drop time preservation** - Fixed issue where dragging events between days in month view would reset the time. Now preserves original time components (hours, minutes, seconds) when moving events between dates
 - **Create event modal interference** - Fixed issue where the create event modal would incorrectly open after dragging or resizing events. Added global flag mechanism to prevent modal from opening immediately after event modifications
 - **Event interaction conflicts** - Fixed interference between drag operations and click events in month view by conditionally attaching mousedown handlers only for week/day views
 
 ### Technical Improvements
+- **Modal rendering optimization** - Changed fallback modal from conditional `v-if` to `v-show` for better performance and immediate method availability
+- **Event click handling enhancement** - Improved event click detection with proper event propagation control and debug logging
 - **Event interaction state management** - Improved event interaction handling with global flag to track recent drag/resize operations
 - **Modal behavior consistency** - Enhanced user experience by preventing unwanted modal triggers during event manipulation
 - **Debug infrastructure** - Added comprehensive debug logging system with conditional output and browser console controls
