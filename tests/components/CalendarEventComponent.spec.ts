@@ -178,4 +178,69 @@ describe('CalendarEventComponent', () => {
     })
     expect(wrapper.find('.cursor-row-resize').exists()).toBe(true)
   })
+
+  it('renders custom slot content', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: baseProps,
+      slots: {
+        default: '<div class="custom-slot">Custom Content</div>'
+      },
+      global: { plugins: [pinia] }
+    })
+    expect(wrapper.find('.custom-slot').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Custom Content')
+  })
+
+  it('applies custom classes and styles', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: {
+        ...baseProps,
+        customClasses: { eventContainer: 'test-class' },
+        customStyles: { eventContainer: { background: 'red' } }
+      },
+      global: { plugins: [pinia] }
+    })
+    const eventEl = wrapper.find('[role="button"]')
+    expect(eventEl.classes()).toContain('test-class')
+    expect(eventEl.attributes('style')).toContain('background: red')
+  })
+
+  it('renders correctly in month view and uses pastel color', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: {
+        ...baseProps,
+        viewType: 'month',
+        event: { ...baseProps.event, id: 'unique-id', tailwindColor: '' }
+      },
+      global: { plugins: [pinia] }
+    })
+    const eventEl = wrapper.find('[role="button"]')
+    // Should have a pastel color class
+    const classes = eventEl.classes().join(' ')
+    expect(classes).toMatch(/bg-\w+-100/)
+    expect(classes).toMatch(/border-l-\w+-500/)
+  })
+
+  it('renders all-day event', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: {
+        ...baseProps,
+        event: { ...baseProps.event, allDay: true }
+      },
+      global: { plugins: [pinia] }
+    })
+    expect(wrapper.text()).toContain('Test Event')
+  })
+
+  it('handles error in formatEventTime gracefully', () => {
+    const wrapper = mount(CalendarEventComponent, {
+      props: {
+        ...baseProps,
+        event: { ...baseProps.event, start: 'invalid', end: 'invalid' }
+      },
+      global: { plugins: [pinia] }
+    })
+    // Should not throw and should show fallback
+    expect(wrapper.text()).toContain('--:-- - --:--')
+  })
 })

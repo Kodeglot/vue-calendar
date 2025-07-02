@@ -71,6 +71,7 @@
           :timeFormat="props.timeFormat === '24h' 
             ? { hour: '2-digit', minute: '2-digit', hour12: false }
             : { hour: 'numeric', minute: '2-digit', hour12: true }"
+          @timeClick="emit('dayClick', $event)"
         >
           <!-- Calendar Events -->
           <template v-if="dayGrid">
