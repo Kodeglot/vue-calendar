@@ -60,6 +60,18 @@ Add the following script tag to your HTML:
 <script src="https://unpkg.com/@kodeglot/vue-calendar/dist/vue-calendar.umd.js"></script>
 ```
 
+## Demo
+
+🚀 **Live Demo**: [https://kodeglot.github.io/vue-calendar/](https://kodeglot.github.io/vue-calendar/)
+
+The demo showcases all the calendar features including:
+- Multiple view modes (month, week, day)
+- Custom event content and modals
+- Drag and drop functionality
+- Event resizing
+- Custom controls and navigation
+- Event creation with metadata
+
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -104,6 +116,8 @@ import { v4 as uuidv4 } from 'uuid'
 export interface CalendarEvent {
   id: string
   title: string
+  description?: string // Optional event description
+  location?: string   // Optional event location
   start: string        // ISO date string (UTC)
   end: string          // ISO date string (UTC)
   tailwindColor: string // Tailwind color name (e.g., 'blue', 'red', 'green')
@@ -112,6 +126,7 @@ export interface CalendarEvent {
   left?: number        // For event positioning
   marginLeft?: number  // For event spacing
   order?: number       // Vertical stacking order
+  metadata?: Record<string, any> // Custom key-value pairs for user-defined data
 }
 
 export const useCalendarStore = defineStore('calendar', () => {
@@ -502,17 +517,20 @@ If you encounter issues with the demo:
 ### CalendarEvent Interface
 
 ```typescript
-interface CalendarEvent {
-  id: string                    // Unique identifier
-  title: string                 // Event title
-  start: string                 // ISO date string for start time
-  end: string                   // ISO date string for end time
-  tailwindColor: string         // Tailwind color name
-  allDay?: boolean              // Whether event is all-day
-  width?: number                // Width percentage for stacking
-  left?: number                 // Left position percentage
-  marginLeft?: number           // Margin between stacked events
-  order?: number                // Vertical stacking order
+export interface CalendarEvent {
+  id: string
+  title: string
+  description?: string // Optional event description
+  location?: string   // Optional event location
+  start: string        // ISO date string (UTC)
+  end: string          // ISO date string (UTC)
+  tailwindColor: string // Tailwind color name (e.g., 'blue', 'red', 'green')
+  allDay?: boolean
+  width?: number       // For event stacking
+  left?: number        // For event positioning
+  marginLeft?: number  // For event spacing
+  order?: number       // Vertical stacking order
+  metadata?: Record<string, any> // Custom key-value pairs for user-defined data
 }
 ```
 
@@ -874,6 +892,127 @@ import { CalendarView } from '@kodeglot/vue-calendar'
 </script>
 ```
 
+### Customizing Event Content
+
+You can customize how each event is rendered using the `#event-content` slot. The slot receives the event as a prop:
+
+```vue
+<CalendarView>
+  <template #event-content="{ event }">
+    <div>
+      <strong>{{ event.title }}</strong>
+      <span>{{ event.start }}</span>
+      <!-- Add any custom markup here -->
+    </div>
+  </template>
+</CalendarView>
+```
+
+#### Using Custom Metadata
+
+You can store and display custom data using the `metadata` field:
+
+```vue
+<CalendarView>
+  <template #event-content="{ event }">
+    <div class="flex items-center gap-2">
+      <span class="font-bold">{{ event.title }}</span>
+      <!-- Show priority badge -->
+      <span v-if="event.metadata?.priority" 
+            class="text-xs px-1 py-0.5 rounded"
+            :class="{
+              'bg-red-100 text-red-700': event.metadata.priority === 'high',
+              'bg-yellow-100 text-yellow-700': event.metadata.priority === 'medium',
+              'bg-green-100 text-green-700': event.metadata.priority === 'low'
+            }">
+        {{ event.metadata.priority }}
+      </span>
+      <!-- Show location -->
+      <span v-if="event.metadata?.location" class="text-xs text-gray-500">
+        📍 {{ event.metadata.location }}
+      </span>
+    </div>
+  </template>
+</CalendarView>
+```
+
+### Customizing the Event Edit Modal
+
+You can provide your own modal UI for editing events using the `#event-modal` slot. The slot receives the following props:
+- `event`: The event being edited
+- `update`: Call this function with the updated event to save changes
+- `delete`: Call this function with the event id to delete
+- `close`: Call this function to close the modal
+
+```vue
+<CalendarView>
+  <template #event-modal="{ event, update, delete: deleteEvent, close }">
+    <MyCustomEventModal
+      v-if="event"
+      :event="event"
+      @save="update"
+      @delete="deleteEvent"
+      @close="close"
+    />
+  </template>
+</CalendarView>
+```
+
+#### Editing Custom Metadata
+
+You can edit custom metadata fields in your modal:
+
+```vue
+<CalendarView>
+  <template #event-modal="{ event, update, delete: deleteEvent, close }">
+    <div v-if="event" class="modal">
+      <!-- Basic fields -->
+      <input v-model="event.title" placeholder="Event title" />
+      <input v-model="event.start" type="datetime-local" />
+      <input v-model="event.end" type="datetime-local" />
+      
+      <!-- Custom metadata fields -->
+      <select v-model="event.metadata.priority">
+        <option value="">No priority</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+      
+      <input v-model="event.metadata.location" placeholder="Location" />
+      <input v-model="event.metadata.attendees" placeholder="Attendees" />
+      <textarea v-model="event.metadata.notes" placeholder="Notes"></textarea>
+      
+      <button @click="() => update({ ...event })">Save</button>
+      <button @click="() => deleteEvent(event.id)">Delete</button>
+      <button @click="close">Cancel</button>
+    </div>
+  </template>
+</CalendarView>
+```
+
+### Creating Events with Metadata
+
+When creating events, you can include custom metadata:
+
+```typescript
+const newEvent: CalendarEvent = {
+  id: crypto.randomUUID(),
+  title: "Team Meeting",
+  start: "2024-01-15T10:00:00.000Z",
+  end: "2024-01-15T11:00:00.000Z",
+  tailwindColor: "blue",
+  metadata: {
+    priority: "high",
+    location: "Conference Room A",
+    attendees: "John, Jane, Bob",
+    notes: "Quarterly planning discussion",
+    category: "work",
+    reminder: true
+  }
+}
+```
+
 ## Customization
 
 ### Custom CSS Classes
@@ -907,6 +1046,10 @@ const event: CalendarEvent = {
 ### Time Formatting
 
 The calendar automatically formats times based on the user's locale and timezone settings.
+
+### Event Content: Use the `#event-content` slot to fully control how each event is rendered.
+### Event Modal: Use the `#event-modal` slot to provide your own event editing UI. The calendar will always show a fallback modal if you do not provide one.
+### Other Slots: You can also customize navigation, controls, and view selectors using the provided slots.
 
 ## Development
 
