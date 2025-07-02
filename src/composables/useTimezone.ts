@@ -208,6 +208,38 @@ export function useTimezone() {
     return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59, 999)
   }
 
+  /**
+   * Round time to the nearest interval (in minutes)
+   * @param date - Date to round
+   * @param interval - Interval in minutes (default: 5)
+   * @returns Rounded date
+   */
+  const roundToNearestInterval = (date: Date, interval: number = 5): Date => {
+    const rounded = new Date(date)
+    const minutes = rounded.getMinutes()
+    const roundedMinutes = Math.round(minutes / interval) * interval
+    
+    if (roundedMinutes === 60) {
+      rounded.setHours(rounded.getHours() + 1, 0, 0, 0)
+    } else {
+      rounded.setMinutes(roundedMinutes, 0, 0)
+    }
+    
+    return rounded
+  }
+
+  /**
+   * Create a time range with default duration
+   * @param startTime - Start time
+   * @param durationMinutes - Duration in minutes (default: 60)
+   * @returns Object with start and end times
+   */
+  const createTimeRange = (startTime: Date, durationMinutes: number = 60): { start: Date; end: Date } => {
+    const start = new Date(startTime)
+    const end = new Date(start.getTime() + durationMinutes * 60 * 1000)
+    return { start, end }
+  }
+
   return {
     // Timezone info
     userTimezone,
@@ -236,6 +268,8 @@ export function useTimezone() {
     isToday,
     isSameDay,
     startOfDay,
-    endOfDay
+    endOfDay,
+    roundToNearestInterval,
+    createTimeRange
   }
 } 

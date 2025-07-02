@@ -80,6 +80,7 @@
           props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
         "
         @dayClick="handleDayClick"
+        @date-clicked="handleDateClick"
         @eventClick="onEventClick"
       >
         <!--
@@ -300,7 +301,7 @@ const currentDate = ref<Date>(props.initialDate); // Currently displayed date
 const currentView = ref<CalendarView>(props.initialView as CalendarView); // Current view mode
 const store = useCalendarStore(); // Pinia store for calendar events
 const eventModal = ref<InstanceType<typeof EventModal>>(); // Reference to event modal component
-const { formatMonthYear, formatWeekdayShort, formatFullDate } = useTimezone(); // Timezone utilities
+const { formatMonthYear, formatWeekdayShort, formatFullDate, roundToNearestInterval, createTimeRange } = useTimezone(); // Timezone utilities
 const selectedEvent = ref<CalendarEvent | null>(null);
 const fallbackModalRef = ref<InstanceType<typeof EventModal> | null>(null);
 const slots = useSlots();
@@ -415,7 +416,20 @@ const handleEventDrop = (eventId: string, date: Date) => {
  * @param {Date} date - The date that was clicked
  */
 const handleDayClick = (date: Date) => {
-  eventModal.value?.openModal(date);
+  // Round the time to the nearest 5 minutes
+  const roundedTime = roundToNearestInterval(date, 5)
+  eventModal.value?.openModal(roundedTime);
+};
+
+/**
+ * Handles date click events from month view to open the event modal
+ * @param {Date} date - The date that was clicked
+ */
+const handleDateClick = (date: Date) => {
+  // For month view, set the time to 9 AM by default
+  const defaultTime = new Date(date);
+  defaultTime.setHours(9, 0, 0, 0);
+  eventModal.value?.openModal(defaultTime);
 };
 
 /**

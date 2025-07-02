@@ -40,9 +40,10 @@ interface Props {
   hourHeight: number;
   timeFormat: Intl.DateTimeFormatOptions;
   showHourLabels?: boolean;
+  baseDate?: Date;
 }
 
-const { hourHeight, timeFormat, showHourLabels = false } = defineProps<Props>();
+const { hourHeight, timeFormat, showHourLabels = false, baseDate } = defineProps<Props>();
 
 // Cache hours array to avoid recreation on every render
 const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -77,7 +78,8 @@ const handleClick = (e: MouseEvent) => {
   const hour = Math.floor(clickY / hourHeight);
   const minutes = Math.floor((clickY % hourHeight) / (hourHeight / 60));
   
-  const clickedTime = new Date();
+  // Use the baseDate if provided, otherwise use current date
+  const clickedTime = baseDate ? new Date(baseDate) : new Date();
   clickedTime.setHours(hour, minutes, 0, 0);
   
   emit('timeClick', clickedTime);

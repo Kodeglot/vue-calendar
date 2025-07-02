@@ -94,6 +94,7 @@
                 ? { hour: '2-digit', minute: '2-digit', hour12: false }
                 : { hour: 'numeric', minute: '2-digit', hour12: true }"
               :showHourLabels="false"
+              :baseDate="date"
               @timeClick="handleTimeClick"
             >
               <!-- Calendar Events -->
@@ -381,7 +382,7 @@ const handleDragOver = (e: DragEvent) => {
 };
 
 const handleTimeClick = (time: Date) => {
-  emit("time-click", time);
+  emit("dayClick", time);
 };
 
 /**

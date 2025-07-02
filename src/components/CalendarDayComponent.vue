@@ -71,6 +71,7 @@
           :timeFormat="props.timeFormat === '24h' 
             ? { hour: '2-digit', minute: '2-digit', hour12: false }
             : { hour: 'numeric', minute: '2-digit', hour12: true }"
+          :baseDate="props.currentDate"
           @timeClick="emit('dayClick', $event)"
         >
           <!-- Calendar Events -->
