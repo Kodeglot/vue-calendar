@@ -30,15 +30,17 @@
     }"
     :draggable="!isResizing"
     @mousedown="handleMouseDown"
-    @click="handleClick"
   >
-    <!-- Event Content -->
-    <div :class="['font-medium', customClasses?.eventTitle]">
-      {{ event.title }}
-    </div>
-    <div :class="['text-xs text-gray-600', customClasses?.eventTime]">
-      {{ formatEventTime() }}
-    </div>
+    <!-- Customizable Event Content Slot -->
+    <slot :event="event">
+      <!-- Default Event Content -->
+      <div :class="['font-medium', customClasses?.eventTitle]">
+        {{ event.title }}
+      </div>
+      <div :class="['text-xs text-gray-600', customClasses?.eventTime]">
+        {{ formatEventTime() }}
+      </div>
+    </slot>
 
     <!-- Resize Handles -->
     <div
@@ -275,17 +277,7 @@ watch(
   }
 );
 
-// Handle click events
-const handleClick = (e: MouseEvent) => {
-  try {
-    // Only handle click if not resizing
-    if (!isResizing.value) {
-      emit("click", props.event);
-    }
-  } catch (error) {
-    console.error("Click event failed:", error);
-  }
-};
+
 
 // Format event time for display based on view type and time format
 const formatEventTime = () => {

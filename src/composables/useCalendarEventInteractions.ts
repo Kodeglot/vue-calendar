@@ -147,6 +147,7 @@ export function useCalendarEventInteractions(
   const initialTop = ref(0)
   const initialHeight = ref(0)
   const dragThreshold = 5 // Minimum pixels to move before starting drag
+  const hasInteracted = ref(false) // Track if any drag/resize interaction occurred
 
   // Cache DateTimeFormat instances for better performance
   const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
@@ -199,6 +200,7 @@ export function useCalendarEventInteractions(
   // Resize Handlers
   const startResize = (direction: 'top' | 'bottom') => {
     isResizing.value = true
+    hasInteracted.value = true
     if (!containerRef) return
 
     resizeDirection.value = direction
@@ -274,9 +276,9 @@ export function useCalendarEventInteractions(
 
   const stopResize = () => {
     isResizing.value = false
+    hasInteracted.value = false
     document.removeEventListener('mousemove', handleResizeMove)
     document.removeEventListener('mouseup', stopResize)
-
   }
 
   // Throttled drag move handler for better performance
@@ -298,6 +300,7 @@ export function useCalendarEventInteractions(
     if (!isDragging.value && (Math.abs(deltaY) > dragThreshold ||
       (options.viewType === 'week' && Math.abs(deltaX) > dragThreshold))) {
       isDragging.value = true
+      hasInteracted.value = true
     }
 
     if (!isDragging.value) return
@@ -400,10 +403,16 @@ export function useCalendarEventInteractions(
           top: initialTop.value,
           height: position.value.height
         }
+        
+        // If no drag occurred and no resize is happening, emit click event
+        if (!hasInteracted.value && !isResizing.value) {
+          emit('click', event)
+        }
       }
 
       // Reset state
       isDragging.value = false
+      hasInteracted.value = false
       startY.value = 0
       startX.value = 0
       initialTop.value = 0
@@ -413,6 +422,7 @@ export function useCalendarEventInteractions(
       document.removeEventListener('mousemove', handleDragMove)
       document.removeEventListener('mouseup', stopDrag)
       isDragging.value = false
+      hasInteracted.value = false
     }
   }
 
@@ -446,6 +456,7 @@ export function useCalendarEventInteractions(
       startX.value = e.clientX - containerRect.left
       initialTop.value = position.value.top
       isDragging.value = false
+      hasInteracted.value = false
 
       startTimeBeforeDrag.value = new Date(event.start)
       endTimeBeforeDrag.value = new Date(event.end)
@@ -453,8 +464,6 @@ export function useCalendarEventInteractions(
       // Setup drag listeners
       document.addEventListener('mousemove', handleDragMove)
       document.addEventListener('mouseup', stopDrag)
-
-      emit('click', event)
     } catch (error) {
       console.error('Mouse down event failed:', error)
     }
