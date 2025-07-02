@@ -30,7 +30,7 @@
     }"
     :draggable="viewType === 'month' ? true : false"
     v-on="viewType === 'month' ? {} : { mousedown: handleMouseDown }"
-    @click="handleClick()"
+    @click="handleClick($event)"
     @dragstart="onDragStart"
     @dragend="onDragEnd"
   >
@@ -272,9 +272,18 @@ onMounted(() => {
 });
 
 // Handle click events - for month view, emit click directly
-const handleClick = () => {
+const handleClick = (event?: Event) => {
+  // Stop event propagation to prevent date click from triggering
+  if (event) {
+    event.stopPropagation();
+  }
+  
   // For month view, emit click directly since drag/resize is not enabled
   if (props.viewType === 'month') {
+    debug.log('Event: Clicked in month view', {
+      eventId: props.event.id,
+      title: props.event.title
+    });
     emit('click', props.event);
   }
   // For other views, let the mousedown/mouseup logic handle it
