@@ -83,7 +83,12 @@
               :timeFormat="props.timeFormat"
               class="absolute"
               :viewType="'day'"
-            />
+              @click="emit('eventClick', event)"
+            >
+              <template v-if="$slots['event-content']" #default="slotProps">
+                <slot name="event-content" v-bind="slotProps" />
+              </template>
+            </CalendarEventComponent>
           </template>
         </TimeGridComponent>
       </div>
@@ -201,6 +206,11 @@ interface Emits {
    * @param date - The date/time the event was dropped on
    */
   (e: "eventDrop", eventId: string, date: Date): void;
+  /**
+   * Emitted when an event is clicked
+   * @param {CalendarEvent} event - The clicked event
+   */
+  (e: "eventClick", event: CalendarEvent): void;
 }
 
 const emit = defineEmits<Emits>();
@@ -227,6 +237,9 @@ const props = withDefaults(defineProps<Props>(), {
  */
 const store = useCalendarStore();
 
+// Make events reactive by accessing the store's events directly
+const allEvents = computed(() => Array.from(store.events.values()));
+
 /**
  * Array of hours from 0 to 23
  * @type {number[]}
@@ -239,7 +252,11 @@ const hours = Array.from({ length: 24 }, (_, i) => i);
  * @returns {CalendarEvent[]} Array of all-day events
  */
 const getAllDayEvents = (date: Date) => {
-  return store.getEventsForDate(date).filter((event) => {
+  const targetDateString = date.toDateString();
+  return allEvents.value.filter((event) => {
+    const eventDateString = new Date(event.start).toDateString();
+    if (eventDateString !== targetDateString) return false;
+    
     const start = new Date(event.start);
     const end = new Date(event.end);
     // All-day events span exactly 24 hours
@@ -273,7 +290,11 @@ const getAllDayEventsForRow = (date: Date, row: number) => {
  */
 const stackedEvents = computed(() => {
   try {
-    const events = store.getEventsForDate(props.currentDate);
+    const targetDateString = props.currentDate.toDateString();
+    const events = allEvents.value.filter((event) => {
+      const eventDateString = new Date(event.start).toDateString();
+      return eventDateString === targetDateString;
+    });
     return calculateEventPositions(events);
   } catch (error) {
     console.error("Error loading events:", error);

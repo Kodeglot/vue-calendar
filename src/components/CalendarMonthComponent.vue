@@ -69,7 +69,12 @@
           :event="ce"
           :resizable="false"
           :viewType="'month'"
-        />
+          @click="emit('eventClick', ce)"
+        >
+          <template v-if="$slots['event-content']" #default="slotProps">
+            <slot name="event-content" v-bind="slotProps" />
+          </template>
+        </CalendarEventComponent>
       </div>
     </div>
   </div>
@@ -135,9 +140,21 @@ interface MonthComponentEmits {
    * @param newDate - The new month date
    */
   (e: "month-changed", newDate: Date): void;
+  /**
+   * Emitted when an event is clicked
+   * @param {CalendarEvent} event - The clicked event
+   */
+  (e: "eventClick", event: CalendarEvent): void;
 }
 
 const emit = defineEmits<MonthComponentEmits>();
+
+const store = useCalendarStore();
+
+onMounted(() => {});
+
+// Make events reactive by accessing the store's events directly
+const allEvents = computed(() => Array.from(store.events.values()));
 
 // Weekday labels based on firstDayOfWeek prop
 const days = computed(() => {
@@ -147,9 +164,6 @@ const days = computed(() => {
     ...days.slice(0, props.firstDayOfWeek),
   ];
 });
-const store = useCalendarStore();
-
-onMounted(() => {});
 
 /**
  * Generates dates for the month view including:
@@ -185,20 +199,13 @@ const visibleDates = computed<Date[]>(() => {
   }
 });
 
-// Stack events with small horizontal offset
-// const getStackedEvents = (date: Date): CalendarEvent[] => {
-//   const events = store.getEventsForDate(date)
-//   return events.map((event, index) => ({
-//     ...event,
-//     width: 100,
-//     left: 0,
-//     marginLeft: index * 2, // 2% margin between stacked events
-//   }))
-// }
-
 // Get all-day events for a specific date
 const getAllDayEvents = (date: Date) => {
-  return store.getEventsForDate(date).filter((event) => {
+  const targetDateString = date.toDateString();
+  return allEvents.value.filter((event) => {
+    const eventDateString = new Date(event.start).toDateString();
+    if (eventDateString !== targetDateString) return false;
+    
     const start = new Date(event.start);
     const end = new Date(event.end);
     // All-day events span exactly 24 hours
@@ -220,8 +227,13 @@ const getAllDayEventsForRow = (date: Date, row: number) => {
   return events.slice((row - 1) * 2, row * 2); // 2 events per row
 };
 
-const getStackedEvents = computed(() => (date: Date) => {
-  const events = store.getEventsForDate(date);
+const getStackedEvents = (date: Date) => {
+  const targetDateString = date.toDateString();
+  const events = allEvents.value.filter((event) => {
+    const eventDateString = new Date(event.start).toDateString();
+    return eventDateString === targetDateString;
+  });
+  
   const sortedEvents = events
     .map((event) => ({
       ...event,
@@ -232,7 +244,7 @@ const getStackedEvents = computed(() => (date: Date) => {
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
   return sortedEvents;
-});
+};
 
 // Check if date is today
 const isToday = (date: Date) => {

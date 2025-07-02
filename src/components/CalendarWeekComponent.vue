@@ -108,7 +108,12 @@
                   :timeFormat="props.timeFormat"
                   class="absolute"
                   role="article"
-                />
+                  @click="emit('eventClick', event)"
+                >
+                  <template v-if="$slots['event-content']" #default="slotProps">
+                    <slot name="event-content" v-bind="slotProps" />
+                  </template>
+                </CalendarEventComponent>
               </template>
             </TimeGridComponent>
           </div>
@@ -189,6 +194,11 @@ const emit = defineEmits<{
    * @param {Date} time - The clicked time
    */
   (e: "time-click", time: Date): void;
+  /**
+   * Emitted when an event is clicked
+   * @param {CalendarEvent} event - The clicked event
+   */
+  (e: "eventClick", event: CalendarEvent): void;
 }>();
 
 // Constants
@@ -196,6 +206,9 @@ const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const hours = Array.from({ length: 24 }, (_, i) => i); // [0..23] hour array
 const store = useCalendarStore();
 const draggedEvent = ref<CalendarEvent | null>(null);
+
+// Make events reactive by accessing the store's events directly
+const allEvents = computed(() => Array.from(store.events.values()));
 
 /**
  * Reference to the day grid container
@@ -256,8 +269,11 @@ const visibleDates = computed<Date[]>(() => {
  * @returns {CalendarEvent[]} Array of all-day events
  */
 const getAllDayEvents = (date: Date) => {
-  const dateString = date.toDateString()
-  return store.getEventsForDate(date).filter((event) => {
+  const targetDateString = date.toDateString();
+  return allEvents.value.filter((event) => {
+    const eventDateString = new Date(event.start).toDateString();
+    if (eventDateString !== targetDateString) return false;
+    
     const start = new Date(event.start)
     const end = new Date(event.end)
     // All-day events span exactly 24 hours (86400000 ms)
@@ -292,10 +308,14 @@ const getAllDayEventsForRow = (date: Date, row: number) => {
  * @param {Date} date - The date to get events for
  * @returns {CalendarEvent[]} Array of events with position data
  */
-const getStackedEvents = computed(() => (date: Date) => {
-  const events = store.getEventsForDate(date);
+const getStackedEvents = (date: Date) => {
+  const targetDateString = date.toDateString();
+  const events = allEvents.value.filter((event) => {
+    const eventDateString = new Date(event.start).toDateString();
+    return eventDateString === targetDateString;
+  });
   return calculateEventPositions(events);
-});
+};
 
 /**
  * Calculates event positions to prevent overlap - Optimized version
