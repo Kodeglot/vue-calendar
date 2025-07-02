@@ -43,7 +43,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📅 **All-day event support**
 - 🎯 **Time-based positioning** with 5-minute snap intervals
 - 🛠️ **Plugin architecture** for extensibility
-- 🧪 **Comprehensive testing** with Vitest
+- 🧪 **Comprehensive testing** with Vitest (69 tests across all components)
 - 🎨 **Enhanced visual hierarchy** with improved month view styling
 - 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
 
@@ -237,6 +237,26 @@ The calendar now supports creating events by clicking on empty space:
 - **Default duration**: New events automatically span 1 hour
 - **Visual feedback**: Clear indication of clickable areas
 - **Cross-view consistency**: Works seamlessly across all view modes
+
+## Event Interaction
+
+The calendar provides intuitive event interaction across all views:
+
+### Creating Events
+- **Month View**: Click on empty date cells to create events at 9 AM on that date
+- **Week/Day View**: Click on empty time slots to create events at that specific time
+- **All Views**: Use the "Create Event" button for quick event creation
+
+### Editing Events
+- **Click on any event** to open the edit modal
+- **Month View**: Events are draggable between days (preserves time)
+- **Week/Day View**: Events can be dragged and resized with time snapping
+- **All Views**: Edit modal provides full event management (title, time, color, delete)
+
+### Drag and Drop
+- **Month View**: Drag events between days while preserving original time
+- **Week/Day View**: Drag events to new times and resize for duration changes
+- **Time Preservation**: Moving events between days maintains the original time components
 
 ## Debug Logging
 
