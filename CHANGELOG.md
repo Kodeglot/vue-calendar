@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Month view event click reliability** - Fixed issue where clicking events in month view would not reliably emit click events due to drag/resize logic interference. Added dedicated click handler for month view that bypasses drag/resize logic.
+- **Test reliability** - Fixed CalendarMonthComponent test to properly trigger click events on the correct DOM element, ensuring consistent test behavior.
+
+### Changed
+- **Event interaction logic** - Improved event click handling in month view by adding a dedicated `handleClick` method that emits events directly for month view, while preserving drag/resize functionality for week/day views.
+
 ## [1.2.0] - 2025-07-02
 
 ### Added
