@@ -110,7 +110,7 @@
 
     <!-- Fallback Modal -->
     <EventModal
-      v-if="!slots['event-modal'] && selectedEvent"
+      v-show="!slots['event-modal'] && selectedEvent"
       ref="fallbackModalRef"
       @update="handleEventUpdate"
       @delete="handleEventDelete"
@@ -552,6 +552,23 @@ watch(currentDate, (newDate) => {
 watch(currentView, (newView) => {
   // Re-emit date change when view changes to ensure proper updates
   emit("date-change", currentDate.value);
+});
+
+// Watch for selected event changes and open edit modal
+watch(selectedEvent, (newEvent) => {
+  debug.log('CalendarView: Selected event changed', {
+    eventId: newEvent?.id,
+    title: newEvent?.title,
+    hasCustomModal: !!slots['event-modal']
+  });
+  
+  if (newEvent && !slots['event-modal']) {
+    debug.log('CalendarView: Opening edit modal for selected event', {
+      eventId: newEvent.id,
+      title: newEvent.title
+    });
+    fallbackModalRef.value?.openEditModal(newEvent);
+  }
 });
 
 // Add sample events on component mount
