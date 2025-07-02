@@ -12,6 +12,7 @@
             <div>
               <label class="block text-sm font-medium mb-1">Title</label>
               <input
+                ref="titleInput"
                 v-model="event.title"
                 type="text"
                 required
@@ -144,6 +145,9 @@ const { userTimezone, toUTC, toISOString, toUserTimezone } = useTimezone();
 // Local time inputs for the form (in user's timezone)
 const localStartTime = ref("");
 const localEndTime = ref("");
+
+// Template refs
+const titleInput = ref<HTMLInputElement | null>(null);
 
 function openModal(time: Date) {
   debug.log('EventModal: Opening modal for new event', {
