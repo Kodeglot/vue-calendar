@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid'
 export interface CalendarEvent {
   id: string          // Unique identifier for the event
   title: string       // Display title of the event
+  description?: string // Optional event description
+  location?: string   // Optional event location
   start: string       // ISO string of event start time
   end: string         // ISO string of event end time
   tailwindColor: string // Tailwind color name (e.g. 'blue', 'green', 'red')
@@ -17,6 +19,7 @@ export interface CalendarEvent {
   left?: number       // Left position percentage for stacking
   marginLeft?: number // Margin between stacked events
   order?: number      // Vertical stacking order for month view
+  metadata?: Record<string, any> // Custom key-value pairs for user-defined data
 }
 
 export const useCalendarStore = defineStore('calendar', () => {
@@ -138,6 +141,23 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
   }
 
+  const updateEvent = (updatedEvent: CalendarEvent): void => {
+    const existingEvent = events.value.get(updatedEvent.id)
+    if (existingEvent) {
+      // Merge the updated event with existing event to preserve any additional properties
+      const mergedEvent = { ...existingEvent, ...updatedEvent }
+      events.value.set(updatedEvent.id, mergedEvent)
+      triggerPositionRecalculation();
+    }
+  }
+
+  const deleteEvent = (eventId: string): void => {
+    if (events.value.has(eventId)) {
+      events.value.delete(eventId)
+      triggerPositionRecalculation();
+    }
+  }
+
   const getEventsForDate = (date: Date): CalendarEvent[] => {
     const targetDateString = getDateString(date)
     return Array.from(events.value.values()).filter(event =>
@@ -165,6 +185,8 @@ export const useCalendarStore = defineStore('calendar', () => {
       currentMonth: currentMonth.value,
       monthEvents: monthEvents.value,
       addEvent,
+      updateEvent,
+      deleteEvent,
       updateEventDate,
       updateEventDateOnly,
       updateEventDuration,
@@ -184,6 +206,8 @@ export const useCalendarStore = defineStore('calendar', () => {
     monthEvents,
     getEventById,
     addEvent,
+    updateEvent,
+    deleteEvent,
     updateEventDate,
     updateEventDateOnly,
     updateEventDuration,
@@ -203,6 +227,8 @@ export interface CalendarPlugin {
     currentMonth: number
     monthEvents: CalendarEvent[]
     addEvent: (event: CalendarEvent) => void
+    updateEvent: (event: CalendarEvent) => void
+    deleteEvent: (eventId: string) => void
     updateEventDate: (eventId: string, newDate: Date) => void
     updateEventDateOnly: (eventId: string, newDate: Date) => void
     updateEventDuration: (eventId: string, newStart: Date, newEnd: Date) => void
