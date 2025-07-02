@@ -7,12 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Comprehensive Debug Logging System** - New debug utility with conditional logging that only shows during development (`npm run dev`) and can be toggled via browser console
+  - Global browser console functions: `__enableCalendarDebug()`, `__disableCalendarDebug()`, `__getCalendarDebugStatus()`
+  - Extensive debug logs throughout calendar lifecycle, user interactions, data operations, and performance
+  - Debug logs cover navigation, event operations, drag-and-drop, modal actions, and timezone conversions
+  - Production builds remain clean with no debug output by default
+
 ### Fixed
-- **Create event modal interference** - Fixed issue where the create event modal would incorrectly open after dragging or resizing events. Added global flag mechanism to prevent modal from opening immediately after event modifications.
+- **Month view drag and drop time preservation** - Fixed issue where dragging events between days in month view would reset the time. Now preserves original time components (hours, minutes, seconds) when moving events between dates
+- **Create event modal interference** - Fixed issue where the create event modal would incorrectly open after dragging or resizing events. Added global flag mechanism to prevent modal from opening immediately after event modifications
+- **Event interaction conflicts** - Fixed interference between drag operations and click events in month view by conditionally attaching mousedown handlers only for week/day views
 
 ### Technical Improvements
 - **Event interaction state management** - Improved event interaction handling with global flag to track recent drag/resize operations
 - **Modal behavior consistency** - Enhanced user experience by preventing unwanted modal triggers during event manipulation
+- **Debug infrastructure** - Added comprehensive debug logging system with conditional output and browser console controls
+- **Event time preservation logic** - Enhanced `updateEventDateOnly` function to properly preserve time components when changing dates
 
 ## [1.2.1] - 2025-07-02
 

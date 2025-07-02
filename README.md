@@ -238,6 +238,75 @@ The calendar now supports creating events by clicking on empty space:
 - **Visual feedback**: Clear indication of clickable areas
 - **Cross-view consistency**: Works seamlessly across all view modes
 
+## Debug Logging
+
+Vue Calendar includes a comprehensive debug logging system that helps with development and troubleshooting:
+
+### Automatic Debug Mode
+
+- **Development**: Debug logs are automatically enabled when running `npm run dev`
+- **Production**: Debug logs are disabled by default to keep builds clean
+- **Conditional Output**: All debug logs are wrapped in conditional checks
+
+### Browser Console Controls
+
+You can control debug mode directly from the browser console:
+
+```javascript
+// Enable debug mode
+__enableCalendarDebug()
+
+// Disable debug mode  
+__disableCalendarDebug()
+
+// Check current debug status
+__getCalendarDebugStatus()
+```
+
+### Debug Coverage
+
+The debug system logs comprehensive information about:
+
+- **Calendar Lifecycle**: Component mounting, updates, and cleanup
+- **User Interactions**: Clicks, drags, resizes, and navigation
+- **Event Operations**: Creation, updates, deletions, and movements
+- **Data Flow**: Store updates, event filtering, and reactivity
+- **Performance**: Timing for expensive operations
+- **Errors**: Detailed error information with context
+
+### Using Debug in Your Code
+
+```typescript
+import { debug } from '@kodeglot/vue-calendar'
+
+// Basic logging
+debug.log('User clicked event:', eventId)
+
+// Warning and error logging
+debug.warn('Event not found:', eventId)
+debug.error('Failed to update event:', error)
+
+// Grouped logging for complex operations
+debug.group('Event Drag Operation')
+debug.log('Drag started:', { eventId, startTime })
+debug.log('Drag position:', { x, y })
+debug.groupEnd()
+
+// Performance timing
+debug.time('Event Filtering')
+// ... your code ...
+debug.timeEnd('Event Filtering')
+```
+
+### Debug Output Example
+
+```
+[Vue Calendar Debug] Store: Adding event {eventId: "123", title: "Meeting", start: "2024-01-15T10:00:00Z"}
+[Vue Calendar Debug] CalendarView: Component mounted
+[Vue Calendar Debug] Event: Drag started {eventId: "123", position: {x: 100, y: 200}}
+[Vue Calendar Debug] Store: Updating event date only {eventId: "123", preservedTime: "10:0:0"}
+```
+
 ## Troubleshooting
 
 ### Calendar Not Styling Correctly?
