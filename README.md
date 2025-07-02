@@ -1135,7 +1135,11 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a history of changes and releases.
+**v1.2.0 (2025-07-02)**
+- Ensured `eventClick` is reliably emitted from month view events (explicit click handler)
+- Comprehensive test coverage for all major components and store
+- Fixed TypeScript build error due to unused variable
+- Changelog is now in reverse chronological order (most recent at the top)
 
 ## Roadmap
 

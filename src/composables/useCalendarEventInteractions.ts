@@ -150,15 +150,6 @@ export function useCalendarEventInteractions(
   const dragThreshold = 5 // Minimum pixels to move before starting drag
   const hasInteracted = ref(false) // Track if any drag/resize interaction occurred
 
-  // Cache DateTimeFormat instances for better performance
-  const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: options.timeZone,
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23'
-  })
-
   // Convert minutes to pixels based on pxPerHour
   const minutesToPixels = (minutes: number) => (minutes / 60) * pxPerHour
 

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-07-02
+
+### Added
+- Comprehensive test coverage for CalendarDayComponent, CalendarMonthComponent, CalendarEventComponent, EventModal, TimeGridComponent, and store.
+- New tests for event emission, all-day events, stacked events, and edge cases in all major views.
+
+### Fixed
+- Ensured `eventClick` is reliably emitted from month view events by adding an explicit click handler to `CalendarEventComponent`.
+- Fixed event emission and forwarding logic for robust parent-child communication.
+- TypeScript build error due to unused variable in event interactions composable.
+
+### Changed
+- Minor refactors to event emission and test logic for reliability and maintainability.
+
 ## [1.1.0] - 2025-01-27
 
 ### Fixed
