@@ -1247,6 +1247,15 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 ## Changelog
 
+**v1.3.0 (2025-07-03)**
+- Added comprehensive debug logging system with browser console controls
+- Fixed event interaction issues in month view (click vs drag conflicts)
+- Fixed edit modal opening on first click instead of second click
+- Fixed EventModal reference error and improved focus handling
+- Enhanced event time preservation when dragging between days
+- Improved modal rendering performance and user experience
+- Added extensive debug logging throughout all components
+
 **v1.2.1 (2025-07-02)**
 - Added click-to-create events functionality with automatic time rounding
 - Enhanced month view visual hierarchy with gray backgrounds for adjacent months

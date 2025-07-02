@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2025-07-03
 
 ### Added
 - **Comprehensive Debug Logging System** - New debug utility with conditional logging that only shows during development (`npm run dev`) and can be toggled via browser console
@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Modal behavior consistency** - Enhanced user experience by preventing unwanted modal triggers during event manipulation
 - **Debug infrastructure** - Added comprehensive debug logging system with conditional output and browser console controls
 - **Event time preservation logic** - Enhanced `updateEventDateOnly` function to properly preserve time components when changing dates
+
+## [Unreleased]
 
 ## [1.2.1] - 2025-07-02
 
