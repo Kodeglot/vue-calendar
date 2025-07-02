@@ -53,6 +53,7 @@
         :class="`bg-white min-h-32 p-2 relative gap-y-2`"
         @dragover.prevent
         @drop="handleDrop(date, $event)"
+        role="gridcell"
       >
         <!-- Date Number Indicator -->
         <div class="text-right text-sm text-gray-500">
@@ -69,7 +70,7 @@
           :event="ce"
           :resizable="false"
           :viewType="'month'"
-          @click="emit('eventClick', ce)"
+          @click="emit('eventClick', $event)"
         >
           <template v-if="$slots['event-content']" #default="slotProps">
             <slot name="event-content" v-bind="slotProps" />

@@ -30,6 +30,7 @@
     }"
     :draggable="!isResizing"
     @mousedown="handleMouseDown"
+    @click.stop="emit('click', event)"
   >
     <!-- Customizable Event Content Slot -->
     <slot :event="event">
@@ -203,6 +204,7 @@ const wrappedEmit = (event: string, ...args: any[]) => {
       emit(emitKey, args[0] as DragEvent, args[1] as CalendarEvent);
       break;
     case "click":
+      // Ensure we emit the calendar event object, not the mouse event
       emit(emitKey, args[0] as CalendarEvent);
       break;
     default:
