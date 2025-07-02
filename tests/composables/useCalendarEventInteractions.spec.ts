@@ -233,7 +233,8 @@ describe('useCalendarEventInteractions', () => {
       const { handleMouseDown } = useCalendarEventInteractions(mockEmit, {
         event: mockEvent,
         containerRef: mockContainer,
-        timeZone: 'UTC'
+        timeZone: 'UTC',
+        viewType: 'week',
       })
 
       const mockMouseEvent = {
@@ -245,6 +246,8 @@ describe('useCalendarEventInteractions', () => {
       } as unknown as MouseEvent
 
       handleMouseDown(mockMouseEvent)
+      // Simulate mouseup to trigger click emission
+      document.dispatchEvent(new Event('mouseup'))
       expect(mockEmit).toHaveBeenCalledWith('click', mockEvent)
     })
 

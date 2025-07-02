@@ -36,16 +36,21 @@ describe('CalendarEventComponent', () => {
   })
 
   it('emits click event when clicked', async () => {
+    const mockContainer = document.createElement('div')
+    mockContainer.getBoundingClientRect = () => ({ top: 0, left: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => {} })
     const wrapper = mount(CalendarEventComponent, { 
-      props: baseProps,
+      props: { ...baseProps, containerRef: mockContainer },
       global: {
         plugins: [pinia]
       }
     })
-    await wrapper.find('[role="button"]').trigger('click', {
+    const button = wrapper.find('[role="button"]')
+    await button.trigger('mousedown', {
       button: 0,
       stopPropagation: () => {}
     })
+    document.dispatchEvent(new Event('mouseup'))
+    await wrapper.vm.$nextTick()
     expect(wrapper.emitted('click')).toBeDefined()
     expect(wrapper.emitted('click')?.[0][0]).toMatchObject({
       id: '1',
