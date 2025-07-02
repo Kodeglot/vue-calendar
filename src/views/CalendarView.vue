@@ -80,11 +80,48 @@
           props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
         "
         @dayClick="handleDayClick"
-      />
+        @eventClick="onEventClick"
+      >
+        <!--
+          Custom Event Content Slot:
+          Usage example:
+          <template #event-content="{ event }">
+            <div>
+              <strong>{{ event.title }}</strong>
+              <span>{{ event.start }}</span>
+            </div>
+          </template>
+        -->
+        <template v-if="$slots['event-content']" #event-content="slotProps">
+          <slot name="event-content" v-bind="slotProps" />
+        </template>
+      </component>
     </div>
 
-    <!-- Event Modal -->
-    <EventModal ref="eventModal" @save="handleEventSave" />
+    <!--
+      Custom Event Modal Slot:
+      Usage example:
+      <template #event-modal="{ event, update, delete: deleteEvent, close }">
+        <MyCustomEventModal :event="event" @save="update" @delete="deleteEvent" @close="close" />
+      </template>
+    -->
+    <slot name="event-modal" :event="selectedEvent" :update="handleEventUpdate" :delete="handleEventDelete" :close="clearSelectedEvent" />
+
+    <!-- Fallback Modal -->
+    <EventModal
+      v-if="!slots['event-modal'] && selectedEvent"
+      ref="fallbackModalRef"
+      @update="handleEventUpdate"
+      @delete="handleEventDelete"
+      @close="clearSelectedEvent"
+    />
+
+    <!-- Default Event Creation Modal -->
+    <EventModal
+      ref="eventModal"
+      @save="handleEventSave"
+      @close="() => {}"
+    />
   </div>
 </template>
 
@@ -135,14 +172,21 @@
  *   @param {Function} toggleNewEventForm - Function to open event creation modal
  *   @param {Date} currentDate - Currently displayed date
  *
+ * @slot event-modal - Custom event modal component
+ *   @param {CalendarEvent} event - The clicked event
+ *   @param {Function} update - Function to update the event
+ *   @param {Function} delete - Function to delete the event
+ *   @param {Function} close - Function to close the modal
+ *
  * @event {Date} date-change - Emitted when the displayed date changes
  * @event {CalendarEvent} event-created - Emitted when a new event is created
  * @event {CalendarEvent} event-updated - Emitted when an event is updated
  * @event {string} event-deleted - Emitted when an event is deleted (event ID)
  * @event {Date} openEventModal - Emitted when event modal is opened
+ * @event {CalendarEvent} event-click - Emitted when an event is clicked
  */
 
-import { ref, computed, watch, type Component, PropType, onMounted } from "vue";
+import { ref, computed, watch, type Component, PropType, useSlots, onMounted, nextTick } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useTimezone } from "../composables/useTimezone";
 import CalendarMonthComponent from "../components/CalendarMonthComponent.vue";
@@ -248,6 +292,7 @@ const emit = defineEmits<{
   (e: "event-updated", event: CalendarEvent): void;
   (e: "event-deleted", eventId: string): void;
   (e: "openEventModal", date: Date): void;
+  (e: "event-click", event: CalendarEvent): void;
 }>();
 
 // Reactive state
@@ -256,6 +301,9 @@ const currentView = ref<CalendarView>(props.initialView as CalendarView); // Cur
 const store = useCalendarStore(); // Pinia store for calendar events
 const eventModal = ref<InstanceType<typeof EventModal>>(); // Reference to event modal component
 const { formatMonthYear, formatWeekdayShort, formatFullDate } = useTimezone(); // Timezone utilities
+const selectedEvent = ref<CalendarEvent | null>(null);
+const fallbackModalRef = ref<InstanceType<typeof EventModal> | null>(null);
+const slots = useSlots();
 
 // Mapping of view modes to their corresponding components
 const viewComponents: Record<CalendarView, Component> = {
@@ -380,6 +428,41 @@ const handleEventSave = (event: CalendarEvent) => {
 };
 
 /**
+ * Handles updating existing events in the store
+ * @param {CalendarEvent} event - The updated event
+ */
+const handleEventUpdate = (event: CalendarEvent) => {
+  store.updateEvent(event);
+  emit("event-updated", event);
+  clearSelectedEvent();
+};
+
+/**
+ * Handles deleting events from the store
+ * @param {string} eventId - The ID of the event to delete
+ */
+const handleEventDelete = (eventId: string) => {
+  store.deleteEvent(eventId);
+  emit("event-deleted", eventId);
+  clearSelectedEvent();
+};
+
+/**
+ * Handles event click to open edit modal
+ * @param {CalendarEvent} event - The clicked event
+ */
+const onEventClick = (event: CalendarEvent) => {
+  selectedEvent.value = event;
+  emit("event-click", event);
+  nextTick(() => {
+    // Open fallback modal if no slot is provided
+    if (!slots["event-modal"] && fallbackModalRef.value) {
+      fallbackModalRef.value.openEditModal(event);
+    }
+  });
+};
+
+/**
  * Opens the event modal for creating a new event at the current time
  */
 const toggleNewEventForm = () => {
@@ -391,6 +474,10 @@ const toggleNewEventForm = () => {
 const setView = (view: CalendarView) => {
   currentView.value = view;
 };
+
+function clearSelectedEvent() {
+  selectedEvent.value = null;
+}
 
 // Watch for changes in currentDate and emit events
 watch(currentDate, (newDate) => {

@@ -5,7 +5,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     >
       <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-        <h2 class="text-xl font-semibold mb-4">Create New Event</h2>
+        <h2 class="text-xl font-semibold mb-4">{{ isEditMode ? 'Edit Event' : 'Create New Event' }}</h2>
 
         <form @submit.prevent="handleSubmit">
           <div class="space-y-4">
@@ -92,6 +92,14 @@
 
           <div class="mt-6 flex justify-end space-x-2">
             <button
+              v-if="isEditMode"
+              type="button"
+              @click="handleDelete"
+              class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
+            >
+              Delete
+            </button>
+            <button
               type="button"
               @click="closeModal"
               class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
@@ -102,7 +110,7 @@
               type="submit"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Save Event
+              {{ isEditMode ? 'Update Event' : 'Save Event' }}
             </button>
           </div>
         </form>
@@ -113,12 +121,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useCalendarStore } from "../stores/calendarStore";
+import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useTimezone } from "../composables/useTimezone";
 
-const emit = defineEmits(["close", "save"]);
+const emit = defineEmits(["close", "save", "update", "delete"]);
 const isOpen = ref(false);
 const selectedTime = ref<Date | null>(null);
+const isEditMode = ref(false);
+const editingEventId = ref<string | null>(null);
 
 const event = ref({
   title: "New Event",
@@ -136,6 +146,16 @@ const localEndTime = ref("");
 
 function openModal(time: Date) {
   selectedTime.value = time;
+  isEditMode.value = false;
+  editingEventId.value = null;
+
+  // Reset form for new event
+  event.value = {
+    title: "New Event",
+    start: "",
+    end: "",
+    tailwindColor: "blue",
+  };
 
   // Convert the selected time to user's timezone for display
   const userTime = toUserTimezone(time);
@@ -145,6 +165,29 @@ function openModal(time: Date) {
   // Format for datetime-local input (YYYY-MM-DDTHH:mm)
   localStartTime.value = formatForDateTimeLocal(userTime);
   localEndTime.value = formatForDateTimeLocal(endTime);
+
+  isOpen.value = true;
+}
+
+function openEditModal(existingEvent: CalendarEvent) {
+  isEditMode.value = true;
+  editingEventId.value = existingEvent.id;
+
+  // Populate form with existing event data
+  event.value = {
+    title: existingEvent.title,
+    start: existingEvent.start,
+    end: existingEvent.end,
+    tailwindColor: existingEvent.tailwindColor || "blue",
+  };
+
+  // Convert times to user's timezone for display
+  const userStartTime = toUserTimezone(new Date(existingEvent.start));
+  const userEndTime = toUserTimezone(new Date(existingEvent.end));
+
+  // Format for datetime-local input
+  localStartTime.value = formatForDateTimeLocal(userStartTime);
+  localEndTime.value = formatForDateTimeLocal(userEndTime);
 
   isOpen.value = true;
 }
@@ -164,19 +207,39 @@ function handleSubmit() {
     const utcStart = toUTC(startDate);
     const utcEnd = toUTC(endDate);
 
-    const newEvent = {
-      id: crypto.randomUUID(),
-      title: event.value.title,
-      start: toISOString(utcStart),
-      end: toISOString(utcEnd),
-      tailwindColor: event.value.tailwindColor,
-    };
-
-    emit("save", newEvent);
+    if (isEditMode.value && editingEventId.value) {
+      // Update existing event
+      const updatedEvent = {
+        id: editingEventId.value,
+        title: event.value.title,
+        start: toISOString(utcStart),
+        end: toISOString(utcEnd),
+        tailwindColor: event.value.tailwindColor,
+      };
+      emit("update", updatedEvent);
+    } else {
+      // Create new event
+      const newEvent = {
+        id: crypto.randomUUID(),
+        title: event.value.title,
+        start: toISOString(utcStart),
+        end: toISOString(utcEnd),
+        tailwindColor: event.value.tailwindColor,
+      };
+      emit("save", newEvent);
+    }
+    
     closeModal();
   } catch (error) {
-    console.error("Error creating event:", error);
-    alert("Error creating event. Please check your date/time inputs.");
+    console.error("Error saving event:", error);
+    alert("Error saving event. Please check your date/time inputs.");
+  }
+}
+
+function handleDelete() {
+  if (isEditMode.value && editingEventId.value) {
+    emit("delete", editingEventId.value);
+    closeModal();
   }
 }
 
@@ -211,6 +274,7 @@ const getTailwindColor = (color: string) => {
 
 defineExpose({
   openModal,
+  openEditModal,
 });
 </script>
 
