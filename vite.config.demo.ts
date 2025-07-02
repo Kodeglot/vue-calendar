@@ -5,9 +5,9 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [vue()],
   root: 'demo',
-  publicDir: '../',
+  publicDir: 'demo',
   build: {
-    outDir: '../dist-demo',
+    outDir: '../dist',
     emptyOutDir: true
   },
   server: {
@@ -16,7 +16,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
+      '@/': resolve(__dirname, 'src/')
     }
-  }
+  },
+  base: '/vue-calendar/'
 }) 
