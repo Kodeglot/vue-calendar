@@ -126,7 +126,7 @@
           <!-- Custom Event Button -->
           <template #event-button="{ toggleNewEventForm, currentDate }">
             <button
-              @click="handleCustomEventCreation"
+              @click="toggleNewEventForm"
               class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
             >
               ✨ Add Event
@@ -151,6 +151,178 @@
           @event-updated="handleEventUpdated"
           @event-deleted="handleEventDeleted"
         />
+      </div>
+    </div>
+
+    <!-- Custom Event Content & Modal Demo -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <h2 class="text-2xl font-bold mb-4">Custom Event Content & Modal</h2>
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <CalendarView
+          :initial-date="currentDate"
+          :initial-view="'month'"
+          :time-format="timeFormat"
+          :height="calendarHeight"
+          @event-created="handleEventCreated"
+          @event-updated="handleEventUpdated"
+          @event-deleted="handleEventDeleted"
+        >
+          <!-- Custom event button slot -->
+          <template #event-button>
+            <button 
+              @click="openCreateModal"
+              class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors font-medium"
+            >
+              ✨ Create Custom Event
+            </button>
+          </template>
+
+          <!-- Custom event content slot -->
+          <template #event-content="{ event }">
+            <div class="flex items-center gap-2">
+              <span class="inline-block w-2 h-2 rounded-full" :class="`bg-${event.tailwindColor}-500`"></span>
+              <span class="font-bold">{{ event.title }}</span>
+              <span class="text-xs text-gray-400">({{ event.start.slice(11, 16) }})</span>
+              <!-- Show custom metadata if available -->
+              <span v-if="getEventMetadata(event).priority" class="text-xs px-1 py-0.5 rounded" :class="{
+                'bg-red-100 text-red-700': getEventMetadata(event).priority === 'high',
+                'bg-yellow-100 text-yellow-700': getEventMetadata(event).priority === 'medium',
+                'bg-green-100 text-green-700': getEventMetadata(event).priority === 'low'
+              }">
+                {{ getEventMetadata(event).priority }}
+              </span>
+              <span v-if="event.location" class="text-xs text-gray-500">
+                📍 {{ event.location }}
+              </span>
+            </div>
+          </template>
+
+          <!-- Custom event modal slot -->
+          <template #event-modal="{ event, update, delete: deleteEvent, close }">
+            <div v-if="event" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+                <button @click="close" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+                <h2 class="text-xl font-semibold mb-4">Custom Modal: {{ event.title }}</h2>
+                
+                <!-- Basic event fields -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Title</label>
+                  <input v-model="event.title" class="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Description</label>
+                  <textarea v-model="event.description" class="w-full px-3 py-2 border rounded-lg" rows="2" placeholder="Event description..."></textarea>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Location</label>
+                  <input v-model="event.location" class="w-full px-3 py-2 border rounded-lg" placeholder="Meeting room, address, etc." />
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Start</label>
+                  <input v-model="event.start" class="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">End</label>
+                  <input v-model="event.end" class="w-full px-3 py-2 border rounded-lg" />
+                </div>
+
+                <!-- Custom metadata fields -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Priority</label>
+                  <select v-model="getEventMetadata(event).priority" class="w-full px-3 py-2 border rounded-lg">
+                    <option value="">No priority</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Attendees</label>
+                  <input v-model="getEventMetadata(event).attendees" class="w-full px-3 py-2 border rounded-lg" placeholder="John, Jane, Bob" />
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">Notes</label>
+                  <textarea v-model="getEventMetadata(event).notes" class="w-full px-3 py-2 border rounded-lg" rows="3" placeholder="Additional notes..."></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6">
+                  <button @click="close" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                  <button @click="() => update({ ...event })" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+                  <button @click="() => deleteEvent(event.id)" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </CalendarView>
+
+        <!-- Custom Event Creation Modal -->
+        <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <button @click="closeCreateModal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+            <h2 class="text-xl font-semibold mb-4">Create New Event</h2>
+            
+            <form @submit.prevent="createNewEvent">
+              <!-- Basic event fields -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Title</label>
+                <input v-model="newEvent.title" required class="w-full px-3 py-2 border rounded-lg" placeholder="Event title" />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Description</label>
+                <textarea v-model="newEvent.description" class="w-full px-3 py-2 border rounded-lg" rows="2" placeholder="Event description..."></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Location</label>
+                <input v-model="newEvent.location" class="w-full px-3 py-2 border rounded-lg" placeholder="Meeting room, address, etc." />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Start Date & Time</label>
+                <input v-model="newEvent.start" type="datetime-local" required class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">End Date & Time</label>
+                <input v-model="newEvent.end" type="datetime-local" required class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Color</label>
+                <select v-model="newEvent.tailwindColor" class="w-full px-3 py-2 border rounded-lg">
+                  <option value="blue">Blue</option>
+                  <option value="green">Green</option>
+                  <option value="red">Red</option>
+                  <option value="purple">Purple</option>
+                  <option value="orange">Orange</option>
+                  <option value="pink">Pink</option>
+                  <option value="indigo">Indigo</option>
+                  <option value="yellow">Yellow</option>
+                </select>
+              </div>
+
+              <!-- Custom metadata fields -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Priority</label>
+                <select v-model="newEvent.metadata.priority" class="w-full px-3 py-2 border rounded-lg">
+                  <option value="">No priority</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Attendees</label>
+                <input v-model="newEvent.metadata.attendees" class="w-full px-3 py-2 border rounded-lg" placeholder="John, Jane, Bob" />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">Notes</label>
+                <textarea v-model="newEvent.metadata.notes" class="w-full px-3 py-2 border rounded-lg" rows="3" placeholder="Additional notes..."></textarea>
+              </div>
+
+              <div class="flex justify-end gap-2 mt-6">
+                <button type="button" @click="closeCreateModal" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Event</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -182,6 +354,22 @@ const heightOptions = [
 ]
 const selectedHeightOption = ref('')
 
+// Custom event creation modal state
+const showCreateModal = ref(false)
+const newEvent = ref({
+  title: '',
+  description: '',
+  location: '',
+  start: '',
+  end: '',
+  tailwindColor: 'blue',
+  metadata: {
+    priority: '',
+    attendees: '',
+    notes: ''
+  }
+})
+
 function onHeightDropdownChange() {
   if (selectedHeightOption.value) {
     calendarHeight.value = selectedHeightOption.value
@@ -201,9 +389,69 @@ function handleEventDeleted(eventId) {
   console.log('Event deleted:', eventId)
 }
 
-function handleCustomEventCreation() {
-  console.log('Custom event creation triggered')
-  alert('Custom event creation button clicked! You can implement your own modal or form here.')
+
+
+function getEventMetadata(event) {
+  if (!event.metadata) {
+    event.metadata = {}
+  }
+  return event.metadata
+}
+
+// Custom event creation functions
+function openCreateModal() {
+  // Set default start and end times (current time + 1 hour)
+  const now = new Date()
+  const endTime = new Date(now.getTime() + 60 * 60 * 1000) // 1 hour later
+  
+  newEvent.value = {
+    title: '',
+    description: '',
+    location: '',
+    start: formatDateTimeLocal(now),
+    end: formatDateTimeLocal(endTime),
+    tailwindColor: 'blue',
+    metadata: {
+      priority: '',
+      attendees: '',
+      notes: ''
+    }
+  }
+  showCreateModal.value = true
+}
+
+function closeCreateModal() {
+  showCreateModal.value = false
+}
+
+function createNewEvent() {
+  // Create the event object
+  const event = {
+    id: crypto.randomUUID(),
+    title: newEvent.value.title,
+    description: newEvent.value.description,
+    location: newEvent.value.location,
+    start: new Date(newEvent.value.start).toISOString(),
+    end: new Date(newEvent.value.end).toISOString(),
+    tailwindColor: newEvent.value.tailwindColor,
+    metadata: { ...newEvent.value.metadata }
+  }
+  
+  // Call the event created handler
+  handleEventCreated(event)
+  
+  // Close the modal
+  closeCreateModal()
+}
+
+function formatDateTimeLocal(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 </script>
 
