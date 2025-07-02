@@ -14,7 +14,7 @@
     :aria-describedby="`event-${event.id}-description`"
     :class="[
       'text-sm p-2 rounded cursor-move absolute truncate hover:shadow-sm group event-transition focus:outline-none focus:ring-2 focus:ring-primary-500',
-      viewType === 'month' ? 'mt-2' : '',
+      viewType === 'month' ? 'mt-2 z-10' : '',
       viewType === 'day' ? 'ml-16' : '',
       `${getPastelColor(event.id)}`,
       `border-l-4 ${getPastelColorBorder(event.id)}`,
@@ -28,9 +28,11 @@
       left: `${event.left}%`,
       ...customStyles?.eventContainer,
     }"
-    :draggable="!isResizing"
-    @mousedown="handleMouseDown"
+    :draggable="viewType === 'month' ? true : false"
+    v-on="viewType === 'month' ? {} : { mousedown: handleMouseDown }"
     @click="handleClick()"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
   >
     <!-- Customizable Event Content Slot -->
     <slot :event="event">
@@ -80,6 +82,7 @@ import { computed, onMounted, watch, onUnmounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useCalendarEventInteractions } from "@/composables/useCalendarEventInteractions";
 import { useTimezone } from "@/composables/useTimezone";
+import { debug } from "@/utils/debug";
 
 interface EventComponentProps {
   /**
@@ -235,6 +238,13 @@ const {
 // Calculate initial position on mount
 onMounted(() => {
   calculatePosition(props.viewType, props.event.order);
+  if (props.viewType === 'month') {
+    debug.log('MOUNTED (month view)', {
+      eventId: props.event.id,
+      draggable: true,
+      event: props.event
+    });
+  }
 
   // Listen for external position recalculation requests
   const handleRecalculatePosition = () => {
@@ -301,15 +311,9 @@ const formatEventTime = () => {
         ? formatTime12(props.event.end)
         : formatTime(props.event.end);
 
-    // For month view, show date if it's not today
-    if (props.viewType === "month" && !isToday(props.event.start)) {
-      const date = formatDate(props.event.start);
-      return `${date} ${startTime} - ${endTime}`;
-    }
-
     return `${startTime} - ${endTime}`;
   } catch (error) {
-    console.error("Time formatting failed:", error);
+    debug.error("Time formatting failed:", error);
     return "--:-- - --:--";
   }
 };
@@ -393,4 +397,29 @@ const getPastelColorBorder = (id: string) => {
   }
   return borderColors[Math.abs(hash) % borderColors.length];
 };
+
+function onDragStart(e: DragEvent) {
+  if (props.viewType === 'month') {
+    debug.log('DRAG START', {
+      eventId: props.event.id,
+      event: props.event,
+      viewType: props.viewType,
+      e
+    });
+    e.dataTransfer?.setData('text/plain', props.event.id);
+    e.dataTransfer?.setData('application/calendar-event-id', props.event.id);
+    e.dataTransfer!.effectAllowed = 'move';
+  }
+}
+
+function onDragEnd(e: DragEvent) {
+  if (props.viewType === 'month') {
+    debug.log('DRAG END', {
+      eventId: props.event.id,
+      event: props.event,
+      viewType: props.viewType,
+      e
+    });
+  }
+}
 </script>

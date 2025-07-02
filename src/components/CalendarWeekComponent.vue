@@ -109,7 +109,7 @@
                   :timeFormat="props.timeFormat"
                   class="absolute"
                   role="article"
-                  @click="emit('eventClick', event)"
+                  @click="handleWeekEventClick(event)"
                 >
                   <template v-if="$slots['event-content']" #default="slotProps">
                     <slot name="event-content" v-bind="slotProps" />
@@ -129,7 +129,16 @@ import { ref, computed, onMounted, type PropType } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
+import { debug } from "@/utils/debug";
 // import { useCalendarEventInteractions } from "@/composables/useCalendarEventInteractions";
+
+// Declare global property for TypeScript
+declare global {
+  interface Window {
+    __calendarEventModified?: boolean;
+    __lastModifiedEventId?: string | null;
+  }
+}
 
 /**
  * CalendarWeekComponent - Displays a week view calendar with time slots and events
@@ -381,7 +390,30 @@ const handleDragOver = (e: DragEvent) => {
   e.dataTransfer!.dropEffect = "move";
 };
 
+// Handle event clicks with protection against drag/resize
+const handleWeekEventClick = (event: CalendarEvent) => {
+  debug.log('Week: Event clicked', {
+    eventTitle: event.title,
+    eventId: event.id,
+    globalFlag: window.__calendarEventModified,
+    lastModifiedEventId: window.__lastModifiedEventId
+  });
+  
+  // Check if this event was recently modified
+  if (window.__calendarEventModified || window.__lastModifiedEventId === event.id) {
+    debug.log('Week: Preventing event click - event was recently modified');
+    return;
+  }
+  
+  debug.log('Week: Emitting eventClick for week view');
+  emit('eventClick', event);
+};
+
 const handleTimeClick = (time: Date) => {
+  debug.log('Week: Time clicked', {
+    time: time.toISOString(),
+    currentDate: props.currentDate.toISOString()
+  });
   emit("dayClick", time);
 };
 

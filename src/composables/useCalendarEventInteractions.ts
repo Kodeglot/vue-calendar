@@ -1,6 +1,7 @@
 import { ref, onUnmounted, type Ref } from 'vue'
 import { type CalendarEvent } from '../stores/calendarStore'
 import { toZonedTime } from 'date-fns-tz'
+import { debug } from "@/utils/debug"
 
 declare global {
   interface Window {
@@ -113,7 +114,7 @@ const performanceLog = (operation: string, startTime: number) => {
   if (isDevelopment) {
     const duration = performance.now() - startTime
     if (duration > 16) { // Log operations taking longer than 16ms (60fps threshold)
-      console.warn(`Performance warning: ${operation} took ${duration.toFixed(2)}ms`)
+      debug.warn(`Performance warning: ${operation} took ${duration.toFixed(2)}ms`)
     }
   }
 }
@@ -279,7 +280,7 @@ export function useCalendarEventInteractions(
     const startTime = performance.now()
     
     if (!containerRef) {
-      console.error('Container ref not available for drag')
+      debug.error('Container ref not available for drag')
       return
     }
 
@@ -410,7 +411,7 @@ export function useCalendarEventInteractions(
       startX.value = 0
       initialTop.value = 0
     } catch (error) {
-      console.error('Error stopping drag:', error)
+      debug.error('Error stopping drag:', error)
       // Ensure cleanup happens even if error occurs
       document.removeEventListener('mousemove', handleDragMove)
       document.removeEventListener('mouseup', stopDrag)
@@ -460,7 +461,7 @@ export function useCalendarEventInteractions(
       document.addEventListener('mousemove', handleDragMove)
       document.addEventListener('mouseup', stopDrag)
     } catch (error) {
-      console.error('Mouse down event failed:', error)
+      debug.error('Mouse down event failed:', error)
     }
   }
 

@@ -96,6 +96,7 @@
 import { computed, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
+import { debug } from "@/utils/debug";
 
 interface MonthComponentProps {
   /**
@@ -267,11 +268,31 @@ const isToday = (date: Date) => {
 // Drop Handler
 const handleDrop = (date: Date, e: DragEvent) => {
   const eventId = e.dataTransfer?.getData("text/plain");
-  if (eventId) emit("event-dropped", eventId, date);
+  if (eventId) {
+    debug.log('Month: Event dropped', {
+      eventId,
+      targetDate: date.toISOString(),
+      dataTransfer: {
+        text: e.dataTransfer?.getData("text/plain"),
+        calendarEventId: e.dataTransfer?.getData("application/calendar-event-id")
+      }
+    });
+    emit("event-dropped", eventId, date);
+  } else {
+    debug.warn('Month: Drop event missing event ID', {
+      targetDate: date.toISOString(),
+      dataTransfer: e.dataTransfer
+    });
+  }
 };
 
 // Date Click Handler
 const handleDateClick = (date: Date, e: Event) => {
+  debug.log('Month: Date clicked', {
+    date: date.toISOString(),
+    isCurrentMonth: isCurrentMonth(date),
+    isToday: isToday(date)
+  });
   emit("date-clicked", date);
 };
 

@@ -103,6 +103,7 @@ import { ref, computed, onMounted } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
+import { debug } from "@/utils/debug";
 // import { useCalendarEventInteractions } from "../composables/useCalendarEventInteractions";
 
 /**
@@ -114,6 +115,11 @@ const isMounted = ref(false);
 
 onMounted(() => {
   isMounted.value = true;
+  debug.log('Day: Component mounted', {
+    currentDate: props.currentDate.toISOString(),
+    hourHeight: props.hourHeight,
+    timeFormat: props.timeFormat
+  });
 });
 
 
@@ -297,9 +303,16 @@ const stackedEvents = computed(() => {
       const eventDateString = new Date(event.start).toDateString();
       return eventDateString === targetDateString;
     });
+    
+    debug.log('Day: Stacked events calculated', {
+      targetDate: props.currentDate.toISOString(),
+      eventCount: events.length,
+      events: events.map(e => ({ id: e.id, title: e.title, start: e.start, end: e.end }))
+    });
+    
     return calculateEventPositions(events);
   } catch (error) {
-    console.error("Error loading events:", error);
+    debug.error("Day: Error loading events:", error);
     return [];
   }
 });
