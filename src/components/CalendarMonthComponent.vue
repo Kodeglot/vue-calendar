@@ -50,32 +50,43 @@
       <div
         v-for="date in visibleDates"
         :key="date.toISOString()"
-        :class="`bg-white min-h-32 p-2 relative gap-y-2`"
+        :class="[
+          'min-h-32 p-2 relative gap-y-2 flex flex-col',
+          isCurrentMonth(date) ? 'bg-white' : 'bg-gray-100'
+        ]"
         @dragover.prevent
         @drop="handleDrop(date, $event)"
+        @click="handleDateClick(date, $event)"
         role="gridcell"
       >
         <!-- Date Number Indicator -->
-        <div class="text-right text-sm text-gray-500">
+        <div :class="[
+          'text-right text-sm flex-shrink-0',
+          isCurrentMonth(date) ? 'text-gray-500' : 'text-gray-400'
+        ]">
           {{ date.getDate() }}
           <span v-if="isToday(date)" class="text-blue-500 font-extrabold"
             >•</span
           >
         </div>
 
-        <!-- Events in Cell -->
-        <CalendarEventComponent
-          v-for="ce in getStackedEvents(date)"
-          :key="ce.id"
-          :event="ce"
-          :resizable="false"
-          :viewType="'month'"
-          @click="emit('eventClick', $event)"
-        >
-          <template v-if="$slots['event-content']" #default="slotProps">
-            <slot name="event-content" v-bind="slotProps" />
-          </template>
-        </CalendarEventComponent>
+        <!-- Events Container -->
+        <div class="flex-1 flex flex-col">
+          <!-- Events in Cell -->
+          <CalendarEventComponent
+            v-for="ce in getStackedEvents(date)"
+            :key="ce.id"
+            :event="ce"
+            :resizable="false"
+            :viewType="'month'"
+            class="!relative -mb-1"
+            @click="emit('eventClick', $event)"
+          >
+            <template v-if="$slots['event-content']" #default="slotProps">
+              <slot name="event-content" v-bind="slotProps" />
+            </template>
+          </CalendarEventComponent>
+        </div>
       </div>
     </div>
   </div>
@@ -257,5 +268,17 @@ const isToday = (date: Date) => {
 const handleDrop = (date: Date, e: DragEvent) => {
   const eventId = e.dataTransfer?.getData("text/plain");
   if (eventId) emit("event-dropped", eventId, date);
+};
+
+// Date Click Handler
+const handleDateClick = (date: Date, e: Event) => {
+  emit("date-clicked", date);
+};
+
+// Check if date is from the current month
+const isCurrentMonth = (date: Date) => {
+  const currentMonth = new Date(props.currentDate.getFullYear(), props.currentDate.getMonth()).getMonth();
+  const targetMonth = new Date(date.getFullYear(), date.getMonth()).getMonth();
+  return currentMonth === targetMonth;
 };
 </script>
