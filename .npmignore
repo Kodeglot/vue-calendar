@@ -1,0 +1,50 @@
+# Source files (not needed in npm package)
+src/
+tests/
+docs/
+
+# Development files
+.vscode/
+.idea/
+*.log
+*.tsbuildinfo
+
+# Build artifacts (except dist)
+coverage/
+.vitest/
+
+# Configuration files
+vite.config.ts
+vite.config.lib.ts
+vite.config.types.ts
+tsconfig*.json
+tailwind.config.js
+postcss.config.js
+
+# Development dependencies
+node_modules/
+
+# Git files
+.git/
+.gitignore
+
+# Documentation (README and LICENSE are included by default)
+CHANGELOG.md
+CONTRIBUTING.md
+
+# CI/CD
+.github/
+.github/
+
+# Environment files
+.env*
+!.env.example
+
+# Editor files
+.editorconfig
+.prettierrc*
+.eslintrc*
+
+# OS files
+.DS_Store
+Thumbs.db 
