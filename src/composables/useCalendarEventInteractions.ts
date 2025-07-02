@@ -2,6 +2,12 @@ import { ref, onUnmounted, type Ref } from 'vue'
 import { type CalendarEvent } from '../stores/calendarStore'
 import { toZonedTime } from 'date-fns-tz'
 
+declare global {
+  interface Window {
+    __calendarEventModified?: boolean;
+  }
+}
+
 interface UseCalendarEventInteractionsOptions {
   /**
    * Calendar event data
@@ -184,6 +190,8 @@ export function useCalendarEventInteractions(
 
   // Resize Handlers
   const startResize = (direction: 'top' | 'bottom') => {
+    window.__calendarEventModified = true;
+    
     isResizing.value = true
     hasInteracted.value = true
     if (!containerRef) return
@@ -429,6 +437,8 @@ export function useCalendarEventInteractions(
         currentElement = currentElement.parentElement
       }
 
+      window.__calendarEventModified = true;
+      
       e.stopPropagation()
       e.preventDefault()
 
