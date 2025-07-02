@@ -1,5 +1,6 @@
 import { ref, onUnmounted, type Ref } from 'vue'
 import { type CalendarEvent } from '../stores/calendarStore'
+import { toZonedTime } from 'date-fns-tz'
 
 interface UseCalendarEventInteractionsOptions {
   /**
@@ -174,18 +175,11 @@ export function useCalendarEventInteractions(
         height: 50
       }
     } else {
-      // Use cached formatter for better performance
-      const startTime = dateTimeFormatter
-        .format(new Date(event.start))
-        .split(':')
-        .map(Number)
-      const startTotalHours = startTime[0] + (startTime[1] / 60)
-
-      const endTime = dateTimeFormatter
-        .format(new Date(event.end))
-        .split(':')
-        .map(Number)
-      const endTotalHours = endTime[0] + (endTime[1] / 60)
+      // Use date-fns-tz for robust timezone math
+      const startDate = toZonedTime(new Date(event.start), options.timeZone)
+      const endDate = toZonedTime(new Date(event.end), options.timeZone)
+      const startTotalHours = startDate.getHours() + (startDate.getMinutes() / 60)
+      const endTotalHours = endDate.getHours() + (endDate.getMinutes() / 60)
       const durationHours = endTotalHours - startTotalHours
 
       position.value = {

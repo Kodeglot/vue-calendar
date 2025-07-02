@@ -39,8 +39,6 @@
     "deploy": "gh-pages -d dist"
   },
   "peerDependencies": {
-    "date-fns": "^3.0.0",
-    "date-fns-tz": "^3.0.0",
     "pinia": "^3.0.0",
     "vue": "^3.3.0"
   },
@@ -99,8 +97,8 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.15",
-    "date-fns": "^3.0.0",
-    "date-fns-tz": "^3.0.0",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0",
     "pinia": "^3.0.0",
     "uuid": "^11.1.0"
   }
