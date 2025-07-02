@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Create event modal interference** - Fixed issue where the create event modal would incorrectly open after dragging or resizing events. Added global flag mechanism to prevent modal from opening immediately after event modifications.
+
+### Technical Improvements
+- **Event interaction state management** - Improved event interaction handling with global flag to track recent drag/resize operations
+- **Modal behavior consistency** - Enhanced user experience by preventing unwanted modal triggers during event manipulation
+
 ## [1.2.1] - 2025-07-02
 
 ### Added
