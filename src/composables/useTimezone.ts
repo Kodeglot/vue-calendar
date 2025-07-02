@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { format, parseISO, formatISO } from 'date-fns'
 import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz'
+import { debug } from '@/utils/debug'
 
 /**
  * Timezone utility composable for handling ISO date storage and localized display
@@ -35,7 +36,13 @@ export function useTimezone() {
    */
   const toUserTimezone = (date: string | Date): Date => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date
-    return toZonedTime(dateObj, userTimezone.value)
+    const userDate = new Date(dateObj.toLocaleString("en-US", { timeZone: userTimezone.value }))
+    debug.log('Timezone: Converting to user timezone', {
+      input: dateObj.toISOString(),
+      userTimezone: userTimezone.value,
+      output: userDate.toISOString()
+    });
+    return userDate
   }
 
   /**
@@ -44,7 +51,13 @@ export function useTimezone() {
    * @returns Date object in UTC
    */
   const toUTC = (date: Date): Date => {
-    return fromZonedTime(date, userTimezone.value)
+    const utcDate = new Date(date.toLocaleString("en-US", { timeZone: userTimezone.value }))
+    debug.log('Timezone: Converting to UTC', {
+      input: date.toISOString(),
+      userTimezone: userTimezone.value,
+      output: utcDate.toISOString()
+    });
+    return utcDate
   }
 
   /**
@@ -154,7 +167,12 @@ export function useTimezone() {
    * @returns ISO string
    */
   const toISOString = (date: Date): string => {
-    return formatISO(date)
+    const isoString = date.toISOString()
+    debug.log('Timezone: Converting to ISO string', {
+      input: date.toISOString(),
+      output: isoString
+    });
+    return isoString
   }
 
   /**

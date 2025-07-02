@@ -516,6 +516,7 @@
 <script setup>
 import { ref } from 'vue'
 import CalendarView from '../src/views/CalendarView.vue'
+import { debug } from '../src/utils/debug'
 
 const currentDate = ref(new Date())
 const timeFormat = ref('24h')
@@ -555,16 +556,16 @@ function onHeightDropdownChange() {
 }
 
 function handleEventCreated(event) {
-  console.log('Event created:', event)
+  debug.log('Event created:', event)
   alert('Event created: ' + event.title)
 }
 
 function handleEventUpdated(event) {
-  console.log('Event updated:', event)
+  debug.log('Event updated:', event)
 }
 
 function handleEventDeleted(eventId) {
-  console.log('Event deleted:', eventId)
+  debug.log('Event deleted:', eventId)
 }
 
 function getEventMetadata(event) {

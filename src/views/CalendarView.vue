@@ -195,6 +195,7 @@ import CalendarWeekComponent from "../components/CalendarWeekComponent.vue";
 import CalendarDayComponent from "../components/CalendarDayComponent.vue";
 import CalendarEventComponent from "@/components/CalendarEventComponent.vue";
 import EventModal from "@/components/EventModal.vue";
+import { debug } from "@/utils/debug";
 import type { 
   CalendarView, 
   NavigationSlotProps, 
@@ -360,6 +361,7 @@ const headerDate = computed(() => {
  * - Day view: Previous day
  */
 const previousPeriod = () => {
+  const oldDate = new Date(currentDate.value);
   const newDate = new Date(currentDate.value);
   switch (currentView.value) {
     case "month":
@@ -373,6 +375,11 @@ const previousPeriod = () => {
       break;
   }
   currentDate.value = newDate;
+  debug.log('Navigation: Previous period', {
+    view: currentView.value,
+    from: oldDate.toISOString(),
+    to: newDate.toISOString()
+  });
   emit("date-change", newDate);
 };
 
@@ -383,6 +390,7 @@ const previousPeriod = () => {
  * - Day view: Next day
  */
 const nextPeriod = () => {
+  const oldDate = new Date(currentDate.value);
   const newDate = new Date(currentDate.value);
   switch (currentView.value) {
     case "month":
@@ -396,6 +404,11 @@ const nextPeriod = () => {
       break;
   }
   currentDate.value = newDate;
+  debug.log('Navigation: Next period', {
+    view: currentView.value,
+    from: oldDate.toISOString(),
+    to: newDate.toISOString()
+  });
   emit("date-change", newDate);
 };
 
@@ -406,8 +419,20 @@ const nextPeriod = () => {
  */
 const handleEventDrop = (eventId: string, date: Date) => {
   if (props.enableDragDrop) {
+    debug.log('Event dropped', {
+      eventId,
+      newDate: date.toISOString(),
+      view: currentView.value,
+      enableDragDrop: props.enableDragDrop
+    });
     // The store will automatically trigger position recalculation
     store.updateEventDateOnly(eventId, date);
+  } else {
+    debug.warn('Event drop ignored - drag and drop disabled', {
+      eventId,
+      newDate: date.toISOString(),
+      enableDragDrop: props.enableDragDrop
+    });
   }
 };
 
@@ -417,11 +442,16 @@ const handleEventDrop = (eventId: string, date: Date) => {
  */
 const handleDayClick = (date: Date) => {
   if (window.__calendarEventModified) {
+    debug.log('Day click ignored - event recently modified');
     window.__calendarEventModified = false;
     return;
   }
   // Round the time to the nearest 5 minutes
   const roundedTime = roundToNearestInterval(date, 5)
+  debug.log('Day clicked - opening event modal', {
+    originalDate: date.toISOString(),
+    roundedTime: roundedTime.toISOString()
+  });
   eventModal.value?.openModal(roundedTime);
 };
 
@@ -433,6 +463,10 @@ const handleDateClick = (date: Date) => {
   // For month view, set the time to 9 AM by default
   const defaultTime = new Date(date);
   defaultTime.setHours(9, 0, 0, 0);
+  debug.log('Date clicked in month view - opening event modal', {
+    date: date.toISOString(),
+    defaultTime: defaultTime.toISOString()
+  });
   eventModal.value?.openModal(defaultTime);
 };
 
@@ -441,6 +475,12 @@ const handleDateClick = (date: Date) => {
  * @param {CalendarEvent} event - The event to save
  */
 const handleEventSave = (event: CalendarEvent) => {
+  debug.log('Saving new event', {
+    eventId: event.id,
+    title: event.title,
+    start: event.start,
+    end: event.end
+  });
   store.addEvent(event);
   emit("event-created", event);
 };
@@ -450,6 +490,12 @@ const handleEventSave = (event: CalendarEvent) => {
  * @param {CalendarEvent} event - The updated event
  */
 const handleEventUpdate = (event: CalendarEvent) => {
+  debug.log('Updating event', {
+    eventId: event.id,
+    title: event.title,
+    start: event.start,
+    end: event.end
+  });
   store.updateEvent(event);
   emit("event-updated", event);
   clearSelectedEvent();
@@ -460,24 +506,24 @@ const handleEventUpdate = (event: CalendarEvent) => {
  * @param {string} eventId - The ID of the event to delete
  */
 const handleEventDelete = (eventId: string) => {
+  debug.log('Deleting event', { eventId });
   store.deleteEvent(eventId);
   emit("event-deleted", eventId);
   clearSelectedEvent();
 };
 
 /**
- * Handles event click to open edit modal
+ * Handles event click events
  * @param {CalendarEvent} event - The clicked event
  */
 const onEventClick = (event: CalendarEvent) => {
+  debug.log('Event clicked', {
+    eventId: event.id,
+    title: event.title,
+    view: currentView.value
+  });
   selectedEvent.value = event;
   emit("event-click", event);
-  nextTick(() => {
-    // Open fallback modal if no slot is provided
-    if (!slots["event-modal"] && fallbackModalRef.value) {
-      fallbackModalRef.value.openEditModal(event);
-    }
-  });
 };
 
 /**

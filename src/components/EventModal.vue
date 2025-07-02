@@ -120,9 +120,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import { useTimezone } from "../composables/useTimezone";
+import { debug } from "@/utils/debug";
 
 const emit = defineEmits(["close", "save", "update", "delete"]);
 const isOpen = ref(false);
@@ -145,6 +146,9 @@ const localStartTime = ref("");
 const localEndTime = ref("");
 
 function openModal(time: Date) {
+  debug.log('EventModal: Opening modal for new event', {
+    initialDate: time.toISOString()
+  });
   selectedTime.value = time;
   isEditMode.value = false;
   editingEventId.value = null;
@@ -167,9 +171,18 @@ function openModal(time: Date) {
   localEndTime.value = formatForDateTimeLocal(endTime);
 
   isOpen.value = true;
+  nextTick(() => {
+    titleInput.value?.focus();
+  });
 }
 
 function openEditModal(existingEvent: CalendarEvent) {
+  debug.log('EventModal: Opening modal for edit', {
+    eventId: existingEvent.id,
+    title: existingEvent.title,
+    start: existingEvent.start,
+    end: existingEvent.end
+  });
   isEditMode.value = true;
   editingEventId.value = existingEvent.id;
 
@@ -190,9 +203,13 @@ function openEditModal(existingEvent: CalendarEvent) {
   localEndTime.value = formatForDateTimeLocal(userEndTime);
 
   isOpen.value = true;
+  nextTick(() => {
+    titleInput.value?.focus();
+  });
 }
 
 function closeModal() {
+  debug.log('EventModal: Closing modal');
   isOpen.value = false;
   emit("close");
 }
@@ -216,6 +233,12 @@ function handleSubmit() {
         end: toISOString(utcEnd),
         tailwindColor: event.value.tailwindColor,
       };
+      debug.log('EventModal: Updating existing event', {
+        eventId: editingEventId.value,
+        title: updatedEvent.title,
+        start: updatedEvent.start,
+        end: updatedEvent.end
+      });
       emit("update", updatedEvent);
     } else {
       // Create new event
@@ -226,20 +249,32 @@ function handleSubmit() {
         end: toISOString(utcEnd),
         tailwindColor: event.value.tailwindColor,
       };
+      debug.log('EventModal: Creating new event', {
+        eventId: newEvent.id,
+        title: newEvent.title,
+        start: newEvent.start,
+        end: newEvent.end
+      });
       emit("save", newEvent);
     }
     
     closeModal();
   } catch (error) {
-    console.error("Error saving event:", error);
+    debug.error("EventModal: Error saving event:", error);
     alert("Error saving event. Please check your date/time inputs.");
   }
 }
 
 function handleDelete() {
   if (isEditMode.value && editingEventId.value) {
+    debug.log('EventModal: Deleting event', {
+      eventId: editingEventId.value,
+      title: event.value.title
+    });
     emit("delete", editingEventId.value);
     closeModal();
+  } else {
+    debug.warn('EventModal: Cannot delete - not in edit mode or no event ID');
   }
 }
 
