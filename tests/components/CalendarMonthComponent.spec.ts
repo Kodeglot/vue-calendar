@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import CalendarMonthComponent from '../../src/components/CalendarMonthComponent.vue'
 import { nextTick } from 'vue'
+import CalendarEventComponent from '../../src/components/CalendarEventComponent.vue'
 
 describe('CalendarMonthComponent', () => {
   let pinia: any
@@ -84,7 +85,9 @@ describe('CalendarMonthComponent', () => {
   it('emits eventClick when an event is clicked', async () => {
     const wrapper = mount(CalendarMonthComponent, {
       props: baseProps,
-      global: { plugins: [pinia] }
+      global: {
+        plugins: [pinia]
+      }
     })
     const store = wrapper.vm.store
     store.addEvent({
@@ -98,17 +101,13 @@ describe('CalendarMonthComponent', () => {
       left: 0
     })
     await nextTick()
-    // Find CalendarEventComponent with the correct event title and trigger click on its button
+    // Find CalendarEventComponent with the correct event title
     const eventComps = wrapper.findAllComponents({ name: 'CalendarEventComponent' })
     const eventComp = eventComps.find(comp => comp.text().includes('Clickable Event'))
-    const button = eventComp?.find('[role="button"]')
-    console.log('Found eventComp:', !!eventComp, 'Found button:', !!button)
-    await button?.trigger('mousedown', { button: 0, stopPropagation: () => {} })
-    document.dispatchEvent(new Event('mouseup'))
+    // Trigger a native click event on the actual DOM element
+    const eventElement = eventComp?.find('[role="button"]')
+    await eventElement?.trigger('click')
     await nextTick()
-    await button?.trigger('click')
-    await nextTick()
-    console.log('Emitted events:', wrapper.emitted())
     expect(wrapper.emitted('eventClick')).toBeTruthy()
   })
 
