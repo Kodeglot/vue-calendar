@@ -7,12 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Click to create events** - Click on empty space in any calendar view to create a new event
+  - Month view: Click on date cells to create events at 9 AM on that date
+  - Week/Day view: Click on time slots to create events at the clicked time (rounded to nearest 5 minutes)
+  - All new events default to 1-hour duration
+- **Time rounding utility** - Added `roundToNearestInterval` function to round times to nearest 5-minute intervals
+- **Development server with styles** - `npm run dev` now includes Tailwind CSS and works like the demo
+- **Enhanced demo experience** - Added comprehensive "Try it out!" sections for all demo examples
+- **Project links in demo** - Added links to npm, CI/CD, license, coverage, and GitHub repository
+- **Kodeglot branding** - Added company branding to demo headers and page titles
+
 ### Fixed
 - **Month view event click reliability** - Fixed issue where clicking events in month view would not reliably emit click events due to drag/resize logic interference. Added dedicated click handler for month view that bypasses drag/resize logic.
 - **Test reliability** - Fixed CalendarMonthComponent test to properly trigger click events on the correct DOM element, ensuring consistent test behavior.
+- **Week view date accuracy** - Fixed issue where clicking in week view would use current date instead of the clicked date
+- **Month view visual hierarchy** - Fixed event layout so events appear below day numbers instead of overlapping
+- **Demo modal responsiveness** - Fixed modal sizing to fit properly on mobile devices with proper margins and scrolling
 
 ### Changed
-- **Event interaction logic** - Improved event click handling in month view by adding a dedicated `handleClick` method that emits events directly for month view, while preserving drag/resize functionality for week/day views.
+- **Event interaction logic** - Improved event click handling in month view by adding a dedicated `handleClick` method that emits events directly for month view
+- **TimeGridComponent** - Added `baseDate` prop to ensure correct date calculation for clicked times in week/day views
+- **Development experience** - Updated main Vite config to include Tailwind CSS and proper HTML setup for development
+- **Month view styling** - Added gray background for dates from previous/next months to improve visual hierarchy
+- **Event spacing** - Reduced spacing between events on the same day in month view for more compact layout
+- **Demo modals** - Restructured modals with fixed headers/footers and scrollable content areas for better UX
 
 ## [1.2.0] - 2025-07-02
 

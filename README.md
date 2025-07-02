@@ -34,6 +34,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📱 **Responsive design** for all screen sizes
 - 🔌 **Easy to integrate** with any Vue 3 project
 - 🖱️ **Drag and drop support** for event management
+- 🖱️ **Click to create events** - Click on empty space to create new events with automatic time rounding
 - 🖱️ **Improved event interaction**: Edit modal only opens on single click, not on drag or resize
 - 🔄 **Reactive event updates**: Calendar updates instantly when events are added/edited
 - 🎨 **22 customizable event colors** using Tailwind color palette
@@ -43,6 +44,8 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 🎯 **Time-based positioning** with 5-minute snap intervals
 - 🛠️ **Plugin architecture** for extensibility
 - 🧪 **Comprehensive testing** with Vitest
+- 🎨 **Enhanced visual hierarchy** with improved month view styling
+- 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
 
 ## Installation
 
@@ -73,11 +76,14 @@ Add the following script tag to your HTML:
 
 The demo showcases all the calendar features including:
 - Multiple view modes (month, week, day)
+- **Click to create events** with interactive guides
 - Custom event content and modals
 - Drag and drop functionality
 - Event resizing
 - Custom controls and navigation
 - Event creation with metadata
+- **Enhanced visual hierarchy** with improved styling
+- **Mobile-optimized modals** with responsive design
 
 ## Quick Start
 
@@ -198,22 +204,39 @@ export const useCalendarStore = defineStore('calendar', () => {
 </template>
 
 <script setup lang="ts">
-import { CalendarView, useCalendarStore, type CalendarEvent } from '@kodeglot/vue-calendar'
+import CalendarView from '@kodeglot/vue-calendar'
 
-const store = useCalendarStore()
-
-function handleEventCreated(event: CalendarEvent) {
+const handleEventCreated = (event) => {
   console.log('Event created:', event)
 }
 
-function handleEventUpdated(event: CalendarEvent) {
+const handleEventUpdated = (event) => {
   console.log('Event updated:', event)
 }
 
-function handleEventDeleted(eventId: string) {
+const handleEventDeleted = (eventId) => {
   console.log('Event deleted:', eventId)
 }
 </script>
+
+## Click to Create Events
+
+The calendar now supports creating events by clicking on empty space:
+
+### Month View
+- Click on any date cell to create an event at 9 AM on that date
+- Previous/next month dates have a subtle gray background for better visual hierarchy
+
+### Week/Day View  
+- Click on any time slot to create an event at that specific time
+- Times are automatically rounded to the nearest 5-minute interval
+- All new events default to 1-hour duration
+
+### Features
+- **Automatic time rounding**: Times are rounded to the nearest 5 minutes for consistency
+- **Default duration**: New events automatically span 1 hour
+- **Visual feedback**: Clear indication of clickable areas
+- **Cross-view consistency**: Works seamlessly across all view modes
 
 ## Troubleshooting
 
