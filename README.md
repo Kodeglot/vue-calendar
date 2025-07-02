@@ -4,8 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD](https://github.com/Kodeglot/vue-calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/Kodeglot/vue-calendar/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/Kodeglot/vue-calendar)](https://codecov.io/gh/Kodeglot/vue-calendar)
+[![Live Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://kodeglot.github.io/vue-calendar/)
 
 A fully-featured, customizable calendar component for Vue 3 with built-in Tailwind CSS support. Perfect for building scheduling applications, event calendars, and date management systems.
+
+## Live Demo
+
+👉 [Try the Vue Calendar Live Demo on GitHub Pages](https://kodeglot.github.io/vue-calendar/)
 
 ## Table of Contents
 - [Features](#features)
@@ -29,6 +34,8 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📱 **Responsive design** for all screen sizes
 - 🔌 **Easy to integrate** with any Vue 3 project
 - 🖱️ **Drag and drop support** for event management
+- 🖱️ **Improved event interaction**: Edit modal only opens on single click, not on drag or resize
+- 🔄 **Reactive event updates**: Calendar updates instantly when events are added/edited
 - 🎨 **22 customizable event colors** using Tailwind color palette
 - 🗓️ **Multiple view modes** (month, week, day)
 - 🔄 **Event resizing** with time snapping
