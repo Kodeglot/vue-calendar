@@ -1158,11 +1158,17 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 ## Changelog
 
+**v1.2.1 (2025-07-02)**
+- Added click-to-create events functionality with automatic time rounding
+- Enhanced month view visual hierarchy with gray backgrounds for adjacent months
+- Improved event layout to prevent overlapping with day numbers
+- Added comprehensive interactive demo with "Try it out!" guides
+- Enhanced mobile experience with responsive modals
+- Added Kodeglot branding throughout the demo
+- Fixed week view date accuracy for clicked times
+- Improved development experience with styled dev server
+
 **v1.2.0 (2025-07-02)**
-- Ensured `eventClick` is reliably emitted from month view events (explicit click handler)
-- Comprehensive test coverage for all major components and store
-- Fixed TypeScript build error due to unused variable
-- Changelog is now in reverse chronological order (most recent at the top)
 
 ## Roadmap
 
