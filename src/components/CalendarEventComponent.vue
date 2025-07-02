@@ -30,7 +30,7 @@
     }"
     :draggable="!isResizing"
     @mousedown="handleMouseDown"
-    @click.stop="emit('click', event)"
+    @click="handleClick()"
   >
     <!-- Customizable Event Content Slot -->
     <slot :event="event">
@@ -261,6 +261,15 @@ onMounted(() => {
   onUnmounted(cleanup);
 });
 
+// Handle click events - for month view, emit click directly
+const handleClick = () => {
+  // For month view, emit click directly since drag/resize is not enabled
+  if (props.viewType === 'month') {
+    emit('click', props.event);
+  }
+  // For other views, let the mousedown/mouseup logic handle it
+};
+
 // Watch for changes in event data and recalculate position
 watch(
   () => [props.event.start, props.event.end, props.event.order],
@@ -278,8 +287,6 @@ watch(
     calculatePosition(newViewType, props.event.order);
   }
 );
-
-
 
 // Format event time for display based on view type and time format
 const formatEventTime = () => {
