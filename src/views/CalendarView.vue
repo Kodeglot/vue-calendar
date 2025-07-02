@@ -416,6 +416,10 @@ const handleEventDrop = (eventId: string, date: Date) => {
  * @param {Date} date - The date that was clicked
  */
 const handleDayClick = (date: Date) => {
+  if (window.__calendarEventModified) {
+    window.__calendarEventModified = false;
+    return;
+  }
   // Round the time to the nearest 5 minutes
   const roundedTime = roundToNearestInterval(date, 5)
   eventModal.value?.openModal(roundedTime);
@@ -599,4 +603,10 @@ onMounted(() => {
     store.addEvent(event);
   });
 });
+
+declare global {
+  interface Window {
+    __calendarEventModified?: boolean;
+  }
+}
 </script>
