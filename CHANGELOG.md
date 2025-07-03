@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2025-07-03
+
+### Changed
+- **Timezone composable optimization** - Removed unused imports (`formatISO`, `fromZonedTime`, `toZonedTime`) from timezone utilities to reduce bundle size and improve code clarity
+- **Enhanced contributing guidelines** - Comprehensive development documentation with detailed setup instructions, testing guidelines, and project structure overview
+
+### Documentation
+- **Development workflow** - Added detailed development commands, testing procedures, and code quality guidelines
+- **Project structure** - Documented project layout and file organization for new contributors
+- **Release process** - Added guidelines for versioning, changelog updates, and publishing procedures
+- **README cleanup** - Removed changelog section from README.md to keep it focused on core documentation, changelog remains in separate CHANGELOG.md file
+
 ## [1.3.0] - 2025-07-03
 
 ### Added
@@ -29,18 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Modal behavior consistency** - Enhanced user experience by preventing unwanted modal triggers during event manipulation
 - **Debug infrastructure** - Added comprehensive debug logging system with conditional output and browser console controls
 - **Event time preservation logic** - Enhanced `updateEventDateOnly` function to properly preserve time components when changing dates
-
-## [1.3.1] - 2025-07-03
-
-### Changed
-- **Timezone composable optimization** - Removed unused imports (`formatISO`, `fromZonedTime`, `toZonedTime`) from timezone utilities to reduce bundle size and improve code clarity
-- **Enhanced contributing guidelines** - Comprehensive development documentation with detailed setup instructions, testing guidelines, and project structure overview
-
-### Documentation
-- **Development workflow** - Added detailed development commands, testing procedures, and code quality guidelines
-- **Project structure** - Documented project layout and file organization for new contributors
-- **Release process** - Added guidelines for versioning, changelog updates, and publishing procedures
-- **README cleanup** - Removed changelog section from README.md to keep it focused on core documentation, changelog remains in separate CHANGELOG.md file
 
 ## [Unreleased]
 
