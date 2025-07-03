@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Debug infrastructure** - Added comprehensive debug logging system with conditional output and browser console controls
 - **Event time preservation logic** - Enhanced `updateEventDateOnly` function to properly preserve time components when changing dates
 
-## [Unreleased]
+## [1.3.1] - 2025-07-03
 
 ### Changed
 - **Timezone composable optimization** - Removed unused imports (`formatISO`, `fromZonedTime`, `toZonedTime`) from timezone utilities to reduce bundle size and improve code clarity
@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Project structure** - Documented project layout and file organization for new contributors
 - **Release process** - Added guidelines for versioning, changelog updates, and publishing procedures
 - **README cleanup** - Removed changelog section from README.md to keep it focused on core documentation, changelog remains in separate CHANGELOG.md file
+
+## [Unreleased]
 
 ## [1.2.1] - 2025-07-02
 
