@@ -22,7 +22,6 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - [Customization](#customization)
 - [Development](#development)
 - [Contributing](#contributing)
-- [Changelog](#changelog)
 - [Roadmap](#roadmap)
 - [License](#license)
 
@@ -1244,29 +1243,6 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 - Write tests for new features
 - Use Tailwind CSS for styling
 - Follow the existing code structure
-
-## Changelog
-
-**v1.3.0 (2025-07-03)**
-- Added comprehensive debug logging system with browser console controls
-- Fixed event interaction issues in month view (click vs drag conflicts)
-- Fixed edit modal opening on first click instead of second click
-- Fixed EventModal reference error and improved focus handling
-- Enhanced event time preservation when dragging between days
-- Improved modal rendering performance and user experience
-- Added extensive debug logging throughout all components
-
-**v1.2.1 (2025-07-02)**
-- Added click-to-create events functionality with automatic time rounding
-- Enhanced month view visual hierarchy with gray backgrounds for adjacent months
-- Improved event layout to prevent overlapping with day numbers
-- Added comprehensive interactive demo with "Try it out!" guides
-- Enhanced mobile experience with responsive modals
-- Added Kodeglot branding throughout the demo
-- Fixed week view date accuracy for clicked times
-- Improved development experience with styled dev server
-
-**v1.2.0 (2025-07-02)**
 
 ## Roadmap
 

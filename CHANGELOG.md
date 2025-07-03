@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Timezone composable optimization** - Removed unused imports (`formatISO`, `fromZonedTime`, `toZonedTime`) from timezone utilities to reduce bundle size and improve code clarity
+- **Enhanced contributing guidelines** - Comprehensive development documentation with detailed setup instructions, testing guidelines, and project structure overview
+
+### Documentation
+- **Development workflow** - Added detailed development commands, testing procedures, and code quality guidelines
+- **Project structure** - Documented project layout and file organization for new contributors
+- **Release process** - Added guidelines for versioning, changelog updates, and publishing procedures
+- **README cleanup** - Removed changelog section from README.md to keep it focused on core documentation, changelog remains in separate CHANGELOG.md file
+
 ## [1.2.1] - 2025-07-02
 
 ### Added
