@@ -32,6 +32,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 🧩 **TypeScript support** with full type definitions
 - 📱 **Responsive design** for all screen sizes
 - 🔌 **Easy to integrate** with any Vue 3 project
+- 🛡️ **CSS Style Isolation** - All styles prefixed with `.vc-calendar` to prevent conflicts with host apps
 - 🖱️ **Drag and drop support** for event management
 - 🖱️ **Click to create events** - Click on empty space to create new events with automatic time rounding
 - 🖱️ **Improved event interaction**: Edit modal only opens on single click, not on drag or resize
@@ -91,6 +92,38 @@ The demo showcases all the calendar features including:
 ```bash
 npm install @kodeglot/vue-calendar pinia date-fns date-fns-tz
 ```
+
+## CSS Style Isolation
+
+The Vue Calendar plugin includes comprehensive CSS style isolation to prevent conflicts with your host application:
+
+### ✅ Safe Integration
+- All calendar styles are prefixed with `.vc-calendar`
+- No interference with your app's Tailwind CSS or other styling frameworks
+- Safe to use alongside any CSS framework or custom styles
+
+### 🔧 How It Works
+The calendar automatically wraps all its content with the `vc-calendar` class, ensuring that:
+- Calendar styles only apply within the calendar component
+- Your app's global styles remain unaffected
+- No CSS conflicts or style leakage
+
+### 📝 Usage Example
+```vue
+<template>
+  <div>
+    <!-- Your app's styles work normally -->
+    <div class="grid grid-cols-3">
+      <div>Your content</div>
+    </div>
+    
+    <!-- Calendar styles are isolated -->
+    <CalendarView />
+  </div>
+</template>
+```
+
+In this example, your app's grid layout will work normally, while the calendar's styles are completely isolated within the `.vc-calendar` wrapper.
 
 ### 2. Import Styles (REQUIRED)
 
@@ -327,6 +360,15 @@ debug.timeEnd('Event Filtering')
 ```
 
 ## Troubleshooting
+
+### CSS Style Conflicts?
+
+The Vue Calendar plugin includes comprehensive CSS style isolation to prevent conflicts with your host application. All calendar styles are prefixed with `.vc-calendar` to ensure they only apply within the calendar component.
+
+If you're experiencing style conflicts, ensure that:
+- The calendar component is properly wrapped with the `vc-calendar` class (this happens automatically)
+- Your host app's styles are not interfering with the calendar's isolated styles
+- The CSS import is working correctly
 
 ### Calendar Not Styling Correctly?
 

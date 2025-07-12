@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-07-12
+
+### Added
+- **CSS Style Isolation** - Implemented comprehensive CSS prefixing solution to prevent style leakage into host applications
+  - All CSS selectors now prefixed with `.vc-calendar` to ensure calendar styles only apply within the component
+  - Added `postcss-prefix-selector` dependency for automated CSS prefixing during build
+  - Updated component structure to include `vc-calendar` class on root wrappers
+  - Prevents conflicts with host app's Tailwind CSS or other styling frameworks
+  - Complete style isolation ensures safe integration into any Vue application
+
+### Changed
+- **PostCSS Configuration** - Updated `postcss.config.js` to include CSS prefixing plugin with `.vc-calendar` prefix
+- **Component Structure** - Added `vc-calendar` class to root wrappers in `CalendarView.vue` and `EventModal.vue`
+- **Build Process** - CSS now automatically prefixed during build to prevent global style conflicts
+
+### Documentation
+- **CSS Prefixing Guide** - Added comprehensive documentation explaining the style isolation solution
+- **Integration Safety** - Updated documentation to highlight safe integration with any Vue app
+
 ## [1.3.1] - 2025-07-03
 
 ### Changed

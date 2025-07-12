@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'grow w-full flex flex-col',
+      'vc-calendar grow w-full flex flex-col',
       'bg-white rounded-xl shadow-lg overflow-hidden',
       'border border-gray-200',
       customClasses?.container,
