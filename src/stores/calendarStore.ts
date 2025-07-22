@@ -35,12 +35,13 @@ export const useCalendarStore = defineStore('calendar', () => {
 
   // Helper function to trigger position recalculation with debouncing
   const triggerPositionRecalculation = () => {
-    // Clear existing timeout to debounce multiple calls
     if (positionRecalculationTimeout) {
       clearTimeout(positionRecalculationTimeout)
     }
     
     positionRecalculationTimeout = setTimeout(() => {
+      // Only run in browser environments
+      if (typeof document === 'undefined') return;
       const eventElements = document.querySelectorAll('[data-event-id]');
       eventElements.forEach((element) => {
         element.dispatchEvent(new CustomEvent('recalculate-position'));
