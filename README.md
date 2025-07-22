@@ -670,9 +670,30 @@ If you encounter issues with the demo:
 |-------|------------|-------------|
 | `date-change` | `date: Date` | Emitted when displayed date changes |
 | `event-created` | `event: CalendarEvent` | Emitted when new event is created |
-| `event-updated` | `event: CalendarEvent` | Emitted when event is updated |
+| `event-updated` | `event: CalendarEvent, newStart: string, newEnd: string` | Emitted when event is updated (drag or resize end) |
 | `event-deleted` | `eventId: string` | Emitted when event is deleted |
 | `openEventModal` | `date: Date` | Emitted when event modal is opened |
+
+#### `event-updated` Payload
+- `event`: The updated event object (including id, title, start, end, etc.)
+- `newStart`: The new start time as an ISO string
+- `newEnd`: The new end time as an ISO string
+
+### How-to: Listen for event-updated on drag/resize
+
+```vue
+<CalendarView
+  ...
+  @event-updated="onEventUpdated"
+/>
+
+<script setup lang="ts">
+function onEventUpdated(event, newStart, newEnd) {
+  // Handle the updated event (e.g., save to backend)
+  console.log('Event updated:', event, newStart, newEnd)
+}
+</script>
+```
 
 ### CalendarEvent Interface
 
