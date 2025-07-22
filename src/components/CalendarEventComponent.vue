@@ -184,6 +184,14 @@ interface EventComponentEmits {
   ): void;
 
   /**
+   * Emitted when drag ends or resize ends (event updated)
+   * @param event - The updated calendar event
+   * @param newStart - New start time as ISO string
+   * @param newEnd - New end time as ISO string
+   */
+  (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
+
+  /**
    * Emitted when drag starts
    * @param dragEvent - Native drag event
    * @param event - The calendar event
@@ -205,6 +213,11 @@ const wrappedEmit = (event: string, ...args: any[]) => {
   switch (emitKey) {
     case "dragstart":
       emit(emitKey, args[0] as DragEvent, args[1] as CalendarEvent);
+      break;
+    case "dragend":
+    case "resize-end":
+      // Forward as 'event-updated' to parent
+      emit("event-updated", args[0] as CalendarEvent, args[1] as string, args[2] as string);
       break;
     case "click":
       // Ensure we emit the calendar event object, not the mouse event
