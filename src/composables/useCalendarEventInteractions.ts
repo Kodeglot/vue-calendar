@@ -273,6 +273,8 @@ export function useCalendarEventInteractions(
     hasInteracted.value = false
     document.removeEventListener('mousemove', handleResizeMove)
     document.removeEventListener('mouseup', stopResize)
+    // Emit resize-end event with updated event data
+    emit('resize-end', event, event.start, event.end)
   }
 
   // Throttled drag move handler for better performance
