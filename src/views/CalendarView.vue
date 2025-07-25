@@ -292,7 +292,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: "date-change", date: Date): void;
   (e: "event-created", event: CalendarEvent): void;
-  (e: "event-updated", event: CalendarEvent): void;
+  (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
   (e: "event-deleted", eventId: string): void;
   (e: "openEventModal", date: Date): void;
   (e: "event-click", event: CalendarEvent): void;
@@ -546,7 +546,7 @@ function clearSelectedEvent() {
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   console.log('[CalendarView] event-updated fired:', event, newStart, newEnd);
-  emit('event-updated', event);
+  emit('event-updated', event, newStart, newEnd);
 }
 
 // Watch for changes in currentDate and emit events
