@@ -110,6 +110,7 @@
                   class="absolute"
                   role="article"
                   @click="handleWeekEventClick(event)"
+                  @event-updated="onEventUpdated"
                 >
                   <template v-if="$slots['event-content']" #default="slotProps">
                     <slot name="event-content" v-bind="slotProps" />
@@ -209,6 +210,13 @@ const emit = defineEmits<{
    * @param {CalendarEvent} event - The clicked event
    */
   (e: "eventClick", event: CalendarEvent): void;
+  /**
+   * Emitted when an event is updated (resized or moved)
+   * @param {CalendarEvent} event - The updated event
+   * @param {string} newStart - The new start time of the event
+   * @param {string} newEnd - The new end time of the event
+   */
+  (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
 }>();
 
 // Constants
@@ -429,4 +437,8 @@ const formatHour = (hour: number) => {
     hour12: props.timeFormat === '12h',
   });
 };
+
+function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
+  emit('event-updated', event, newStart, newEnd);
+}
 </script>

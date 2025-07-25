@@ -81,6 +81,7 @@
             :viewType="'month'"
             class="!relative -mb-1"
             @click="emit('eventClick', $event)"
+            @event-updated="onEventUpdated"
           >
             <template v-if="$slots['event-content']" #default="slotProps">
               <slot name="event-content" v-bind="slotProps" />
@@ -158,6 +159,13 @@ interface MonthComponentEmits {
    * @param {CalendarEvent} event - The clicked event
    */
   (e: "eventClick", event: CalendarEvent): void;
+  /**
+   * Emitted when an event is updated
+   * @param event - The updated event
+   * @param newStart - The new start date of the event
+   * @param newEnd - The new end date of the event
+   */
+  (e: "event-updated", event: CalendarEvent, newStart: Date, newEnd: Date): void;
 }
 
 const emit = defineEmits<MonthComponentEmits>();
@@ -302,4 +310,8 @@ const isCurrentMonth = (date: Date) => {
   const targetMonth = new Date(date.getFullYear(), date.getMonth()).getMonth();
   return currentMonth === targetMonth;
 };
+
+function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
+  emit('event-updated', event, newStart, newEnd);
+}
 </script>

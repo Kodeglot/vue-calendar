@@ -86,6 +86,7 @@
               class="absolute"
               :viewType="'day'"
               @click="emit('eventClick', event)"
+              @event-updated="onEventUpdated"
             >
               <template v-if="$slots['event-content']" #default="slotProps">
                 <slot name="event-content" v-bind="slotProps" />
@@ -219,6 +220,13 @@ interface Emits {
    * @param {CalendarEvent} event - The clicked event
    */
   (e: "eventClick", event: CalendarEvent): void;
+  /**
+   * Emitted when an event is updated (resized or moved)
+   * @param {CalendarEvent} event - The updated event
+   * @param {string} newStart - The new start time of the event
+   * @param {string} newEnd - The new end time of the event
+   */
+  (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
 }
 
 const emit = defineEmits<Emits>();
@@ -398,5 +406,9 @@ const formatHour = (hour: number) => {
     }
   );
 };
+
+function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
+  emit('event-updated', event, newStart, newEnd);
+}
 
 </script>
