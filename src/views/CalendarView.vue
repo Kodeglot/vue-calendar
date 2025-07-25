@@ -82,6 +82,7 @@
         @dayClick="handleDayClick"
         @date-clicked="handleDateClick"
         @eventClick="onEventClick"
+        @event-updated="onEventUpdated"
       >
         <!--
           Custom Event Content Slot:
@@ -541,6 +542,11 @@ const setView = (view: CalendarView) => {
 
 function clearSelectedEvent() {
   selectedEvent.value = null;
+}
+
+function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
+  console.log('[CalendarView] event-updated fired:', event, newStart, newEnd);
+  emit('event-updated', event);
 }
 
 // Watch for changes in currentDate and emit events
