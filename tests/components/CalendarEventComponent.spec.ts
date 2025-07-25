@@ -79,6 +79,28 @@ describe('CalendarEventComponent', () => {
     expect(wrapper.emitted('click')).toBeUndefined()
   })
 
+  it('emits event-updated after drag/resize', async () => {
+    const mockContainer = document.createElement('div')
+    mockContainer.getBoundingClientRect = () => ({ top: 0, left: 0, width: 100, height: 100, right: 100, bottom: 100, x: 0, y: 0, toJSON: () => {} })
+    const wrapper = mount(CalendarEventComponent, {
+      props: { ...baseProps, resizable: true, containerRef: mockContainer },
+      global: { plugins: [pinia] }
+    })
+    // Simulate mousedown on the resize handle
+    const handle = wrapper.find('.cursor-row-resize')
+    await handle.trigger('mousedown', { button: 0 })
+    // Simulate mousemove and mouseup to end resize
+    document.dispatchEvent(new MouseEvent('mousemove', { clientY: 10 }))
+    document.dispatchEvent(new MouseEvent('mouseup'))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('event-updated')).toBeTruthy()
+    const payload = wrapper.emitted('event-updated')?.[0]
+    expect(payload).toBeDefined()
+    expect(payload[0]).toMatchObject({ id: '1', title: 'Test Event' })
+    expect(typeof payload[1]).toBe('string')
+    expect(typeof payload[2]).toBe('string')
+  })
+
   describe('Timezone handling', () => {
     const testCases = [
       {

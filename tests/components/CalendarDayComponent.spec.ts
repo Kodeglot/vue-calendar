@@ -123,4 +123,32 @@ describe('CalendarDayComponent', () => {
     await nextTick()
     expect(wrapper.emitted('eventClick')).toBeTruthy()
   })
+
+  it('emits event-updated when child event emits it', async () => {
+    const wrapper = mount(CalendarDayComponent, {
+      props: baseProps,
+      global: { plugins: [pinia] }
+    })
+    const store = wrapper.vm.store
+    store.addEvent({
+      id: '20',
+      title: 'Day Propagate Event',
+      start: '2025-01-01T14:00:00Z',
+      end: '2025-01-01T15:00:00Z',
+      tailwindColor: 'blue',
+      allDay: false,
+      width: 100,
+      left: 0
+    })
+    await nextTick()
+    // Find the event component and emit event-updated
+    const eventComp = wrapper.findComponent({ name: 'CalendarEventComponent' })
+    eventComp.vm.$emit('event-updated', store.events.get('20'), '2025-01-01T14:00:00Z', '2025-01-01T15:00:00Z')
+    await nextTick()
+    expect(wrapper.emitted('event-updated')).toBeTruthy()
+    const payload = wrapper.emitted('event-updated')?.[0]
+    expect(payload[0]).toMatchObject({ id: '20', title: 'Day Propagate Event' })
+    expect(typeof payload[1]).toBe('string')
+    expect(typeof payload[2]).toBe('string')
+  })
 }) 

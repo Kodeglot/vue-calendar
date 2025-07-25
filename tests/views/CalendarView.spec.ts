@@ -155,4 +155,23 @@ describe('CalendarView', () => {
     expect(store.events.size).toBe(1)
     expect(store.events.get('test-1')?.id).toBe('test-1')
   })
+
+  it('emits event-updated from root and logs when child view emits it', async () => {
+    const wrapper = mount(CalendarView, {
+      global: { plugins: [pinia] },
+      props: { initialDate: mockDate }
+    })
+    // Spy on console.log
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    // Simulate event-updated from child view
+    wrapper.vm.onEventUpdated({ id: '30', title: 'Root Propagate Event' }, '2025-01-01T16:00:00Z', '2025-01-01T17:00:00Z')
+    await nextTick()
+    expect(wrapper.emitted('event-updated')).toBeTruthy()
+    const payload = wrapper.emitted('event-updated')?.[0]
+    expect(payload[0]).toMatchObject({ id: '30', title: 'Root Propagate Event' })
+    expect(typeof payload[1]).toBe('string')
+    expect(typeof payload[2]).toBe('string')
+    expect(logSpy).toHaveBeenCalledWith('[CalendarView] event-updated fired:', expect.any(Object), expect.any(String), expect.any(String))
+    logSpy.mockRestore()
+  })
 })
