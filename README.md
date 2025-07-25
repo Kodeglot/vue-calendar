@@ -695,6 +695,8 @@ function onEventUpdated(event, newStart, newEnd) {
 </script>
 ```
 
+> **Note:** After a drag or resize, `@event-updated` is always emitted from the root `CalendarView`. For troubleshooting, check the browser console for `[CalendarView] event-updated fired:`. If you see this log, the event is being emitted from the root. If not, check your integration or build setup.
+
 ### CalendarEvent Interface
 
 ```typescript
