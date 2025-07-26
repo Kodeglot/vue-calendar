@@ -47,6 +47,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 🎨 **Enhanced visual hierarchy** with improved month view styling
 - 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
 - 🔧 **Clean codebase** with regular maintenance and removal of unused code
+- 🚫 **Demo events control** with `showDemoEvents` prop to prevent unwanted demo events in production
 
 ## Installation
 
@@ -85,6 +86,7 @@ The demo showcases all the calendar features including:
 - Event creation with metadata
 - **Enhanced visual hierarchy** with improved styling
 - **Mobile-optimized modals** with responsive design
+- **Demo events** (enabled for testing purposes - disabled by default in production)
 
 ## Quick Start
 
@@ -93,6 +95,24 @@ The demo showcases all the calendar features including:
 ```bash
 npm install @kodeglot/vue-calendar pinia date-fns date-fns-tz
 ```
+
+### 2. Basic Usage (No Demo Events)
+
+```vue
+<template>
+  <CalendarView
+    :show-demo-events="false"
+    :initial-date="new Date()"
+    :initial-view="'month'"
+  />
+</template>
+
+<script setup lang="ts">
+import { CalendarView } from '@kodeglot/vue-calendar'
+</script>
+```
+
+**Important**: The `showDemoEvents` prop defaults to `false`, so your calendar will be clean without any demo events by default.
 
 ## CSS Style Isolation
 
