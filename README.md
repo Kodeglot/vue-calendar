@@ -663,6 +663,7 @@ If you encounter issues with the demo:
 | `showControls` | `boolean` | `true` | Show navigation controls |
 | `showEventButton` | `boolean` | `true` | Show add event button |
 | `enableDragDrop` | `boolean` | `true` | Enable drag and drop functionality |
+| `showDemoEvents` | `boolean` | `false` | Show demo events (for development/testing only) |
 | `customClasses` | `CustomClasses` | `{}` | Custom CSS classes for styling |
 
 ### CalendarView Events
@@ -697,6 +698,24 @@ function onEventUpdated(event, newStart, newEnd) {
 ```
 
 > **Note:** After a drag or resize, `@event-updated` is always emitted from the root `CalendarView`. For troubleshooting, check the browser console for `[CalendarView] event-updated fired:`. If you see this log, the event is being emitted from the root. If not, check your integration or build setup.
+
+### Removing Demo Events
+
+By default, the calendar does not show any demo events. If you're seeing demo events in your application, it's likely because:
+
+1. **Demo events are enabled**: The `showDemoEvents` prop is set to `true` somewhere in your code
+2. **Events are being added programmatically**: Check if events are being added to the store elsewhere
+
+To ensure no demo events are shown:
+
+```vue
+<CalendarView
+  :show-demo-events="false"
+  ...other props
+/>
+```
+
+**Note**: The `showDemoEvents` prop defaults to `false`, so demo events should not appear unless explicitly enabled.
 
 ### Drag-and-Drop Reliability
 

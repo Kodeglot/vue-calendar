@@ -280,6 +280,14 @@ const props = defineProps({
     default: true,
   },
   /**
+   * Whether to show demo events (for development/testing only)
+   * @default false
+   */
+  showDemoEvents: {
+    type: Boolean,
+    default: false,
+  },
+  /**
    * Custom CSS classes for styling different parts of the calendar
    * @default {}
    */
@@ -577,100 +585,102 @@ watch(selectedEvent, (newEvent) => {
   }
 });
 
-// Add sample events on component mount
+// Add sample events on component mount (only if showDemoEvents is true)
 onMounted(() => {
-  // Add sample events for testing drag and drop
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (props.showDemoEvents) {
+    // Add sample events for testing drag and drop
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const sampleEvents: CalendarEvent[] = [
-    {
-      id: "sample-1",
-      title: "Team Meeting",
-      start: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        9,
-        0
-      ).toISOString(),
-      end: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        10,
-        30
-      ).toISOString(),
-      tailwindColor: "blue",
-      allDay: false,
-    },
-    {
-      id: "sample-2",
-      title: "Lunch Break",
-      start: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        12,
-        0
-      ).toISOString(),
-      end: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        13,
-        0
-      ).toISOString(),
-      tailwindColor: "green",
-      allDay: false,
-    },
-    {
-      id: "sample-3",
-      title: "Project Review",
-      start: new Date(
-        tomorrow.getFullYear(),
-        tomorrow.getMonth(),
-        tomorrow.getDate(),
-        14,
-        0
-      ).toISOString(),
-      end: new Date(
-        tomorrow.getFullYear(),
-        tomorrow.getMonth(),
-        tomorrow.getDate(),
-        15,
-        30
-      ).toISOString(),
-      tailwindColor: "purple",
-      allDay: false,
-    },
-    {
-      id: "sample-4",
-      title: "All Day Event",
-      start: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        0,
-        0
-      ).toISOString(),
-      end: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        23,
-        59
-      ).toISOString(),
-      tailwindColor: "orange",
-      allDay: true,
-    },
-  ];
+    const sampleEvents: CalendarEvent[] = [
+      {
+        id: "sample-1",
+        title: "Team Meeting",
+        start: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          9,
+          0
+        ).toISOString(),
+        end: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          10,
+          30
+        ).toISOString(),
+        tailwindColor: "blue",
+        allDay: false,
+      },
+      {
+        id: "sample-2",
+        title: "Lunch Break",
+        start: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          12,
+          0
+        ).toISOString(),
+        end: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          13,
+          0
+        ).toISOString(),
+        tailwindColor: "green",
+        allDay: false,
+      },
+      {
+        id: "sample-3",
+        title: "Project Review",
+        start: new Date(
+          tomorrow.getFullYear(),
+          tomorrow.getMonth(),
+          tomorrow.getDate(),
+          14,
+          0
+        ).toISOString(),
+        end: new Date(
+          tomorrow.getFullYear(),
+          tomorrow.getMonth(),
+          tomorrow.getDate(),
+          15,
+          30
+        ).toISOString(),
+        tailwindColor: "purple",
+        allDay: false,
+      },
+      {
+        id: "sample-4",
+        title: "All Day Event",
+        start: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          0,
+          0
+        ).toISOString(),
+        end: new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+          23,
+          59
+        ).toISOString(),
+        tailwindColor: "orange",
+        allDay: true,
+      },
+    ];
 
-  // Add events to store
-  sampleEvents.forEach((event) => {
-    store.addEvent(event);
-  });
+    // Add events to store
+    sampleEvents.forEach((event) => {
+      store.addEvent(event);
+    });
+  }
 });
 
 declare global {
