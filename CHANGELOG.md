@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Demo Events Control**: Added `showDemoEvents` prop to `CalendarView` component to control whether demo events are displayed
+  - Defaults to `false` to prevent demo events from appearing in production applications
+  - Can be set to `true` for development and testing purposes
+  - Demo page updated to show demo events for testing functionality
+
+### Fixed
+- **Production Demo Events Issue**: Fixed issue where demo events (Team Meeting, Lunch Break, etc.) were automatically appearing in production applications
+  - Demo events are now only loaded when explicitly enabled via the `showDemoEvents` prop
+  - Ensures clean calendar display in production environments
+
+### Documentation
+- **Demo Events Guide**: Added comprehensive documentation in README about controlling demo events
+  - Clear instructions on how to ensure no demo events appear in applications
+  - Examples of how to enable demo events for development/testing
+  - Troubleshooting guide for users experiencing unwanted demo events
+
 ## [1.3.5] - 2025-07-26
 
 ### Fixed
