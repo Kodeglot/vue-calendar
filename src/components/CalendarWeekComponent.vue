@@ -131,7 +131,7 @@ import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
 import { debug } from "@/utils/debug";
-// import { useCalendarEventInteractions } from "@/composables/useCalendarEventInteractions";
+
 
 // Declare global property for TypeScript
 declare global {
@@ -219,11 +219,9 @@ const emit = defineEmits<{
   (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
 }>();
 
-// Constants
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const hours = Array.from({ length: 24 }, (_, i) => i); // [0..23] hour array
 const store = useCalendarStore();
-const draggedEvent = ref<CalendarEvent | null>(null);
 
 // Make events reactive by accessing the store's events directly
 const allEvents = computed(() => Array.from(store.events.values()));
@@ -233,38 +231,6 @@ const allEvents = computed(() => Array.from(store.events.values()));
  * @type {Ref<HTMLElement>}
  */
 const weekGrid = ref<HTMLElement>();
-const isMounted = ref(false);
-
-onMounted(() => {
-  isMounted.value = true;
-});
-
-// Setup event interactions composable
-const dummyEvent: CalendarEvent = {
-  id: "dummy",
-  title: "",
-  start: props.currentDate.toISOString(),
-  end: new Date(props.currentDate.getTime() + 3600000).toISOString(),
-  tailwindColor: "bg-white",
-  allDay: false,
-};
-
-// const eventInteractions = useCalendarEventInteractions(
-//   (event: string, ...args: any[]) => {
-//     if (event === "dayClick") {
-//       emit("dayClick", args[0] as Date);
-//     } else if (event === "resize" || event === "resize-end") {
-//       const [event, newStart, newEnd] = args as [CalendarEvent, string, string];
-//       // Handle resize events if needed
-//     }
-//   },
-//   {
-//     event: dummyEvent,
-//     pxPerHour: props.hourHeight,
-//     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-//     containerRef: weekGrid.value as HTMLElement,
-//   }
-// );
 
 /**
  * Generates the visible dates for the current week
@@ -394,7 +360,6 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
 
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault();
-  if (!draggedEvent.value) return;
   e.dataTransfer!.dropEffect = "move";
 };
 

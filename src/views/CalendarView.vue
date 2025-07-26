@@ -303,7 +303,7 @@ const currentDate = ref<Date>(props.initialDate); // Currently displayed date
 const currentView = ref<CalendarView>(props.initialView as CalendarView); // Current view mode
 const store = useCalendarStore(); // Pinia store for calendar events
 const eventModal = ref<InstanceType<typeof EventModal>>(); // Reference to event modal component
-const { formatMonthYear, formatWeekdayShort, formatFullDate, roundToNearestInterval, createTimeRange } = useTimezone(); // Timezone utilities
+const { formatMonthYear, formatWeekdayShort, formatFullDate, roundToNearestInterval } = useTimezone(); // Timezone utilities
 const selectedEvent = ref<CalendarEvent | null>(null);
 const fallbackModalRef = ref<InstanceType<typeof EventModal> | null>(null);
 const slots = useSlots();
@@ -498,7 +498,7 @@ const handleEventUpdate = (event: CalendarEvent) => {
     end: event.end
   });
   store.updateEvent(event);
-  emit("event-updated", event);
+  emit("event-updated", event, event.start, event.end);
   clearSelectedEvent();
 };
 

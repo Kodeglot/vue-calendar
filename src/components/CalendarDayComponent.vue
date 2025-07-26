@@ -105,17 +105,15 @@ import { useCalendarStore, type CalendarEvent } from "../stores/calendarStore";
 import CalendarEventComponent from "../components/CalendarEventComponent.vue";
 import TimeGridComponent from "./TimeGridComponent.vue";
 import { debug } from "@/utils/debug";
-// import { useCalendarEventInteractions } from "../composables/useCalendarEventInteractions";
+
 
 /**
  * Reference to the day grid container
  * @type {Ref<HTMLElement>}
  */
 const dayGrid = ref<HTMLElement | null>(null);
-const isMounted = ref(false);
 
 onMounted(() => {
-  isMounted.value = true;
   debug.log('Day: Component mounted', {
     currentDate: props.currentDate.toISOString(),
     hourHeight: props.hourHeight,

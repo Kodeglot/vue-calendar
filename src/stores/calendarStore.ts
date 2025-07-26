@@ -26,7 +26,6 @@ export interface CalendarEvent {
 export const useCalendarStore = defineStore('calendar', () => {
   // State
   const currentDate = ref(new Date())
-  const selectedDate = ref<Date | null>(null)
   const events = ref<Map<string, CalendarEvent>>(new Map())
   const plugins = ref<CalendarPlugin[]>([])
 
@@ -252,31 +251,29 @@ export const useCalendarStore = defineStore('calendar', () => {
     })
   }
 
-  function registerPlugin(plugin: CalendarPlugin) {
-    plugins.value.push(plugin)
-    plugin.onRegister?.({
-      currentDate: currentDate.value,
-      selectedDate: selectedDate.value,
-      events: Array.from(events.value.values()),
-      plugins: plugins.value,
-      currentMonth: currentMonth.value,
-      monthEvents: monthEvents.value,
-      addEvent,
-      updateEvent,
-      deleteEvent,
-      updateEventDate,
-      updateEventDateOnly,
-      updateEventDuration,
-      updateEventTime,
-      getEventsForDate,
-      getEventsForWeek,
-      registerPlugin,
-    })
-  }
+  function     registerPlugin(plugin: CalendarPlugin) {
+      plugins.value.push(plugin)
+      plugin.onRegister?.({
+        currentDate: currentDate.value,
+        events: Array.from(events.value.values()),
+        plugins: plugins.value,
+        currentMonth: currentMonth.value,
+        monthEvents: monthEvents.value,
+        addEvent,
+        updateEvent,
+        deleteEvent,
+        updateEventDate,
+        updateEventDateOnly,
+        updateEventDuration,
+        updateEventTime,
+        getEventsForDate,
+        getEventsForWeek,
+        registerPlugin,
+      })
+    }
 
   return {
     currentDate,
-    selectedDate,
     events,
     plugins,
     currentMonth,
@@ -298,7 +295,6 @@ export const useCalendarStore = defineStore('calendar', () => {
 export interface CalendarPlugin {
   onRegister?: (store: {
     currentDate: Date
-    selectedDate: Date | null
     events: CalendarEvent[]
     plugins: CalendarPlugin[]
     currentMonth: number
