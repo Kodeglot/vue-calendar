@@ -152,4 +152,34 @@ describe('CalendarMonthComponent', () => {
     expect(typeof payload[1]).toBe('string')
     expect(typeof payload[2]).toBe('string')
   })
+
+  it('updates event start and end correctly after drag and drop', async () => {
+    const wrapper = mount(CalendarMonthComponent, {
+      props: baseProps,
+      global: { plugins: [pinia] }
+    })
+    const store = wrapper.vm.store
+    // Add an event on Jan 1, 2025, 10:00-11:00
+    store.addEvent({
+      id: 'drop-test',
+      title: 'Drop Test',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
+      tailwindColor: 'blue',
+      allDay: false,
+      width: 100,
+      left: 0
+    })
+    await nextTick()
+    // Simulate drop to Jan 3, 2025 using a real DragEvent
+    const dragEvent = new DragEvent('drop', { bubbles: true })
+    Object.defineProperty(dragEvent, 'dataTransfer', { value: { getData: (type: string) => type === 'text/plain' ? 'drop-test' : '' }, writable: true })
+    wrapper.vm.handleDrop(new Date('2025-01-03T00:00:00Z'), dragEvent)
+    await nextTick()
+    // The event should now be on Jan 3, 2025, 10:00-11:00
+    const updated = store.events.get('drop-test')
+    expect(updated).toBeDefined()
+    expect(updated!.start).toBe('2025-01-03T10:00:00.000Z')
+    expect(updated!.end).toBe('2025-01-03T11:00:00.000Z')
+  })
 }) 

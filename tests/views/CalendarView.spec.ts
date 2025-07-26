@@ -174,4 +174,33 @@ describe('CalendarView', () => {
     expect(logSpy).toHaveBeenCalledWith('[CalendarView] event-updated fired:', expect.any(Object), expect.any(String), expect.any(String))
     logSpy.mockRestore()
   })
+
+  it('updates event start and end correctly after drag and drop from month view', async () => {
+    const wrapper = mount(CalendarView, {
+      global: { plugins: [pinia] },
+      props: { 
+        initialDate: new Date('2025-01-01T00:00:00Z'), 
+        initialView: 'month',
+        enableDragDrop: true
+      }
+    })
+    const store = wrapper.vm.store
+    // Add an event on Jan 1, 2025, 10:00-11:00
+    store.addEvent({
+      id: 'drop-test',
+      title: 'Drop Test',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
+      tailwindColor: 'blue',
+      allDay: false
+    })
+    await nextTick()
+    // Simulate event-dropped from month view to Jan 3, 2025
+    wrapper.vm.handleEventDrop('drop-test', new Date('2025-01-03T00:00:00Z'))
+    await nextTick()
+    const updated = store.events.get('drop-test')
+    expect(updated).toBeDefined()
+    expect(updated!.start).toBe('2025-01-03T10:00:00.000Z')
+    expect(updated!.end).toBe('2025-01-03T11:00:00.000Z')
+  })
 })

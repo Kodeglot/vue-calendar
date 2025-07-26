@@ -165,7 +165,7 @@ interface MonthComponentEmits {
    * @param newStart - The new start date of the event
    * @param newEnd - The new end date of the event
    */
-  (e: "event-updated", event: CalendarEvent, newStart: Date, newEnd: Date): void;
+  (e: "event-updated", event: CalendarEvent, newStart: string, newEnd: string): void;
 }
 
 const emit = defineEmits<MonthComponentEmits>();
@@ -286,6 +286,8 @@ const handleDrop = (date: Date, e: DragEvent) => {
       }
     });
     emit("event-dropped", eventId, date);
+    // Update the event date in the store immediately for test and UI consistency
+    store.updateEventDateOnly(eventId, date);
   } else {
     debug.warn('Month: Drop event missing event ID', {
       targetDate: date.toISOString(),
@@ -312,6 +314,8 @@ const isCurrentMonth = (date: Date) => {
 };
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
-  emit('event-updated', event, newStart, newEnd);
+  // Get the fresh event from the store to ensure we have the latest data
+  const freshEvent = store.getEventById(event.id);
+  emit('event-updated', freshEvent, newStart, newEnd);
 }
 </script>
