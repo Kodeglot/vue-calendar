@@ -33,7 +33,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📱 **Responsive design** for all screen sizes
 - 🔌 **Easy to integrate** with any Vue 3 project
 - 🛡️ **CSS Style Isolation** - All styles prefixed with `.vc-calendar` to prevent conflicts with host apps
-- 🖱️ **Drag and drop support** for event management
+- 🖱️ **Drag and drop support** for event management with reliable time preservation
 - 🖱️ **Click to create events** - Click on empty space to create new events with automatic time rounding
 - 🖱️ **Improved event interaction**: Edit modal only opens on single click, not on drag or resize
 - 🔄 **Reactive event updates**: Calendar updates instantly when events are added/edited
@@ -43,9 +43,10 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📅 **All-day event support**
 - 🎯 **Time-based positioning** with 5-minute snap intervals
 - 🛠️ **Plugin architecture** for extensibility
-- 🧪 **Comprehensive testing** with Vitest (69 tests across all components)
+- 🧪 **Comprehensive testing** with Vitest (75+ tests across all components)
 - 🎨 **Enhanced visual hierarchy** with improved month view styling
 - 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
+- 🔧 **Clean codebase** with regular maintenance and removal of unused code
 
 ## Installation
 
@@ -696,6 +697,37 @@ function onEventUpdated(event, newStart, newEnd) {
 ```
 
 > **Note:** After a drag or resize, `@event-updated` is always emitted from the root `CalendarView`. For troubleshooting, check the browser console for `[CalendarView] event-updated fired:`. If you see this log, the event is being emitted from the root. If not, check your integration or build setup.
+
+### Drag-and-Drop Reliability
+
+The calendar now provides reliable drag-and-drop functionality across all views:
+
+#### Month View Drag-and-Drop
+- **Time Preservation**: When dragging events between days in month view, the original time (hours, minutes, seconds) is preserved
+- **Immediate Updates**: Events are updated in the store immediately upon drop for consistent UI behavior
+- **Fresh Data Emission**: The `event-updated` event always contains the most up-to-date event data from the store
+
+#### Week/Day View Drag-and-Drop
+- **Time-based Positioning**: Events can be dragged to specific times with automatic time snapping
+- **Duration Changes**: Events can be resized to change their duration
+- **Real-time Updates**: All changes are reflected immediately in the UI
+
+#### Troubleshooting Drag-and-Drop Issues
+
+If you're experiencing issues with drag-and-drop:
+
+1. **Events not updating after drop**: Ensure your `@event-updated` handler is receiving the correct parameters:
+   ```typescript
+   function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
+     // event contains the updated event object
+     // newStart and newEnd are ISO string timestamps
+     console.log('Event updated:', event.id, newStart, newEnd)
+   }
+   ```
+
+2. **Inconsistent event data**: The calendar now fetches fresh data from the store before emitting events, ensuring consistency
+
+3. **Time preservation issues**: Month view drag-and-drop preserves the original time components when moving between dates
 
 ### CalendarEvent Interface
 

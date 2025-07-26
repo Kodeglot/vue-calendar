@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Drag-and-drop event update reliability**: Fixed issue where events were not updating correctly after being dropped in month view. Events now properly update with fresh data from the store and emit correct `newStart` and `newEnd` values.
+- **Event emission consistency**: Ensured all `onEventUpdated` functions have consistent signatures across all calendar components (month, week, day views) to match the expected parameters from `CalendarEventComponent`.
+- **Store data freshness**: Modified `onEventUpdated` functions to always fetch fresh event data from the store before emitting, ensuring the most up-to-date information is propagated.
+
+### Changed
+- **Code cleanup**: Removed unused variables, functions, and commented-out code across multiple components:
+  - Removed unused `selectedDate` state and references from calendar store
+  - Cleaned up unused imports and variables in `CalendarDayComponent`, `CalendarWeekComponent`, and `CalendarView`
+  - Removed commented-out `useCalendarEventInteractions` code and unused `draggedEvent` references
+  - Removed unused `isMounted` flags and `createTimeRange` import
+
+### Technical Improvements
+- **Function signature consistency**: All `onEventUpdated` functions now accept the same parameters (`event: CalendarEvent, newStart: string, newEnd: string`) across all components.
+- **Store integration**: Enhanced store integration in month view to immediately update event dates on drop for better UI consistency.
+- **Test coverage**: Added comprehensive tests for drag-and-drop functionality in month view to ensure events update correctly with time preservation.
+
 ## [1.3.4] - 2025-07-25
 
 ### Fixed
