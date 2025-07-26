@@ -316,6 +316,7 @@ const isCurrentMonth = (date: Date) => {
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   // Get the fresh event from the store to ensure we have the latest data
   const freshEvent = store.getEventById(event.id);
-  emit('event-updated', freshEvent, newStart, newEnd);
+  // Use the fresh event's start and end times to ensure they reflect the actual updated values
+  emit('event-updated', freshEvent, freshEvent.start, freshEvent.end);
 }
 </script>
