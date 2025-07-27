@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import CalendarDayComponent from '../../src/components/CalendarDayComponent.vue'
+import CalendarWeekComponent from '../../src/components/CalendarWeekComponent.vue'
 import { useCalendarStore } from '../../src/stores/calendarStore'
 
-describe('CalendarDayComponent', () => {
+describe('CalendarWeekComponent', () => {
   let pinia: any
 
   beforeEach(() => {
@@ -13,37 +13,45 @@ describe('CalendarDayComponent', () => {
   })
 
   const baseProps = {
-    currentDate: new Date('2025-01-15T00:00:00Z'),
+    currentDate: new Date('2025-01-01T00:00:00Z'),
     hourHeight: 60,
     timeFormat: '24h' as const,
     enableDragDrop: true
   }
 
   it('renders correctly with default props', () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
-    expect(wrapper.find('.vc-calendar-day').exists()).toBe(true)
-    expect(wrapper.find('.vc-calendar-day-header').exists()).toBe(true)
-    expect(wrapper.find('.vc-calendar-day-grid').exists()).toBe(true)
+    expect(wrapper.find('.vc-calendar-week').exists()).toBe(true)
+    expect(wrapper.find('.vc-calendar-week-header').exists()).toBe(true)
+    expect(wrapper.find('.vc-calendar-week-grid').exists()).toBe(true)
   })
 
-  it('renders day header with correct date', () => {
-    const wrapper = mount(CalendarDayComponent, {
+  it('renders week header with correct days', () => {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
-    const header = wrapper.find('.vc-calendar-day-header')
-    expect(header.exists()).toBe(true)
-    expect(header.text()).toContain('Wednesday')
-    expect(header.text()).toContain('January 15')
+    const headerCells = wrapper.findAll('.vc-calendar-week-header-cell')
+    expect(headerCells).toHaveLength(7)
+    
+    // Check that we have the days of the week
+    const dayTexts = headerCells.map(cell => cell.text())
+    expect(dayTexts.some(text => text.includes('Sun'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Mon'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Tue'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Wed'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Thu'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Fri'))).toBe(true)
+    expect(dayTexts.some(text => text.includes('Sat'))).toBe(true)
   })
 
   it('renders time grid with correct hours', () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -59,17 +67,17 @@ describe('CalendarDayComponent', () => {
   })
 
   it('renders events in correct positions', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
     const store = useCalendarStore()
     const testEvent = {
-      id: 'day-test',
-      title: 'Day Test Event',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
+      id: 'week-test',
+      title: 'Week Test Event',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -82,7 +90,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('emits dayClick when a time slot is clicked', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -94,7 +102,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('emits eventClick when an event is clicked', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -103,8 +111,8 @@ describe('CalendarDayComponent', () => {
     const testEvent = {
       id: 'click-test',
       title: 'Click Test',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -119,7 +127,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('emits event-updated when child event emits it', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -128,8 +136,8 @@ describe('CalendarDayComponent', () => {
     const testEvent = {
       id: 'update-test',
       title: 'Update Test',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -138,17 +146,17 @@ describe('CalendarDayComponent', () => {
     await wrapper.vm.$nextTick()
 
     // Simulate event-updated from child component
-    await wrapper.vm.onEventUpdated(testEvent, '2025-01-15T12:00:00Z', '2025-01-15T13:00:00Z')
+    await wrapper.vm.onEventUpdated(testEvent, '2025-01-01T12:00:00Z', '2025-01-01T13:00:00Z')
 
     expect(wrapper.emitted('event-updated')).toBeTruthy()
     const emitted = wrapper.emitted('event-updated')![0]
     expect(emitted[0]).toBe(testEvent)
-    expect(emitted[1]).toBe('2025-01-15T12:00:00Z')
-    expect(emitted[2]).toBe('2025-01-15T13:00:00Z')
+    expect(emitted[1]).toBe('2025-01-01T12:00:00Z')
+    expect(emitted[2]).toBe('2025-01-01T13:00:00Z')
   })
 
   it('handles drag and drop correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -157,8 +165,8 @@ describe('CalendarDayComponent', () => {
     const testEvent = {
       id: 'drag-test',
       title: 'Drag Test',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -187,7 +195,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles different time formats correctly', () => {
-    const wrapper12h = mount(CalendarDayComponent, {
+    const wrapper12h = mount(CalendarWeekComponent, {
       props: {
         ...baseProps,
         timeFormat: '12h'
@@ -195,7 +203,7 @@ describe('CalendarDayComponent', () => {
       global: { plugins: [pinia] }
     })
 
-    const wrapper24h = mount(CalendarDayComponent, {
+    const wrapper24h = mount(CalendarWeekComponent, {
       props: {
         ...baseProps,
         timeFormat: '24h'
@@ -208,7 +216,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles different hour heights correctly', () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: {
         ...baseProps,
         hourHeight: 80
@@ -220,7 +228,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles enableDragDrop prop correctly', () => {
-    const wrapperEnabled = mount(CalendarDayComponent, {
+    const wrapperEnabled = mount(CalendarWeekComponent, {
       props: {
         ...baseProps,
         enableDragDrop: true
@@ -228,7 +236,7 @@ describe('CalendarDayComponent', () => {
       global: { plugins: [pinia] }
     })
 
-    const wrapperDisabled = mount(CalendarDayComponent, {
+    const wrapperDisabled = mount(CalendarWeekComponent, {
       props: {
         ...baseProps,
         enableDragDrop: false
@@ -241,7 +249,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('renders all-day events correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -250,8 +258,8 @@ describe('CalendarDayComponent', () => {
     const allDayEvent = {
       id: 'allday-test',
       title: 'All Day Event',
-      start: '2025-01-15T00:00:00Z',
-      end: '2025-01-16T00:00:00Z',
+      start: '2025-01-01T00:00:00Z',
+      end: '2025-01-02T00:00:00Z',
       tailwindColor: 'green',
       allDay: true
     }
@@ -264,7 +272,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles multiple events on the same day correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -273,8 +281,8 @@ describe('CalendarDayComponent', () => {
     const event1 = {
       id: 'multi-1',
       title: 'Event 1',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -282,8 +290,8 @@ describe('CalendarDayComponent', () => {
     const event2 = {
       id: 'multi-2',
       title: 'Event 2',
-      start: '2025-01-15T12:00:00Z',
-      end: '2025-01-15T13:00:00Z',
+      start: '2025-01-01T12:00:00Z',
+      end: '2025-01-01T13:00:00Z',
       tailwindColor: 'red',
       allDay: false
     }
@@ -296,23 +304,23 @@ describe('CalendarDayComponent', () => {
     expect(events.length).toBeGreaterThanOrEqual(2)
   })
 
-  it('handles events spanning multiple hours correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+  it('handles events spanning multiple days correctly', async () => {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
     const store = useCalendarStore()
-    const multiHourEvent = {
-      id: 'multihour-test',
-      title: 'Multi Hour Event',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T14:00:00Z',
+    const multiDayEvent = {
+      id: 'multiday-test',
+      title: 'Multi Day Event',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-03T10:00:00Z',
       tailwindColor: 'purple',
       allDay: false
     }
 
-    store.addEvent(multiHourEvent)
+    store.addEvent(multiDayEvent)
     await wrapper.vm.$nextTick()
 
     const events = wrapper.findAll('.vc-calendar-event')
@@ -320,7 +328,7 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles empty store correctly', () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -330,19 +338,19 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles current date changes correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
-    const newDate = new Date('2025-01-16T00:00:00Z')
+    const newDate = new Date('2025-01-08T00:00:00Z')
     await wrapper.setProps({ currentDate: newDate })
 
     expect(wrapper.vm.currentDate).toEqual(newDate)
   })
 
-  it('handles slot content correctly', () => {
-    const wrapper = mount(CalendarDayComponent, {
+  it('handles slot content correctly', async () => {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] },
       slots: {
@@ -350,11 +358,24 @@ describe('CalendarDayComponent', () => {
       }
     })
 
+    const store = useCalendarStore()
+    const testEvent = {
+      id: 'slot-test',
+      title: 'Slot Test Event',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
+      tailwindColor: 'blue',
+      allDay: false
+    }
+
+    store.addEvent(testEvent)
+    await wrapper.vm.$nextTick()
+
     expect(wrapper.find('.custom-event-content').exists()).toBe(true)
   })
 
   it('handles event positioning correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
@@ -363,8 +384,8 @@ describe('CalendarDayComponent', () => {
     const testEvent = {
       id: 'position-test',
       title: 'Position Test',
-      start: '2025-01-15T10:30:00Z',
-      end: '2025-01-15T11:30:00Z',
+      start: '2025-01-01T10:30:00Z',
+      end: '2025-01-01T11:30:00Z',
       tailwindColor: 'blue',
       allDay: false
     }
@@ -377,166 +398,12 @@ describe('CalendarDayComponent', () => {
   })
 
   it('handles time zone changes correctly', () => {
-    const wrapper = mount(CalendarDayComponent, {
+    const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
     // Test that the component handles time zone changes
     expect(wrapper.vm.currentDate).toBeInstanceOf(Date)
-  })
-
-  it('handles events at midnight correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const midnightEvent = {
-      id: 'midnight-test',
-      title: 'Midnight Event',
-      start: '2025-01-15T00:00:00Z',
-      end: '2025-01-15T01:00:00Z',
-      tailwindColor: 'blue',
-      allDay: false
-    }
-
-    store.addEvent(midnightEvent)
-    await wrapper.vm.$nextTick()
-
-    const events = wrapper.findAll('.vc-calendar-event')
-    expect(events.length).toBeGreaterThan(0)
-  })
-
-  it('handles events at end of day correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const endOfDayEvent = {
-      id: 'endofday-test',
-      title: 'End of Day Event',
-      start: '2025-01-15T23:00:00Z',
-      end: '2025-01-16T00:00:00Z',
-      tailwindColor: 'blue',
-      allDay: false
-    }
-
-    store.addEvent(endOfDayEvent)
-    await wrapper.vm.$nextTick()
-
-    const events = wrapper.findAll('.vc-calendar-event')
-    expect(events.length).toBeGreaterThan(0)
-  })
-
-  it('handles overlapping events correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const event1 = {
-      id: 'overlap-1',
-      title: 'Overlap Event 1',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T12:00:00Z',
-      tailwindColor: 'blue',
-      allDay: false
-    }
-
-    const event2 = {
-      id: 'overlap-2',
-      title: 'Overlap Event 2',
-      start: '2025-01-15T11:00:00Z',
-      end: '2025-01-15T13:00:00Z',
-      tailwindColor: 'red',
-      allDay: false
-    }
-
-    store.addEvent(event1)
-    store.addEvent(event2)
-    await wrapper.vm.$nextTick()
-
-    const events = wrapper.findAll('.vc-calendar-event')
-    expect(events.length).toBeGreaterThanOrEqual(2)
-  })
-
-  it('handles events with different colors correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const colors = ['blue', 'red', 'green', 'yellow', 'purple', 'pink', 'indigo', 'gray']
-    
-    colors.forEach((color, index) => {
-      const event = {
-        id: `color-${index}`,
-        title: `Color Event ${index}`,
-        start: `2025-01-15T${10 + index}:00:00Z`,
-        end: `2025-01-15T${11 + index}:00:00Z`,
-        tailwindColor: color,
-        allDay: false
-      }
-      store.addEvent(event)
-    })
-
-    await wrapper.vm.$nextTick()
-
-    const events = wrapper.findAll('.vc-calendar-event')
-    expect(events.length).toBeGreaterThanOrEqual(colors.length)
-  })
-
-  it('handles events with long titles correctly', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const longTitleEvent = {
-      id: 'long-title-test',
-      title: 'This is a very long event title that should be handled properly by the component',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
-      tailwindColor: 'blue',
-      allDay: false
-    }
-
-    store.addEvent(longTitleEvent)
-    await wrapper.vm.$nextTick()
-
-    const event = wrapper.find('.vc-calendar-event')
-    expect(event.exists()).toBe(true)
-    expect(event.text()).toContain('This is a very long event title')
-  })
-
-  it('handles events with special characters in title', async () => {
-    const wrapper = mount(CalendarDayComponent, {
-      props: baseProps,
-      global: { plugins: [pinia] }
-    })
-
-    const store = useCalendarStore()
-    const specialCharEvent = {
-      id: 'special-char-test',
-      title: 'Event with special chars: !@#$%^&*()_+-=[]{}|;:,.<>?',
-      start: '2025-01-15T10:00:00Z',
-      end: '2025-01-15T11:00:00Z',
-      tailwindColor: 'blue',
-      allDay: false
-    }
-
-    store.addEvent(specialCharEvent)
-    await wrapper.vm.$nextTick()
-
-    const event = wrapper.find('.vc-calendar-event')
-    expect(event.exists()).toBe(true)
-    expect(event.text()).toContain('Event with special chars')
   })
 }) 
