@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Comprehensive Timezone Support**: Added full timezone handling with user timezone detection
+  - New `useTimezone` composable with `formatTime`, `formatTime12`, `formatDate`, `formatDateTime` functions
+  - Automatic user timezone detection and proper timezone conversions
+  - Support for both 12-hour and 24-hour time formats
+  - ISO storage with localized display for consistent timezone handling
+- **CSS Class Prefixing**: Implemented comprehensive CSS class prefixing for better component isolation
+  - All calendar styles now prefixed with `vc-calendar-` to prevent conflicts with host applications
+  - Enhanced component isolation ensuring safe integration with any Vue application
+  - Updated all components to use prefixed class names for better style encapsulation
+
+### Fixed
+- **Event Deletion Error Handling**: Fixed `TypeError: Cannot read properties of undefined (reading 'start')` error that occurred when trying to update deleted events
+  - Updated `getEventById` method to return `CalendarEvent | undefined` instead of using non-null assertion
+  - Added safety checks in `onEventUpdated` function to handle cases where events no longer exist
+  - Added comprehensive test coverage for the edge case to prevent future regressions
+- **Click Events During Resize**: Fixed issue where click events were being emitted during resize operations
+  - Added `isResizing` check in `CalendarEventComponent` to prevent unwanted click emissions
+  - Improved event interaction logic to distinguish between clicks and resize operations
+  - Enhanced user experience by preventing modal opening during resize operations
+- **TypeScript Compilation Errors**: Fixed TypeScript errors in debug utility
+  - Removed non-standard console methods that don't exist in test environment
+  - Updated debug implementation to use proper type assertions
+  - Fixed test expectations to match the new debug implementation
+
+### Changed
+- **Test Coverage**: Significantly enhanced test coverage across all calendar components
+  - Added comprehensive tests for event interactions, timezone handling, and edge cases
+  - Improved test reliability with proper mocking and assertions
+  - Enhanced test suite robustness with implementation-agnostic assertions
+
+### Technical Improvements
+- **Code Quality**: Improved overall code quality and maintainability
+  - Better error handling and edge case management
+  - Enhanced type safety with proper TypeScript definitions
+  - Improved component isolation and style encapsulation
+
 ## [1.3.6] - 2025-07-26
 
 ### Added
