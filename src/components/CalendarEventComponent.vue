@@ -291,6 +291,11 @@ const handleClick = (event?: Event) => {
     event.stopPropagation();
   }
   
+  // Don't emit click if we're currently resizing
+  if (isResizing.value) {
+    return;
+  }
+  
   // For month view, emit click directly since drag/resize is not enabled
   if (props.viewType === 'month') {
     debug.log('Event: Clicked in month view', {
@@ -298,8 +303,16 @@ const handleClick = (event?: Event) => {
       title: props.event.title
     });
     emit('click', props.event);
+  } else {
+    // For day and week views, also emit click directly for immediate response
+    // The mousedown/mouseup logic will handle drag/resize separately
+    debug.log('Event: Clicked in day/week view', {
+      eventId: props.event.id,
+      title: props.event.title,
+      viewType: props.viewType
+    });
+    emit('click', props.event);
   }
-  // For other views, let the mousedown/mouseup logic handle it
 };
 
 // Watch for changes in event data and recalculate position
