@@ -43,7 +43,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 📅 **All-day event support**
 - 🎯 **Time-based positioning** with 5-minute snap intervals
 - 🛠️ **Plugin architecture** for extensibility
-- 🧪 **Comprehensive testing** with Vitest (75+ tests across all components)
+- 🧪 **Comprehensive testing** with Vitest (177+ tests across all components)
 - 🎨 **Enhanced visual hierarchy** with improved month view styling
 - 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
 - 🔧 **Clean codebase** with regular maintenance and removal of unused code
@@ -546,6 +546,28 @@ export default {
 - **"Missing colors"**: Add comprehensive safelist to your Tailwind config
 - **"Resize handles not working"**: Add cursor and opacity classes to safelist
 - **"Hover effects missing"**: Add group-hover and transition classes to safelist
+
+## Recent Improvements
+
+### Enhanced Error Handling
+- **Event Deletion Safety**: Fixed edge case where updating deleted events would cause errors
+- **Resize Interaction**: Improved event interaction logic to prevent unwanted click events during resize operations
+- **TypeScript Safety**: Enhanced type safety with proper error handling and edge case management
+
+### Improved Component Isolation
+- **CSS Class Prefixing**: All calendar styles now use `vc-calendar-` prefix for better isolation
+- **Style Encapsulation**: Enhanced component isolation ensuring safe integration with any Vue application
+- **Conflict Prevention**: Comprehensive CSS prefixing prevents style conflicts with host applications
+
+### Enhanced Timezone Support
+- **User Timezone Detection**: Automatic detection and handling of user's local timezone
+- **Flexible Time Formats**: Support for both 12-hour and 24-hour time formats
+- **Consistent Storage**: ISO format storage with localized display for reliable timezone handling
+
+### Robust Test Coverage
+- **Comprehensive Testing**: Enhanced test suite covering all major features and edge cases
+- **Reliable Assertions**: Implementation-agnostic tests that work reliably across different environments
+- **Edge Case Coverage**: Tests for timezone handling, event interactions, and error scenarios
 
 ## Timezone Support
 
@@ -1358,11 +1380,21 @@ src/
 │   ├── EventModal.vue
 │   └── TimeGridComponent.vue
 ├── composables/          # Vue composables
-│   └── useCalendarEventInteractions.ts
+│   ├── useCalendarEventInteractions.ts
+│   └── useTimezone.ts
 ├── stores/              # Pinia stores
 │   └── calendarStore.ts
 ├── views/               # Main view components
 │   └── CalendarView.vue
+├── utils/               # Utility functions
+│   └── debug.ts
+├── types/               # TypeScript type definitions
+│   └── calendar.ts
+├── assets/              # Static assets
+│   └── vue.svg
+├── style.css            # Main stylesheet
+├── vite-env.d.ts        # Vite environment types
+├── vue-shims.d.ts       # Vue type shims
 ├── index.ts             # Package entry point
 └── main.ts              # App entry point
 demo/
