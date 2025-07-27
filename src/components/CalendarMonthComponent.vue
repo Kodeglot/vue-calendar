@@ -316,6 +316,16 @@ const isCurrentMonth = (date: Date) => {
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   // Get the fresh event from the store to ensure we have the latest data
   const freshEvent = store.getEventById(event.id);
+  
+  // Check if the event still exists (hasn't been deleted)
+  if (!freshEvent) {
+    debug.warn('Month: Event no longer exists, skipping update', {
+      eventId: event.id,
+      title: event.title
+    });
+    return;
+  }
+  
   // Use the fresh event's start and end times to ensure they reflect the actual updated values
   emit('event-updated', freshEvent, freshEvent.start, freshEvent.end);
 }

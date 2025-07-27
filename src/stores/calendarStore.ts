@@ -65,8 +65,8 @@ export const useCalendarStore = defineStore('calendar', () => {
     })
   })
 
-  const getEventById = (eventId: string): CalendarEvent => {
-    return events.value.get(eventId)!
+  const getEventById = (eventId: string): CalendarEvent | undefined => {
+    return events.value.get(eventId)
   }
 
   // Optimized event update helper

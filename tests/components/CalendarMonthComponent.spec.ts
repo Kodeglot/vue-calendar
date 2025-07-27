@@ -182,4 +182,35 @@ describe('CalendarMonthComponent', () => {
     expect(updated!.start).toBe('2025-01-03T10:00:00.000Z')
     expect(updated!.end).toBe('2025-01-03T11:00:00.000Z')
   })
+
+  it('handles event updates for deleted events gracefully', async () => {
+    const wrapper = mount(CalendarMonthComponent, {
+      props: baseProps,
+      global: { plugins: [pinia] }
+    })
+    
+    const store = wrapper.vm.store
+    const testEvent = {
+      id: 'delete-update-test',
+      title: 'Delete Update Test',
+      start: '2025-01-01T10:00:00Z',
+      end: '2025-01-01T11:00:00Z',
+      tailwindColor: 'blue',
+      allDay: false
+    }
+    
+    // Add the event
+    store.addEvent(testEvent)
+    
+    // Delete the event
+    store.deleteEvent(testEvent.id)
+    
+    // Try to update the deleted event - this should not throw an error
+    expect(() => {
+      wrapper.vm.onEventUpdated(testEvent, '2025-01-01T12:00:00Z', '2025-01-01T13:00:00Z')
+    }).not.toThrow()
+    
+    // Verify that no event-updated was emitted since the event was deleted
+    expect(wrapper.emitted('event-updated')).toBeFalsy()
+  })
 }) 
