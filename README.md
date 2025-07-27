@@ -547,7 +547,7 @@ export default {
 - **"Resize handles not working"**: Add cursor and opacity classes to safelist
 - **"Hover effects missing"**: Add group-hover and transition classes to safelist
 
-## Recent Improvements
+## Recent Improvements (v1.4.0)
 
 ### Enhanced Error Handling
 - **Event Deletion Safety**: Fixed edge case where updating deleted events would cause errors
