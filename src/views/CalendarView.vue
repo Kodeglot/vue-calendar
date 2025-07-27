@@ -11,7 +11,10 @@
     <!-- Calendar Header -->
     <div
       v-if="props.showControls"
-      class="p-4 flex flex-col md:flex-row justify-between items-center gap-4 text-base/7"
+      :class="[
+        'p-4 flex flex-col md:flex-row justify-between items-center gap-4 text-base/7',
+        customClasses?.header || 'vc-calendar-header'
+      ]"
     >
       <!-- Custom Navigation Controls Slot -->
       <slot name="navigation" :current-date="currentDate" :current-view="currentView" :set-view="setView" :previous-period="previousPeriod" :next-period="nextPeriod" :header-date="headerDate">
@@ -40,7 +43,10 @@
       <!-- Custom Controls Slot -->
       <slot name="controls" :current-date="currentDate" :current-view="currentView" :set-view="setView" :time-format="timeFormat" :toggle-new-event-form="toggleNewEventForm">
         <!-- Default View Selection & New Event Button -->
-        <div class="flex gap-2 text-base/7">
+        <div :class="[
+          'flex gap-2 text-base/7',
+          customClasses?.controls || 'vc-calendar-controls'
+        ]">
           <!-- Custom View Selector Slot -->
           <slot name="view-selector" :current-view="currentView" :set-view="setView" :current-date="currentDate">
             <select
@@ -76,6 +82,7 @@
         :current-date="currentDate"
         :hour-height="60"
         :time-format="timeFormat"
+        :enable-drag-drop="props.enableDragDrop"
         v-bind="
           props.enableDragDrop ? { 'onEvent-dropped': handleEventDrop } : {}
         "
@@ -462,6 +469,7 @@ const handleDayClick = (date: Date) => {
     roundedTime: roundedTime.toISOString()
   });
   eventModal.value?.openModal(roundedTime);
+  emit("openEventModal", roundedTime);
 };
 
 /**
@@ -536,6 +544,14 @@ const onEventClick = (event: CalendarEvent) => {
 };
 
 /**
+ * Handles event click events (alias for onEventClick)
+ * @param {CalendarEvent} event - The clicked event
+ */
+const handleEventClick = (event: CalendarEvent) => {
+  onEventClick(event);
+};
+
+/**
  * Opens the event modal for creating a new event at the current time
  */
 const toggleNewEventForm = () => {
@@ -554,7 +570,10 @@ function clearSelectedEvent() {
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   console.log('[CalendarView] event-updated fired:', event, newStart, newEnd);
-  emit('event-updated', event, newStart, newEnd);
+  // Update the event with new times
+  const updatedEvent = { ...event, start: newStart, end: newEnd };
+  store.updateEvent(updatedEvent);
+  emit('event-updated', updatedEvent, newStart, newEnd);
 }
 
 // Watch for changes in currentDate and emit events
@@ -688,4 +707,15 @@ declare global {
     __calendarEventModified?: boolean;
   }
 }
+
+// Expose methods for testing
+defineExpose({
+  handleEventClick,
+  handleDayClick,
+  toggleNewEventForm,
+  setView,
+  previousPeriod,
+  nextPeriod,
+  clearSelectedEvent
+});
 </script>

@@ -1,7 +1,7 @@
 <template>
   <!-- Day View Layout -->
   <div
-    class="grow flex flex-col w-full"
+    class="grow flex flex-col w-full vc-calendar-day"
     role="grid"
     aria-label="Day View Calendar"
   >
@@ -9,7 +9,7 @@
       <div class="w-20 min-h-10"></div>
       <div class="flex-1">
         <!-- Day Headers -->
-        <div class="bg-gray-200 sticky top-0 z-10">
+        <div class="bg-gray-200 sticky top-0 z-10 vc-calendar-day-header">
           <!-- Day Headers -->
           <div class="bg-white p-2 font-semibold text-center">
             {{ currentDay }}
@@ -30,7 +30,8 @@
                 :event="event"
                 :resizable="false"
                 :viewType="'day'"
-                class="mb-1"
+                class="mb-1 vc-calendar-event"
+                :data-allday="true"
               />
             </div>
           </div>
@@ -42,7 +43,6 @@
       <div
         ref="dayGrid"
         @dragover.prevent
-      
         class="w-20 h-24 text-center"
       >
         <!-- Hour Indicators -->
@@ -55,7 +55,7 @@
         >
           <div
             v-if="hour != 0"
-            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full"
+            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full vc-calendar-time-label"
             role="time"
             :aria-label="formatHour(hour)"
           >
@@ -64,35 +64,46 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-auto" role="rowgroup">
+      <div class="flex-1 overflow-auto vc-calendar-day-grid" role="rowgroup">
         <!-- Main Time Grid -->
-        <TimeGridComponent 
-          :hourHeight="hourHeight" 
-          :timeFormat="props.timeFormat === '24h' 
-            ? { hour: '2-digit', minute: '2-digit', hour12: false }
-            : { hour: 'numeric', minute: '2-digit', hour12: true }"
-          :baseDate="props.currentDate"
-          @timeClick="emit('dayClick', $event)"
-        >
-          <!-- Calendar Events -->
-          <template v-if="dayGrid">
-            <CalendarEventComponent
-              v-for="event in stackedEvents"
-              :key="event.id"
-              :event="event"
-              :resizable="true"
-              :container-ref="dayGrid"
-              :timeFormat="props.timeFormat"
-              class="absolute"
-              :viewType="'day'"
-              @click="emit('eventClick', event)"
-              @event-updated="onEventUpdated"
-            >
-              <template v-if="$slots['event-content']" #default="slotProps">
-                <slot name="event-content" v-bind="slotProps" />
-              </template>
-            </CalendarEventComponent>
-          </template>
+                              <TimeGridComponent
+                        :hourHeight="hourHeight"
+                        :timeFormat="props.timeFormat === '24h'
+                          ? { hour: '2-digit', minute: '2-digit', hour12: false }
+                          : { hour: 'numeric', minute: '2-digit', hour12: true }"
+                        :showHourLabels="true"
+                        :baseDate="props.currentDate"
+                        @timeClick="emit('dayClick', $event)"
+                        @eventDrop="handleEventDrop"
+                      >
+                                  <!-- Calendar Events -->
+                        <template v-if="dayGrid">
+                          <CalendarEventComponent
+                            v-for="event in stackedEvents"
+                            :key="event.id"
+                            :event="event"
+                            :resizable="true"
+                            :container-ref="dayGrid"
+                            :timeFormat="props.timeFormat"
+                            class="absolute vc-calendar-event"
+                            :viewType="'day'"
+                            @click="emit('eventClick', event)"
+                            @event-updated="onEventUpdated"
+                          >
+                            <template v-if="$slots['event-content']" #default="slotProps">
+                              <div class="custom-event-content">
+                                <slot name="event-content" v-bind="slotProps" />
+                              </div>
+                            </template>
+                          </CalendarEventComponent>
+                        </template>
+                        
+                        <!-- Render slot content even when no events exist -->
+                        <template v-if="$slots['event-content'] && stackedEvents.length === 0">
+                          <div class="custom-event-content">
+                            <slot name="event-content" />
+                          </div>
+                        </template>
         </TimeGridComponent>
       </div>
     </div>
@@ -184,6 +195,13 @@ interface Props {
    * @type {boolean}
    */
   showHeader?: boolean;
+
+  /**
+   * Whether to enable drag and drop
+   * @default false
+   * @type {boolean}
+   */
+  enableDragDrop?: boolean;
 }
 
 /**
@@ -212,7 +230,7 @@ interface Emits {
    * @param eventId - The ID of the dropped event
    * @param date - The date/time the event was dropped on
    */
-  (e: "eventDrop", eventId: string, date: Date): void;
+  (e: "event-dropped", eventId: string, date: Date): void;
   /**
    * Emitted when an event is clicked
    * @param {CalendarEvent} event - The clicked event
@@ -243,6 +261,7 @@ const props = withDefaults(defineProps<Props>(), {
     day: "numeric",
   }),
   showHeader: true,
+  enableDragDrop: false,
 });
 
 /**
@@ -304,10 +323,19 @@ const getAllDayEventsForRow = (date: Date, row: number) => {
  */
 const stackedEvents = computed(() => {
   try {
-    const targetDateString = props.currentDate.toDateString();
+    // Use UTC date comparison to avoid timezone issues
+    const targetYear = props.currentDate.getUTCFullYear();
+    const targetMonth = props.currentDate.getUTCMonth();
+    const targetDay = props.currentDate.getUTCDate();
+    
     const events = allEvents.value.filter((event) => {
-      const eventDateString = new Date(event.start).toDateString();
-      return eventDateString === targetDateString;
+      const eventDate = new Date(event.start);
+      const eventYear = eventDate.getUTCFullYear();
+      const eventMonth = eventDate.getUTCMonth();
+      const eventDay = eventDate.getUTCDate();
+      
+      const matches = eventYear === targetYear && eventMonth === targetMonth && eventDay === targetDay;
+      return matches;
     });
     
     debug.log('Day: Stacked events calculated', {
@@ -407,6 +435,10 @@ const formatHour = (hour: number) => {
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   emit('event-updated', event, newStart, newEnd);
+}
+
+function handleEventDrop(eventId: string, time: Date) {
+  emit('event-dropped', eventId, time);
 }
 
 </script>

@@ -1,7 +1,7 @@
 <template>
   <!-- Main Week View Container -->
   <div
-    class="grow flex flex-col w-full"
+    class="grow flex flex-col w-full vc-calendar-week"
     role="grid"
     aria-label="Week View Calendar"
   >
@@ -11,11 +11,11 @@
       <div class="w-20 min-h-10"></div>
       <div class="flex-1">
         <!-- Day Headers -->
-        <div class="flex-1 grid grid-cols-7 bg-gray-200" role="row">
+        <div class="flex-1 grid grid-cols-7 bg-gray-200 vc-calendar-week-header" role="row">
           <div
             v-for="date in visibleDates"
             :key="date.toISOString()"
-            class="bg-white p-2 font-semibold text-center"
+            class="bg-white p-2 font-semibold text-center vc-calendar-week-header-cell"
             role="columnheader"
             :aria-label="`${days[date.getDay()]} ${date.getDate()}`"
           >
@@ -44,7 +44,8 @@
                 :event="event"
                 :resizable="false"
                 :viewType="'week'"
-                class="mb-1"
+                class="mb-1 vc-calendar-event"
+                :data-allday="true"
               />
             </div>
           </div>
@@ -64,7 +65,7 @@
         >
           <div
             v-if="hour !== 0"
-            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full"
+            class="absolute -top-3 left-2 text-sm text-gray-500 text-center w-full vc-calendar-time-label"
             role="time"
             :aria-label="formatHour(hour)"
           >
@@ -74,7 +75,7 @@
       </div>
 
       <div
-        class="flex-1 overflow-auto"
+        class="flex-1 overflow-auto vc-calendar-week-grid"
         role="rowgroup"
         aria-label="Time Slots"
         ref="weekGrid"
@@ -93,9 +94,10 @@
               :timeFormat="props.timeFormat === '24h' 
                 ? { hour: '2-digit', minute: '2-digit', hour12: false }
                 : { hour: 'numeric', minute: '2-digit', hour12: true }"
-              :showHourLabels="false"
+              :showHourLabels="true"
               :baseDate="date"
               @timeClick="handleTimeClick"
+              @eventDrop="handleEventDrop"
             >
               <!-- Calendar Events -->
               <template v-if="weekGrid">
@@ -107,13 +109,15 @@
                   :viewType="'week'"
                   :containerRef="weekGrid"
                   :timeFormat="props.timeFormat"
-                  class="absolute"
+                  class="absolute vc-calendar-event"
                   role="article"
                   @click="handleWeekEventClick(event)"
                   @event-updated="onEventUpdated"
                 >
                   <template v-if="$slots['event-content']" #default="slotProps">
-                    <slot name="event-content" v-bind="slotProps" />
+                    <div class="custom-event-content">
+                      <slot name="event-content" v-bind="slotProps" />
+                    </div>
                   </template>
                 </CalendarEventComponent>
               </template>
@@ -184,6 +188,15 @@ const props = defineProps({
     type: String as PropType<'12h' | '24h'>,
     default: '24h',
     validator: (value: string) => ['12h', '24h'].includes(value),
+  },
+  /**
+   * Whether to enable drag and drop
+   * @default false
+   * @type {boolean}
+   */
+  enableDragDrop: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -360,7 +373,9 @@ const calculateEventPositions = (events: CalendarEvent[]): CalendarEvent[] => {
 
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault();
-  e.dataTransfer!.dropEffect = "move";
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = "move";
+  }
 };
 
 // Handle event clicks with protection against drag/resize
@@ -405,5 +420,9 @@ const formatHour = (hour: number) => {
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   emit('event-updated', event, newStart, newEnd);
+}
+
+function handleEventDrop(eventId: string, time: Date) {
+  emit('event-dropped', eventId, time);
 }
 </script>
