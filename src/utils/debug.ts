@@ -36,6 +36,11 @@ const getDebugFlag = (): boolean => {
     return window.__calendarDebug;
   }
   
+  // For tests, enable debug by default to allow testing
+  if (typeof window === 'undefined' || import.meta.env.MODE === 'test') {
+    return true;
+  }
+  
   // Default to true in development, false otherwise
   return isDevelopment;
 };
@@ -47,42 +52,143 @@ export const debug = {
       console.log('[Vue Calendar Debug]', ...args);
     }
   },
-  
   warn: (...args: any[]) => {
     if (getDebugFlag()) {
       console.warn('[Vue Calendar Debug]', ...args);
     }
   },
-  
   error: (...args: any[]) => {
     if (getDebugFlag()) {
       console.error('[Vue Calendar Debug]', ...args);
     }
   },
-  
-  group: (label: string) => {
+  info: (...args: any[]) => {
     if (getDebugFlag()) {
-      console.group(`[Vue Calendar Debug] ${label}`);
+      console.info('[Vue Calendar Debug]', ...args);
     }
   },
-  
+  table: (...args: any[]) => {
+    if (getDebugFlag()) {
+      console.table(...args);
+    }
+  },
+  trace: (...args: any[]) => {
+    if (getDebugFlag()) {
+      console.trace('[Vue Calendar Debug]', ...args);
+    }
+  },
+  count: (label?: string) => {
+    if (getDebugFlag()) {
+      console.count(`[Vue Calendar Debug] ${label || ''}`);
+    }
+  },
+  countReset: (label?: string) => {
+    if (getDebugFlag()) {
+      console.countReset(`[Vue Calendar Debug] ${label || ''}`);
+    }
+  },
+  assert: (condition: any, ...args: any[]) => {
+    if (getDebugFlag()) {
+      console.assert(condition, '[Vue Calendar Debug]', ...args);
+    }
+  },
+  dir: (...args: any[]) => {
+    if (getDebugFlag()) {
+      console.dir(...args);
+    }
+  },
+  dirxml: (...args: any[]) => {
+    if (getDebugFlag()) {
+      if (console.dirxml) console.dirxml(...args);
+    }
+  },
+  group: (...args: any[]) => {
+    if (getDebugFlag()) {
+      console.group('[Vue Calendar Debug]', ...args);
+    }
+  },
+  groupCollapsed: (...args: any[]) => {
+    if (getDebugFlag()) {
+      if (console.groupCollapsed) console.groupCollapsed('[Vue Calendar Debug]', ...args);
+    }
+  },
   groupEnd: () => {
     if (getDebugFlag()) {
       console.groupEnd();
     }
   },
-  
-  time: (label: string) => {
+  time: (label?: string) => {
     if (getDebugFlag()) {
-      console.time(`[Vue Calendar Debug] ${label}`);
+      console.time(`[Vue Calendar Debug] ${label || ''}`);
     }
   },
-  
-  timeEnd: (label: string) => {
+  timeEnd: (label?: string) => {
     if (getDebugFlag()) {
-      console.timeEnd(`[Vue Calendar Debug] ${label}`);
+      console.timeEnd(`[Vue Calendar Debug] ${label || ''}`);
     }
-  }
+  },
+  clear: () => {
+    if (getDebugFlag()) {
+      console.clear();
+    }
+  },
+  // Stubs for unsupported methods
+  profile: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.profile === 'function') {
+        extendedConsole.profile(...args);
+      }
+    }
+  },
+  profileEnd: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.profileEnd === 'function') {
+        extendedConsole.profileEnd(...args);
+      }
+    }
+  },
+  memory: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.memory === 'function') {
+        extendedConsole.memory(...args);
+      }
+    }
+  },
+  markTimeline: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.markTimeline === 'function') {
+        extendedConsole.markTimeline(...args);
+      }
+    }
+  },
+  timeline: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.timeline === 'function') {
+        extendedConsole.timeline(...args);
+      }
+    }
+  },
+  timelineEnd: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.timelineEnd === 'function') {
+        extendedConsole.timelineEnd(...args);
+      }
+    }
+  },
+  timeStamp: (...args: any[]) => {
+    if (getDebugFlag()) {
+      const extendedConsole = console as any;
+      if (typeof extendedConsole.timeStamp === 'function') {
+        extendedConsole.timeStamp(...args);
+      }
+    }
+  },
 };
 
 // Declare global types for TypeScript
