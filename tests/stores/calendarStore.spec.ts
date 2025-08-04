@@ -281,4 +281,88 @@ describe('calendarStore', () => {
     store.addEvent(event)
     expect(onEventAdd).toHaveBeenCalledWith(event)
   })
+
+  it('adds multiple events at once', () => {
+    const store = useCalendarStore()
+    const events = [
+      {
+        id: '1',
+        title: 'Event 1',
+        start: '2025-01-01T10:00:00Z',
+        end: '2025-01-01T11:00:00Z',
+        tailwindColor: 'blue',
+        allDay: false
+      },
+      {
+        id: '2',
+        title: 'Event 2',
+        start: '2025-01-01T12:00:00Z',
+        end: '2025-01-01T13:00:00Z',
+        tailwindColor: 'green',
+        allDay: false
+      },
+      {
+        title: 'Event 3', // No ID - should be auto-generated
+        start: '2025-01-01T14:00:00Z',
+        end: '2025-01-01T15:00:00Z',
+        tailwindColor: 'red',
+        allDay: false
+      }
+    ]
+
+    store.addEvents(events)
+
+    expect(store.events.size).toBe(3)
+    expect(store.events.get('1')).toEqual(events[0])
+    expect(store.events.get('2')).toEqual(events[1])
+    
+    // Check that the third event got an auto-generated ID
+    const event3 = Array.from(store.events.values()).find(e => e.title === 'Event 3')
+    expect(event3).toBeDefined()
+    expect(event3?.id).toBeDefined()
+    expect(event3?.id).not.toBe('')
+  })
+
+  it('handles empty array of events', () => {
+    const store = useCalendarStore()
+    const initialSize = store.events.size
+
+    store.addEvents([])
+
+    expect(store.events.size).toBe(initialSize)
+  })
+
+  it('triggers plugins for each event when adding multiple events', () => {
+    const store = useCalendarStore()
+    const plugin = {
+      onEventAdd: vi.fn()
+    }
+    
+    store.registerPlugin(plugin)
+    
+    const events = [
+      {
+        id: '1',
+        title: 'Event 1',
+        start: '2025-01-01T10:00:00Z',
+        end: '2025-01-01T11:00:00Z',
+        tailwindColor: 'blue',
+        allDay: false
+      },
+      {
+        id: '2',
+        title: 'Event 2',
+        start: '2025-01-01T12:00:00Z',
+        end: '2025-01-01T13:00:00Z',
+        tailwindColor: 'green',
+        allDay: false
+      }
+    ]
+
+    store.addEvents(events)
+
+    expect(plugin.onEventAdd).toHaveBeenCalledTimes(2)
+    expect(plugin.onEventAdd).toHaveBeenCalledWith(events[0])
+    expect(plugin.onEventAdd).toHaveBeenCalledWith(events[1])
+  })
 }) 

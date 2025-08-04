@@ -13,7 +13,14 @@ export { default as EventModal } from './components/EventModal.vue'
 export { default as TimeGridComponent } from './components/TimeGridComponent.vue'
 
 // Export store and types
-export { useCalendarStore, type CalendarEvent, type CalendarPlugin, type DateRange } from './stores/calendarStore'
+export { 
+  useCalendarStore, 
+  useCustomCalendarStore,
+  type CalendarEvent, 
+  type CalendarPlugin, 
+  type CalendarStoreOverrides,
+  type DateRange 
+} from './stores/calendarStore'
 
 // Export composables
 export { useCalendarEventInteractions } from './composables/useCalendarEventInteractions'

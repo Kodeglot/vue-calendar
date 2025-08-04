@@ -20,6 +20,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - [API Reference](#api-reference)
 - [Usage Examples](#usage-examples)
 - [Customization](#customization)
+- [Plugin System](#plugin-system)
 - [Development](#development)
 - [Contributing](#contributing)
 - [Roadmap](#roadmap)
@@ -42,7 +43,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - 🔄 **Event resizing** with time snapping
 - 📅 **All-day event support**
 - 🎯 **Time-based positioning** with 5-minute snap intervals
-- 🛠️ **Plugin architecture** for extensibility
+- 🛠️ **Plugin architecture** for extensibility - [See Plugin System Documentation](docs/PLUGIN_SYSTEM.md)
 - 🧪 **Comprehensive testing** with Vitest (177+ tests across all components)
 - 🎨 **Enhanced visual hierarchy** with improved month view styling
 - 📱 **Mobile-optimized modals** with fixed headers/footers and scrollable content
@@ -171,74 +172,480 @@ import '@kodeglot/vue-calendar/dist/style.css'
 
 ### 3. Setup Pinia Store
 
-Create your calendar store using Pinia:
+The calendar package provides two store options:
+
+#### Option 1: Standard Store (Recommended for most use cases)
 
 ```typescript
-// stores/calendarStore.ts
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
+import { useCalendarStore } from '@kodeglot/vue-calendar'
 
-export interface CalendarEvent {
-  id: string
-  title: string
-  description?: string // Optional event description
-  location?: string   // Optional event location
-  start: string        // ISO date string (UTC)
-  end: string          // ISO date string (UTC)
-  tailwindColor: string // Tailwind color name (e.g., 'blue', 'red', 'green')
-  allDay?: boolean
-  width?: number       // For event stacking
-  left?: number        // For event positioning
-  marginLeft?: number  // For event spacing
-  order?: number       // Vertical stacking order
-  metadata?: Record<string, any> // Custom key-value pairs for user-defined data
-}
+const store = useCalendarStore()
 
-export const useCalendarStore = defineStore('calendar', () => {
-  const events = ref<Map<string, CalendarEvent>>(new Map())
-  const currentDate = ref(new Date())
-  const selectedDate = ref<Date | null>(null)
+// Add events
+store.addEvent({
+  id: '1',
+  title: 'Meeting',
+  start: '2025-01-01T10:00:00Z',
+  end: '2025-01-01T11:00:00Z',
+  tailwindColor: 'blue'
+})
 
-  const addEvent = (event: CalendarEvent) => {
-    if (!event.id) {
-      event.id = uuidv4()
+// Add multiple events at once
+store.addEvents([
+  {
+    id: '1',
+    title: 'Meeting',
+    start: '2025-01-01T10:00:00Z',
+    end: '2025-01-01T11:00:00Z',
+    tailwindColor: 'blue'
+  },
+  {
+    id: '2',
+    title: 'Lunch',
+    start: '2025-01-01T12:00:00Z',
+    end: '2025-01-01T13:00:00Z',
+    tailwindColor: 'green'
+  }
+])
+
+// Get events for a date
+const events = store.getEventsForDate(new Date('2025-01-01'))
+```
+
+#### Option 2: Custom Store with Overrides
+
+```typescript
+import { useCustomCalendarStore } from '@kodeglot/vue-calendar'
+
+const store = useCustomCalendarStore({
+  addEvent: (event) => {
+    // Custom validation
+    if (!event.title.trim()) {
+      throw new Error('Title is required')
     }
-    events.value.set(event.id, event)
-  }
-
-  const updateEventDateOnly = (eventId: string, newDate: Date) => {
-    const event = events.value.get(eventId)
-    if (event) {
-      const start = new Date(event.start)
-      const end = new Date(event.end)
-      const duration = end.getTime() - start.getTime()
-
-      const newStart = new Date(newDate)
-      const newEnd = new Date(newStart.getTime() + duration)
-
-      event.start = newStart.toISOString()
-      event.end = newEnd.toISOString()
-      events.value.set(eventId, event)
+    
+    // Call the reference implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  },
+  
+  deleteEvent: (eventId) => {
+    // Custom confirmation
+    if (confirm('Are you sure?')) {
+      const baseStore = useCalendarStore()
+      baseStore.deleteEvent(eventId)
     }
-  }
-
-  const getEventsForDate = (date: Date): CalendarEvent[] => {
-    return Array.from(events.value.values()).filter(event =>
-      new Date(event.start).toDateString() === date.toDateString()
-    )
-  }
-
-  return {
-    events,
-    currentDate,
-    selectedDate,
-    addEvent,
-    updateEventDateOnly,
-    getEventsForDate
   }
 })
 ```
+
+**Note**: Both stores share the same underlying state, so you can mix and match as needed.
+
+## Custom Store Overrides
+
+The calendar package provides a flexible way to override specific store methods while keeping the reference implementation for others. This is useful when you need custom business logic for certain operations.
+
+### Using `useCustomCalendarStore`
+
+Instead of implementing your own store from scratch, you can use `useCustomCalendarStore` to selectively override methods:
+
+```typescript
+import { useCustomCalendarStore, type CalendarStoreOverrides } from '@kodeglot/vue-calendar'
+
+// Define your custom overrides
+const customOverrides: CalendarStoreOverrides = {
+  // Override addEvent to add custom logging
+  addEvent: (event) => {
+    console.log('Custom addEvent called:', event)
+    
+    // Call the default implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  },
+  
+  // Override deleteEvent to add confirmation
+  deleteEvent: (eventId) => {
+    if (confirm(`Are you sure you want to delete event "${eventId}"?`)) {
+      const baseStore = useCalendarStore()
+      baseStore.deleteEvent(eventId)
+    }
+  },
+  
+  // Override getEventsForDate to filter private events
+  getEventsForDate: (date) => {
+    const baseStore = useCalendarStore()
+    const allEvents = baseStore.getEventsForDate(date)
+    
+    // Filter out events with "private" in the title
+    return allEvents.filter(event => 
+      !event.title.toLowerCase().includes('private')
+    )
+  }
+}
+
+// Use the custom store
+const customStore = useCustomCalendarStore(customOverrides)
+```
+
+### Available Override Methods
+
+You can override any of these methods:
+
+- `addEvent(event: CalendarEvent)` - Called when adding a new event
+- `addEvents(events: CalendarEvent[])` - Called when adding multiple events at once
+- `updateEvent(event: CalendarEvent)` - Called when updating an event
+- `deleteEvent(eventId: string)` - Called when deleting an event
+- `updateEventDate(eventId: string, newDate: Date)` - Called when changing event date
+- `updateEventDateOnly(eventId: string, newDate: Date)` - Called when changing only the date (preserves time)
+- `updateEventDuration(eventId: string, newStart: Date, newEnd: Date)` - Called when changing event duration
+- `updateEventTime(eventId: string, newTime: Date)` - Called when changing event time
+- `getEventsForDate(date: Date)` - Called when retrieving events for a specific date
+- `getEventsForWeek(startDate: Date)` - Called when retrieving events for a week
+- `getEventById(eventId: string)` - Called when retrieving a specific event
+
+### Benefits of Custom Store Overrides
+
+1. **Selective Customization**: Override only the methods you need
+2. **Reference Implementation**: Keep the battle-tested default behavior for other methods
+3. **Type Safety**: Full TypeScript support with proper interfaces
+4. **Plugin Compatibility**: Works seamlessly with the plugin system
+5. **Performance**: No performance overhead for non-overridden methods
+
+### Example Use Cases
+
+#### 1. Custom Validation
+```typescript
+const customOverrides: CalendarStoreOverrides = {
+  addEvent: (event) => {
+    // Validate event data
+    if (!event.title.trim()) {
+      throw new Error('Event title is required')
+    }
+    
+    // Call default implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  }
+}
+```
+
+#### 2. API Integration
+```typescript
+const customOverrides: CalendarStoreOverrides = {
+  addEvent: async (event) => {
+    // Save to API
+    await api.saveEvent(event)
+    
+    // Call default implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  },
+  
+  deleteEvent: async (eventId) => {
+    // Delete from API
+    await api.deleteEvent(eventId)
+    
+    // Call default implementation
+    const baseStore = useCalendarStore()
+    baseStore.deleteEvent(eventId)
+  }
+}
+```
+
+#### 3. Event Filtering
+```typescript
+const customOverrides: CalendarStoreOverrides = {
+  getEventsForDate: (date) => {
+    const baseStore = useCalendarStore()
+    const allEvents = baseStore.getEventsForDate(date)
+    
+    // Filter based on user permissions
+    return allEvents.filter(event => {
+      if (event.metadata?.isPrivate && !userHasPermission('view-private')) {
+        return false
+      }
+      return true
+    })
+  }
+}
+```
+
+## Plugin System
+
+The vue-calendar package includes a powerful plugin system that allows you to extend calendar functionality without modifying the core code. Plugins can react to events, modify behavior, and add custom functionality.
+
+### Plugin Interface
+
+```typescript
+export interface CalendarPlugin {
+  // Called when the plugin is registered
+  onRegister?: (store: {
+    currentDate: Date
+    events: CalendarEvent[]
+    plugins: CalendarPlugin[]
+    currentMonth: number
+    monthEvents: CalendarEvent[]
+    addEvent: (event: CalendarEvent) => void
+    updateEvent: (event: CalendarEvent) => void
+    deleteEvent: (eventId: string) => void
+    updateEventDate: (eventId: string, newDate: Date) => void
+    updateEventDateOnly: (eventId: string, newDate: Date) => void
+    updateEventDuration: (eventId: string, newStart: Date, newEnd: Date) => void
+    updateEventTime: (eventId: string, newTime: Date) => void
+    getEventsForDate: (date: Date) => CalendarEvent[]
+    getEventsForWeek: (startDate: Date) => CalendarEvent[]
+    registerPlugin: (plugin: CalendarPlugin) => void
+  }) => void
+  
+  // Called whenever a new event is added
+  onEventAdd?: (event: CalendarEvent) => void
+}
+```
+
+### Basic Plugin Usage
+
+```typescript
+import { useCalendarStore, type CalendarPlugin } from '@kodeglot/vue-calendar'
+
+const store = useCalendarStore()
+
+// Create a simple logging plugin
+const eventLoggerPlugin: CalendarPlugin = {
+  onRegister: (store) => {
+    console.log('🔵 Event Logger Plugin registered')
+    console.log('Current events:', store.events.length)
+  },
+  
+  onEventAdd: (event) => {
+    console.log('📅 Event added:', {
+      id: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end
+    })
+  }
+}
+
+// Register the plugin
+store.registerPlugin(eventLoggerPlugin)
+```
+
+### Plugin Examples
+
+#### 1. Event Validation Plugin
+
+```typescript
+const eventValidationPlugin: CalendarPlugin = {
+  onRegister: (store) => {
+    // Store the original addEvent method
+    const originalAddEvent = store.addEvent
+    
+    // Override addEvent to add validation
+    store.addEvent = (event) => {
+      // Validate event
+      if (!event.title || event.title.trim().length === 0) {
+        throw new Error('Event title is required')
+      }
+      
+      if (new Date(event.start) >= new Date(event.end)) {
+        throw new Error('Event start time must be before end time')
+      }
+      
+      // Call original method
+      originalAddEvent(event)
+    }
+  }
+}
+```
+
+#### 2. Event Color Management Plugin
+
+```typescript
+const eventColorPlugin: CalendarPlugin = {
+  colorMap: {
+    'meeting': 'blue',
+    'appointment': 'green',
+    'reminder': 'yellow',
+    'deadline': 'red'
+  },
+  
+  onEventAdd: (event) => {
+    // Auto-assign color based on title keywords
+    const title = event.title.toLowerCase()
+    
+    for (const [keyword, color] of Object.entries(this.colorMap)) {
+      if (title.includes(keyword)) {
+        event.tailwindColor = color
+        console.log(`🎨 Assigned color ${color} to event: ${event.title}`)
+        break
+      }
+    }
+  }
+}
+```
+
+#### 3. Event Statistics Plugin
+
+```typescript
+const eventStatsPlugin: CalendarPlugin = {
+  stats: {
+    totalEvents: 0,
+    eventsByMonth: new Map(),
+    averageEventDuration: 0
+  },
+  
+  onRegister: (store) => {
+    // Initialize stats from existing events
+    store.events.forEach(event => {
+      this.updateStats(event)
+    })
+  },
+  
+  onEventAdd: (event) => {
+    this.updateStats(event)
+    console.log('📈 Updated stats:', this.stats)
+  },
+  
+  updateStats(event: CalendarEvent) {
+    this.stats.totalEvents++
+    
+    const month = new Date(event.start).getMonth()
+    this.stats.eventsByMonth.set(month, 
+      (this.stats.eventsByMonth.get(month) || 0) + 1
+    )
+    
+    const duration = new Date(event.end).getTime() - new Date(event.start).getTime()
+    this.stats.averageEventDuration = 
+      (this.stats.averageEventDuration * (this.stats.totalEvents - 1) + duration) / this.stats.totalEvents
+  }
+}
+```
+
+#### 4. Event Conflict Detection Plugin
+
+```typescript
+const eventConflictPlugin: CalendarPlugin = {
+  onEventAdd: (event) => {
+    const conflicts = this.findConflicts(event, store.events)
+    
+    if (conflicts.length > 0) {
+      console.warn('⚠️ Event conflicts detected:', {
+        event: event.title,
+        conflicts: conflicts.map(c => c.title)
+      })
+      
+      // Highlight conflicting events
+      conflicts.forEach(conflict => {
+        conflict.tailwindColor = 'red'
+      })
+    }
+  },
+  
+  findConflicts(newEvent: CalendarEvent, allEvents: CalendarEvent[]): CalendarEvent[] {
+    const newStart = new Date(newEvent.start)
+    const newEnd = new Date(newEvent.end)
+    
+    return Array.from(allEvents.values()).filter(event => {
+      if (event.id === newEvent.id) return false
+      
+      const eventStart = new Date(event.start)
+      const eventEnd = new Date(event.end)
+      
+      // Check for overlap
+      return newStart < eventEnd && newEnd > eventStart
+    })
+  }
+}
+```
+
+### Plugin Best Practices
+
+1. **Single Responsibility**: Each plugin should have one clear purpose
+2. **Error Handling**: Always handle potential errors gracefully
+3. **Performance**: Avoid expensive operations in hooks
+4. **State Management**: Be careful when modifying store state
+5. **Method Overrides**: Store original methods before overriding
+
+### Plugin Integration with Custom Store
+
+Plugins work seamlessly with both store approaches:
+
+```typescript
+import { useCalendarStore, useCustomCalendarStore } from '@kodeglot/vue-calendar'
+
+// Works with standard store
+const standardStore = useCalendarStore()
+standardStore.registerPlugin(eventLoggerPlugin)
+
+// Works with custom store
+const customStore = useCustomCalendarStore({
+  addEvent: (event) => {
+    // Custom addEvent logic
+    console.log('Custom addEvent called')
+  }
+})
+customStore.registerPlugin(eventLoggerPlugin)
+```
+
+### Advanced Plugin Patterns
+
+#### Plugin Composition
+
+```typescript
+// Combine multiple plugins into one
+const createCompositePlugin = (...plugins: CalendarPlugin[]): CalendarPlugin => {
+  return {
+    onRegister: (store) => {
+      plugins.forEach(plugin => plugin.onRegister?.(store))
+    },
+    
+    onEventAdd: (event) => {
+      plugins.forEach(plugin => plugin.onEventAdd?.(event))
+    }
+  }
+}
+
+// Usage
+const compositePlugin = createCompositePlugin(
+  eventLoggerPlugin,
+  eventValidationPlugin,
+  eventColorPlugin
+)
+```
+
+#### Configurable Plugins
+
+```typescript
+// Make plugins configurable
+const createConfigurablePlugin = (config: {
+  logLevel: 'info' | 'warn' | 'error'
+  enableValidation: boolean
+}) => {
+  return {
+    config,
+    
+    onRegister: (store) => {
+      if (config.enableValidation) {
+        // Set up validation
+      }
+    },
+    
+    onEventAdd: (event) => {
+      if (config.logLevel === 'info') {
+        console.log('Event added:', event)
+      }
+    }
+  } as CalendarPlugin
+}
+
+// Usage
+const plugin = createConfigurablePlugin({
+  logLevel: 'info',
+  enableValidation: true
+})
+```
+
+For more detailed information about the plugin system, see the [Plugin System Documentation](docs/PLUGIN_SYSTEM.md).
 
 ### 4. Use the Calendar Component
 
