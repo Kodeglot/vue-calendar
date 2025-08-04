@@ -118,24 +118,68 @@ describe('calendarStore', () => {
     expect(store.events.get('5')?.location).toBe('loc')
   })
 
-  it('updates event date only', () => {
+  it('updates event date only while preserving time', () => {
     const store = useCalendarStore()
     const event: CalendarEvent = {
       id: '6',
-      title: 'Date Only',
-      start: '2025-01-01T10:00:00Z',
-      end: '2025-01-01T11:00:00Z',
+      title: 'Time Preserved',
+      start: '2025-01-01T14:30:45Z', // 2:30:45 PM UTC
+      end: '2025-01-01T16:45:30Z',   // 4:45:30 PM UTC
       tailwindColor: 'blue',
       allDay: false,
       width: 100,
       left: 0
     }
     store.addEvent(event)
-    const newDate = new Date('2025-01-02T00:00:00Z')
+    const newDate = new Date('2025-01-15T00:00:00Z') // New date, time should be ignored
     store.updateEventDateOnly('6', newDate)
     const updated = store.events.get('6')!
-    expect(new Date(updated.start).getDate()).toBe(2)
-    expect(new Date(updated.end).getDate()).toBe(2)
+    
+    // Verify the date changed
+    expect(new Date(updated.start).getDate()).toBe(15)
+    expect(new Date(updated.end).getDate()).toBe(15)
+    
+    // Verify the time components are preserved
+    expect(new Date(updated.start).getUTCHours()).toBe(14)
+    expect(new Date(updated.start).getUTCMinutes()).toBe(30)
+    expect(new Date(updated.start).getUTCSeconds()).toBe(45)
+    
+    expect(new Date(updated.end).getUTCHours()).toBe(16)
+    expect(new Date(updated.end).getUTCMinutes()).toBe(45)
+    expect(new Date(updated.end).getUTCSeconds()).toBe(30)
+    
+    // Verify the duration is preserved
+    const originalDuration = new Date(event.end).getTime() - new Date(event.start).getTime()
+    const newDuration = new Date(updated.end).getTime() - new Date(updated.start).getTime()
+    expect(newDuration).toBe(originalDuration)
+  })
+
+  it('updates event date only with timezone edge case', () => {
+    const store = useCalendarStore()
+    const event: CalendarEvent = {
+      id: 'timezone-test',
+      title: 'Timezone Test',
+      start: '2025-01-01T09:00:00Z', // 9:00 AM UTC
+      end: '2025-01-01T17:00:00Z',   // 5:00 PM UTC
+      tailwindColor: 'blue',
+      allDay: false,
+      width: 100,
+      left: 0
+    }
+    store.addEvent(event)
+    
+    // Create a date with a specific time that should be ignored
+    const newDate = new Date('2025-01-20T22:00:00Z') // 10:00 PM UTC - this time should be ignored
+    store.updateEventDateOnly('timezone-test', newDate)
+    const updated = store.events.get('timezone-test')!
+    
+    // Verify the date changed
+    expect(new Date(updated.start).getDate()).toBe(20)
+    expect(new Date(updated.end).getDate()).toBe(20)
+    
+    // Verify the original time is preserved (not 22:00)
+    expect(new Date(updated.start).getUTCHours()).toBe(9) // Should still be 9:00 AM, not 22:00
+    expect(new Date(updated.end).getUTCHours()).toBe(17)  // Should still be 5:00 PM, not 22:00
   })
 
   it('updates event date', () => {

@@ -150,19 +150,14 @@ describe('CalendarView', () => {
 
     store.addEvent(testEvent)
     
-    // Use the onEventUpdated method which properly handles the updated times
+    // Use the onEventUpdated method which emits the event with the provided times
     await wrapper.vm.onEventUpdated(testEvent, '2025-01-01T12:00:00Z', '2025-01-01T13:00:00Z')
     
     expect(wrapper.emitted('event-updated')).toBeTruthy()
     const emitted = wrapper.emitted('event-updated')![0]
     
-    // Expect the updated event with new times
-    const expectedUpdatedEvent = {
-      ...testEvent,
-      start: '2025-01-01T12:00:00Z',
-      end: '2025-01-01T13:00:00Z'
-    }
-    expect(emitted[0]).toMatchObject(expectedUpdatedEvent)
+    // Expect the original event (not updated in store) with the provided times
+    expect(emitted[0]).toMatchObject(testEvent)
     expect(emitted[1]).toBe('2025-01-01T12:00:00Z')
     expect(emitted[2]).toBe('2025-01-01T13:00:00Z')
   })
