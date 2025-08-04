@@ -50,20 +50,18 @@ describe('CalendarWeekComponent', () => {
     expect(dayTexts.some(text => text.includes('Sat'))).toBe(true)
   })
 
-  it('renders time grid with correct hours', () => {
+  it('renders time grid with correct time slots', () => {
     const wrapper = mount(CalendarWeekComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
-    const timeLabels = wrapper.findAll('.vc-calendar-time-label')
-    expect(timeLabels.length).toBeGreaterThan(0)
+    // TimeGridComponent no longer renders hour labels, only time slots
+    const timeSlots = wrapper.findAll('.vc-calendar-time-slot')
+    expect(timeSlots.length).toBeGreaterThan(0)
     
-    // Check that we have time labels
-    const timeTexts = timeLabels.map(label => label.text())
-    expect(timeTexts).toContain('00:00')
-    expect(timeTexts).toContain('12:00')
-    expect(timeTexts).toContain('23:00')
+    // Check that we have 168 time slots (24 hours × 7 days)
+    expect(timeSlots.length).toBe(168)
   })
 
   it('renders events in correct positions', async () => {

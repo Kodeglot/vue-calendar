@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import TimeGridComponent from '../../src/components/TimeGridComponent.vue'
 
 describe('TimeGridComponent', () => {
-  it('renders hour labels when showHourLabels is true', () => {
+  it('renders time slots correctly', () => {
     const wrapper = mount(TimeGridComponent, {
       props: {
         hourHeight: 40,
@@ -10,10 +10,11 @@ describe('TimeGridComponent', () => {
         showHourLabels: true
       }
     })
-    expect(wrapper.findAll('[role="time"]').length).toBeGreaterThan(0)
+    // TimeGridComponent no longer renders hour labels, only time slots
+    expect(wrapper.findAll('[role="row"]').length).toBeGreaterThan(0)
   })
 
-  it('does not render hour labels when showHourLabels is false', () => {
+  it('renders time slots without hour labels', () => {
     const wrapper = mount(TimeGridComponent, {
       props: {
         hourHeight: 40,
@@ -21,6 +22,8 @@ describe('TimeGridComponent', () => {
         showHourLabels: false
       }
     })
+    // TimeGridComponent no longer renders hour labels, only time slots
+    expect(wrapper.findAll('[role="row"]').length).toBeGreaterThan(0)
     expect(wrapper.findAll('[role="time"]').length).toBe(0)
   })
 

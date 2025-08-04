@@ -42,20 +42,18 @@ describe('CalendarDayComponent', () => {
     expect(header.text()).toContain('January 15')
   })
 
-  it('renders time grid with correct hours', () => {
+  it('renders time grid with correct time slots', () => {
     const wrapper = mount(CalendarDayComponent, {
       props: baseProps,
       global: { plugins: [pinia] }
     })
 
-    const timeLabels = wrapper.findAll('.vc-calendar-time-label')
-    expect(timeLabels.length).toBeGreaterThan(0)
+    // TimeGridComponent no longer renders hour labels, only time slots
+    const timeSlots = wrapper.findAll('.vc-calendar-time-slot')
+    expect(timeSlots.length).toBeGreaterThan(0)
     
-    // Check that we have time labels
-    const timeTexts = timeLabels.map(label => label.text())
-    expect(timeTexts).toContain('00:00')
-    expect(timeTexts).toContain('12:00')
-    expect(timeTexts).toContain('23:00')
+    // Check that we have 24 time slots (one for each hour)
+    expect(timeSlots.length).toBe(24)
   })
 
   it('renders events in correct positions', async () => {
