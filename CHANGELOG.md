@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Bulk Events Functionality**: Added `addEvents` method to support adding multiple events at once
+  - New `addEvents(events: CalendarEvent[])` method for efficient bulk operations
+  - Automatic ID generation for events without IDs using UUID
+  - Plugin integration - each event triggers `onEventAdd` hook individually
+  - Performance optimized bulk operations with detailed logging
+  - Comprehensive test coverage for bulk operations and edge cases
+- **Unified Store Approach**: Implemented flexible store system with optional method overrides
+  - `useCalendarStore()` for standard usage with reference implementation
+  - `useCustomCalendarStore(overrides?)` for selective method customization
+  - Shared state between both approaches for seamless integration
+  - Full TypeScript support with proper interfaces and type safety
+  - Backward compatibility with existing API
+- **Comprehensive Plugin System**: Added powerful plugin architecture for extensibility
+  - `CalendarPlugin` interface with registration and event hooks
+  - Method override capabilities for custom business logic
+  - Plugin composition and middleware patterns
+  - State management and lifecycle management for plugins
+  - Extensive documentation with examples and best practices
+- **Enhanced Documentation**: Added comprehensive guides and examples
+  - Complete plugin system documentation (`docs/PLUGIN_SYSTEM.md`)
+  - Interactive demo components showcasing custom store and plugin system
+  - Best practices and performance considerations
+  - Troubleshooting guides and advanced patterns
+
+### Technical Improvements
+- **Store Architecture**: Refactored store to support both standard and custom implementations
+  - Reference implementations for all store methods
+  - Factory function for custom store creation with overrides
+  - Plugin system integration with both store approaches
+  - Enhanced error handling and validation
+- **Test Coverage**: Added extensive test suite for new functionality
+  - Bulk events functionality tests
+  - Plugin system integration tests
+  - Custom store override tests
+  - Performance and edge case validation
+- **Code Quality**: Improved overall code organization and maintainability
+  - Better separation of concerns
+  - Enhanced type safety
+  - Comprehensive error handling
+  - Performance optimizations
+
 ## [1.4.2] - 2025-08-04
 
 ### Fixed
