@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-08-04
+
+### Changed
+- **Code Quality**: Improved TimeGridComponent template structure and code formatting
+  - Removed unused hour labels display logic from template
+  - Improved code formatting consistency (using double quotes)
+  - Better formatting of props destructuring
+  - Cleaned up template structure for better maintainability
+
 ## [1.4.0] - 2025-07-27
 
 ### Added
