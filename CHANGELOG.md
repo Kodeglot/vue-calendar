@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Critical Timezone Bug**: Fixed major timezone handling issue in month view drag-and-drop operations
+  - **Root Cause**: Events were being forced to 22:00 UTC during drag-and-drop regardless of original time
+  - **Solution**: Enhanced `updateEventDateOnly` method to properly preserve original time components
+  - **Date Creation Fix**: Fixed `visibleDates` computed property to create dates with 00:00:00 time instead of current time
+  - **Double Update Prevention**: Removed redundant store updates in `onEventUpdated` method to prevent time overrides
+  - **Comprehensive Testing**: Added specific timezone tests to verify time preservation and edge cases
+  - **Impact**: All events now correctly preserve their original time (hours, minutes, seconds) when dragged between dates
+  - **Documentation**: Updated README with timezone handling examples and troubleshooting guide
+
+### Technical Improvements
+- **Enhanced Date Handling**: Improved date creation in month component to avoid timezone conversion issues
+- **Store Optimization**: Streamlined event update flow to prevent double updates and ensure data consistency
+- **Test Coverage**: Added comprehensive timezone tests to prevent future regressions
+
 ## [1.4.1] - 2025-08-04
 
 ### Changed
