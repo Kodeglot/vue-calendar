@@ -88,12 +88,7 @@ export const useCalendarStore = defineStore('calendar', () => {
     return events.value.get(eventId)
   }
 
-  // Optimized event update helper
-  const updateEventTimes = (event: CalendarEvent, newStart: Date, newEnd: Date) => {
-    event.start = newStart.toISOString()
-    event.end = newEnd.toISOString()
-    events.value.set(event.id, event)
-  }
+
 
   // Reference implementations of all methods
   const referenceAddEvent = (event: CalendarEvent): void => {
