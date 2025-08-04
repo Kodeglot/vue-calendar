@@ -570,10 +570,9 @@ function clearSelectedEvent() {
 
 function onEventUpdated(event: CalendarEvent, newStart: string, newEnd: string) {
   console.log('[CalendarView] event-updated fired:', event, newStart, newEnd);
-  // Update the event with new times
-  const updatedEvent = { ...event, start: newStart, end: newEnd };
-  store.updateEvent(updatedEvent);
-  emit('event-updated', updatedEvent, newStart, newEnd);
+  // The store is already updated by updateEventDateOnly, so we don't need to update it again
+  // Just emit the event with the updated event data
+  emit('event-updated', event, newStart, newEnd);
 }
 
 // Watch for changes in currentDate and emit events

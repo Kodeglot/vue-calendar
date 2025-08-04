@@ -210,7 +210,9 @@ const visibleDates = computed<Date[]>(() => {
     const dates: Date[] = [];
     const date = new Date(start);
     while (date <= end) {
-      dates.push(new Date(date));
+      // Create a new date with time set to 00:00:00 to avoid timezone issues
+      const newDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+      dates.push(newDate);
       date.setDate(date.getDate() + 1);
     }
     return dates;

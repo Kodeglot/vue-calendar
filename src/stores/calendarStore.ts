@@ -99,7 +99,10 @@ export const useCalendarStore = defineStore('calendar', () => {
       const duration = end.getTime() - start.getTime()
 
       // Create new start date with target date but preserve original time
-      const newStart = new Date(newDate)
+      // Ensure we're working with a clean date object (00:00:00) to avoid timezone issues
+      const cleanNewDate = new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), 0, 0, 0, 0);
+      
+      const newStart = new Date(cleanNewDate)
       newStart.setHours(start.getHours())
       newStart.setMinutes(start.getMinutes())
       newStart.setSeconds(start.getSeconds())
