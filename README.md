@@ -21,6 +21,7 @@ A fully-featured, customizable calendar component for Vue 3 with built-in Tailwi
 - [Usage Examples](#usage-examples)
 - [Customization](#customization)
 - [Plugin System](#plugin-system)
+- [How-to Guides](#how-to-guides)
 - [Development](#development)
 - [Contributing](#contributing)
 - [Roadmap](#roadmap)
@@ -646,6 +647,155 @@ const plugin = createConfigurablePlugin({
 ```
 
 For more detailed information about the plugin system, see the [Plugin System Documentation](docs/PLUGIN_SYSTEM.md).
+
+## How-to Guides
+
+### How to Initialize Calendar with Events
+
+```typescript
+import { useCalendarStore } from '@kodeglot/vue-calendar'
+
+const store = useCalendarStore()
+
+// Initialize with multiple events
+store.addEvents([
+  {
+    id: '1',
+    title: 'Team Meeting',
+    start: '2025-01-15T10:00:00Z',
+    end: '2025-01-15T11:00:00Z',
+    tailwindColor: 'blue'
+  },
+  {
+    title: 'Lunch Break', // ID will be auto-generated
+    start: '2025-01-15T12:00:00Z',
+    end: '2025-01-15T13:00:00Z',
+    tailwindColor: 'green'
+  }
+])
+```
+
+### How to Add API Integration
+
+```typescript
+import { useCustomCalendarStore } from '@kodeglot/vue-calendar'
+
+const store = useCustomCalendarStore({
+  addEvent: async (event) => {
+    // Save to API
+    await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(event)
+    })
+    
+    // Call reference implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  },
+  
+  deleteEvent: async (eventId) => {
+    // Delete from API
+    await fetch(`/api/events/${eventId}`, { method: 'DELETE' })
+    
+    // Call reference implementation
+    const baseStore = useCalendarStore()
+    baseStore.deleteEvent(eventId)
+  }
+})
+```
+
+### How to Add Event Validation
+
+```typescript
+const store = useCustomCalendarStore({
+  addEvent: (event) => {
+    // Validate event data
+    if (!event.title?.trim()) {
+      throw new Error('Event title is required')
+    }
+    
+    if (new Date(event.start) >= new Date(event.end)) {
+      throw new Error('Start time must be before end time')
+    }
+    
+    // Call reference implementation
+    const baseStore = useCalendarStore()
+    baseStore.addEvent(event)
+  }
+})
+```
+
+### How to Filter Events by Permission
+
+```typescript
+const store = useCustomCalendarStore({
+  getEventsForDate: (date) => {
+    const baseStore = useCalendarStore()
+    const allEvents = baseStore.getEventsForDate(date)
+    
+    // Filter based on user permissions
+    return allEvents.filter(event => {
+      if (event.metadata?.isPrivate && !userHasPermission('view-private')) {
+        return false
+      }
+      return true
+    })
+  }
+})
+```
+
+### How to Add Event Logging
+
+```typescript
+import { useCalendarStore, type CalendarPlugin } from '@kodeglot/vue-calendar'
+
+const store = useCalendarStore()
+
+const loggingPlugin: CalendarPlugin = {
+  onEventAdd: (event) => {
+    console.log('Event added:', event.title, event.start)
+    // Send to analytics
+    analytics.track('event_created', { title: event.title })
+  }
+}
+
+store.registerPlugin(loggingPlugin)
+```
+
+### How to Handle Event Conflicts
+
+```typescript
+const conflictPlugin: CalendarPlugin = {
+  onEventAdd: (event) => {
+    const conflicts = this.findConflicts(event, store.events)
+    
+    if (conflicts.length > 0) {
+      console.warn('Event conflicts detected:', conflicts.map(c => c.title))
+      // Optionally highlight conflicting events
+      conflicts.forEach(conflict => {
+        conflict.tailwindColor = 'red'
+      })
+    }
+  },
+  
+  findConflicts(newEvent, allEvents) {
+    const newStart = new Date(newEvent.start)
+    const newEnd = new Date(newEvent.end)
+    
+    return Array.from(allEvents.values()).filter(event => {
+      if (event.id === newEvent.id) return false
+      
+      const eventStart = new Date(event.start)
+      const eventEnd = new Date(event.end)
+      
+      return newStart < eventEnd && newEnd > eventStart
+    })
+  }
+}
+
+store.registerPlugin(conflictPlugin)
+```
 
 ### 4. Use the Calendar Component
 
